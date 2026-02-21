@@ -41,7 +41,7 @@ namespace QuantityMeasurementApp.Tests.Models
             Assert.AreEqual(first.GetHashCode(), second.GetHashCode());
         }
 
-        [TestMethod]
+        [TestMethod] 
         public void ToString_ReturnsFormattedValue()
         {
             var feet = new Feet(3.5);

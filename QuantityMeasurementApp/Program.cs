@@ -9,15 +9,13 @@ namespace QuantityMeasurementApp
     /// </summary>
     internal class Program
     {
-        private static readonly QuantityMeasurementService _service 
-            = new QuantityMeasurementService();
+        private static readonly QuantityMeasurementService _service = new QuantityMeasurementService();
 
         static void Main(string[] args)
         {
             Console.WriteLine("=== Quantity Measurement Application ===");
             Console.WriteLine("UC1 - Feet Equality Check");
             Console.WriteLine("----------------------------------------");
-
             RunApplication();
         }
 
@@ -28,7 +26,7 @@ namespace QuantityMeasurementApp
                 Console.Write("\nEnter first value in feet (or type 'exit'): ");
                 string? firstInput = Console.ReadLine();
 
-                if (IsExitCommand(firstInput))
+                if(IsExitCommand(firstInput))
                     break;
 
                 Console.Write("Enter second value in feet: ");
@@ -60,7 +58,6 @@ namespace QuantityMeasurementApp
             }
 
             bool result = _service.CompareFeetEquality(first, second);
-
             Console.WriteLine($"\nFirst: {first}");
             Console.WriteLine($"Second: {second}");
             Console.WriteLine($"Result: {(result ? "Equal" : "Not Equal")}");
