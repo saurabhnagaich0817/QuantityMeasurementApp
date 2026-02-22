@@ -1,9 +1,9 @@
 // ===================================================
 // File: Menu.cs
 // Project: QuantityMeasurementApp.Views
-// Description: Interactive console menu for user interaction
+// Description: Interactive console menu - UC4
 // Author: Development Team
-// Version: 3.0 (UC1, UC2, UC3)
+// Version: 4.0 (UC4 - Added Yard and Centimeter options)
 // ===================================================
 
 using QuantityMeasurementApp.Models;
@@ -11,35 +11,15 @@ using QuantityMeasurementApp.Services;
 
 namespace QuantityMeasurementApp.Views
 {
-    /// <summary>
-    /// Handles all user interface interactions.
-    /// UC3: Enhanced to support generic Quantity comparisons.
-    /// </summary>
-    /// <remarks>
-    /// Follows separation of concerns:
-    /// - Presentation logic only (no business logic)
-    /// - Input validation and error handling
-    /// - Clean separation from Models and Services
-    /// </remarks>
     public class Menu
     {
-        /// <summary>
-        /// Service instance for measurement operations.
-        /// </summary>
         private readonly QuantityMeasurementService _service;
 
-        /// <summary>
-        /// Initializes a new instance of the Menu class.
-        /// </summary>
         public Menu()
         {
             _service = new QuantityMeasurementService();
         }
 
-        /// <summary>
-        /// Starts the main menu loop.
-        /// Displays options and handles user input.
-        /// </summary>
         public void Start()
         {
             while (true)
@@ -75,168 +55,152 @@ namespace QuantityMeasurementApp.Views
             }
         }
 
-        /// <summary>
-        /// Displays the main menu options.
-        /// </summary>
         private void DisplayMainMenu()
         {
-            Console.WriteLine("\n========================================");
-            Console.WriteLine("   QUANTITY MEASUREMENT APP - UC3");
-            Console.WriteLine("========================================");
+            Console.WriteLine("\n================================================");
+            Console.WriteLine("   QUANTITY MEASUREMENT APP - UC4");
+            Console.WriteLine("   Extended Units: Yards & Centimeters");
+            Console.WriteLine("================================================");
             Console.WriteLine("1. Compare Feet (UC1 - Legacy)");
             Console.WriteLine("2. Compare Inches (UC2 - Legacy)");
-            Console.WriteLine("3. Compare Quantity (UC3 - Generic)");
+            Console.WriteLine("3. Compare Quantity (UC3/UC4 - All Units)");
             Console.WriteLine("4. Exit");
-            Console.WriteLine("========================================");
+            Console.WriteLine("================================================");
             Console.Write("Select an option: ");
         }
 
-        /// <summary>
-        /// Compares two Feet measurements.
-        /// UC1: Legacy functionality.
-        /// </summary>
         private void CompareFeet()
         {
             Console.WriteLine("\n--- Compare Feet (UC1) ---");
             
             try
             {
-                // Get first feet value
                 Console.Write("Enter first feet value: ");
                 if (!double.TryParse(Console.ReadLine(), out double first))
                 {
-                    Console.WriteLine("Invalid input. Please enter a valid number.");
+                    Console.WriteLine("Invalid input.");
                     return;
                 }
 
-                // Get second feet value
                 Console.Write("Enter second feet value: ");
                 if (!double.TryParse(Console.ReadLine(), out double second))
                 {
-                    Console.WriteLine("Invalid input. Please enter a valid number.");
+                    Console.WriteLine("Invalid input.");
                     return;
                 }
 
-                // Create Feet objects and compare
                 var feet1 = new Feet(first);
                 var feet2 = new Feet(second);
                 
                 bool result = _service.AreEqual(feet1, feet2);
                 
                 Console.WriteLine($"\nResult: {result}");
-                Console.WriteLine($"First: {feet1}");
-                Console.WriteLine($"Second: {feet2}");
             }
             catch (ArgumentException ex)
             {
-                Console.WriteLine($"Validation error: {ex.Message}");
+                Console.WriteLine($"Error: {ex.Message}");
             }
         }
 
-        /// <summary>
-        /// Compares two Inch measurements.
-        /// UC2: Legacy functionality.
-        /// </summary>
         private void CompareInches()
         {
             Console.WriteLine("\n--- Compare Inches (UC2) ---");
             
             try
             {
-                // Get first inch value
                 Console.Write("Enter first inches value: ");
                 if (!double.TryParse(Console.ReadLine(), out double first))
                 {
-                    Console.WriteLine("Invalid input. Please enter a valid number.");
+                    Console.WriteLine("Invalid input.");
                     return;
                 }
 
-                // Get second inch value
                 Console.Write("Enter second inches value: ");
                 if (!double.TryParse(Console.ReadLine(), out double second))
                 {
-                    Console.WriteLine("Invalid input. Please enter a valid number.");
+                    Console.WriteLine("Invalid input.");
                     return;
                 }
 
-                // Create Inch objects and compare
                 var inch1 = new Inch(first);
                 var inch2 = new Inch(second);
                 
                 bool result = _service.AreEqual(inch1, inch2);
                 
                 Console.WriteLine($"\nResult: {result}");
-                Console.WriteLine($"First: {inch1}");
-                Console.WriteLine($"Second: {inch2}");
             }
             catch (ArgumentException ex)
             {
-                Console.WriteLine($"Validation error: {ex.Message}");
+                Console.WriteLine($"Error: {ex.Message}");
             }
         }
 
-        /// <summary>
-        /// Compares two Quantity measurements.
-        /// UC3: Generic comparison supporting different units.
-        /// </summary>
         private void CompareQuantity()
         {
-            Console.WriteLine("\n--- Compare Quantity (UC3 - Generic) ---");
+            Console.WriteLine("\n--- Compare Quantity (UC4 - All Units) ---");
+            Console.WriteLine("Supported Units: FEET, INCH, YARD, CENTIMETER");
             
             try
             {
-                // Get first quantity
                 Console.WriteLine("\nFirst Quantity:");
                 var first = GetQuantityFromUser();
                 if (first == null) return;
 
-                // Get second quantity
                 Console.WriteLine("\nSecond Quantity:");
                 var second = GetQuantityFromUser();
                 if (second == null) return;
 
-                // Compare quantities
                 bool result = _service.AreEqual(first, second);
                 
                 Console.WriteLine("\n========================================");
                 Console.WriteLine($"Comparison Result: {result}");
                 Console.WriteLine($"First: {first.ToDetailedString()}");
                 Console.WriteLine($"Second: {second.ToDetailedString()}");
+                
+                // Show conversions
+                Console.WriteLine("\nConversions:");
+                Console.WriteLine($"First in feet: {first.ValueInFeet:F4} ft");
+                Console.WriteLine($"First in inches: {first.ValueInInches:F4} in");
+                Console.WriteLine($"First in yards: {first.ValueInYards:F4} yd");
+                Console.WriteLine($"First in cm: {first.ValueInCentimeters:F4} cm");
                 Console.WriteLine("========================================");
             }
             catch (ArgumentException ex)
             {
-                Console.WriteLine($"Validation error: {ex.Message}");
+                Console.WriteLine($"Error: {ex.Message}");
             }
         }
 
-        /// <summary>
-        /// Helper method to get quantity input from user.
-        /// </summary>
-        /// <returns>Quantity object or null if input invalid.</returns>
         private Quantity? GetQuantityFromUser()
         {
-            // Get value
             Console.Write("Enter value: ");
             if (!double.TryParse(Console.ReadLine(), out double value))
             {
-                Console.WriteLine("Invalid value. Please enter a valid number.");
+                Console.WriteLine("Invalid value.");
                 return null;
             }
 
-            // Get unit
             Console.WriteLine("Select unit:");
             Console.WriteLine("1. FEET");
             Console.WriteLine("2. INCH");
+            Console.WriteLine("3. YARD");
+            Console.WriteLine("4. CENTIMETER");
             Console.Write("Choice: ");
             
-            if (!int.TryParse(Console.ReadLine(), out int unitChoice) || (unitChoice != 1 && unitChoice != 2))
+            if (!int.TryParse(Console.ReadLine(), out int unitChoice) || unitChoice < 1 || unitChoice > 4)
             {
-                Console.WriteLine("Invalid unit choice. Please select 1 or 2.");
+                Console.WriteLine("Invalid unit choice.");
                 return null;
             }
 
-            LengthUnit unit = unitChoice == 1 ? LengthUnit.FEET : LengthUnit.INCH;
+            LengthUnit unit = unitChoice switch
+            {
+                1 => LengthUnit.FEET,
+                2 => LengthUnit.INCH,
+                3 => LengthUnit.YARD,
+                4 => LengthUnit.CENTIMETER,
+                _ => LengthUnit.FEET
+            };
             
             return new Quantity(value, unit);
         }
