@@ -1,101 +1,140 @@
-// ===================================================
-// File: InchTests.cs
-// Project: QuantityMeasurementApp.Tests.Models
-// Description: Unit tests for Inch class - UC2
-// Author: Development Team
-// Version: 2.0
-// ===================================================
-
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using QuantityMeasurementApp.Models;
 
 namespace QuantityMeasurementApp.Tests.Models
 {
     /// <summary>
-    /// Test class for Inch measurement functionality.
-    /// UC2: Validates inch equality implementation.
+    /// Unit tests for the Inch class
     /// </summary>
     [TestClass]
     public class InchTests
     {
-        /// <summary>
-        /// Test: Two inch objects with same value should be equal.
-        /// </summary>
+        // Tests Inch.Equals(object?) method for same value comparison
         [TestMethod]
-        [Description("Verifies that two Inch objects with same value are equal")]
-        [TestCategory("UC2")]
-        public void GivenSameValue_ShouldBeEqual()
+        public void Equals_SameValue_ReturnsTrue()
         {
-            // Arrange
-            var first = new Inch(10);
-            var second = new Inch(10);
-
-            // Act & Assert
-            Assert.AreEqual(first, second, "Inches with value 10 should be equal");
+            var inchInstance1 = new Inch(1.0);
+            var inchInstance2 = new Inch(1.0);
+            bool comparisonResult = inchInstance1.Equals(inchInstance2);
+            Assert.IsTrue(comparisonResult, "1.0 in should equal 1.0 in");
         }
 
-        /// <summary>
-        /// Test: Two inch objects with different values should not be equal.
-        /// </summary>
+        // Tests Inch.Equals(object?) method for different value comparison
         [TestMethod]
-        [Description("Verifies that two Inch objects with different values are not equal")]
-        [TestCategory("UC2")]
-        public void GivenDifferentValue_ShouldNotBeEqual()
+        public void Equals_DifferentValue_ReturnsFalse()
         {
-            // Arrange
-            var first = new Inch(10);
-            var second = new Inch(12);
-
-            // Act & Assert
-            Assert.AreNotEqual(first, second, "Inches with values 10 and 12 should not be equal");
+            var inchInstance1 = new Inch(1.0);
+            var inchInstance2 = new Inch(2.0);
+            bool comparisonResult = inchInstance1.Equals(inchInstance2);
+            Assert.IsFalse(comparisonResult, "1.0 in should not equal 2.0 in");
         }
 
-        /// <summary>
-        /// Test: Comparing with null should return false.
-        /// </summary>
+        // Tests Inch.Equals(object?) method for same reference comparison
         [TestMethod]
-        [Description("Verifies that comparing Inch with null returns false")]
-        [TestCategory("UC2")]
-        public void GivenNullComparison_ShouldReturnFalse()
+        public void Equals_SameReference_ReturnsTrue()
         {
-            // Arrange
-            var inch = new Inch(10);
-
-            // Act & Assert
-            Assert.IsFalse(inch.Equals(null), "Inch should not equal null");
+            var inchInstance = new Inch(1.0);
+            bool comparisonResult = inchInstance.Equals(inchInstance);
+            Assert.IsTrue(comparisonResult, "Object should equal itself");
         }
 
-        /// <summary>
-        /// Test: Same object reference should return true.
-        /// </summary>
+        // Tests Inch.Equals(object?) method when compared with null
         [TestMethod]
-        [Description("Verifies reflexive property of equality")]
-        [TestCategory("UC2")]
-        public void GivenSameReference_ShouldReturnTrue()
+        public void Equals_NullComparison_ReturnsFalse()
         {
-            // Arrange
-            var inch = new Inch(10);
-
-            // Act & Assert
-            Assert.IsTrue(inch.Equals(inch), "Object should equal itself");
+            var inchInstance = new Inch(1.0);
+            bool comparisonResult = inchInstance.Equals(null);
+            Assert.IsFalse(comparisonResult, "Object should not equal null");
         }
 
-        /// <summary>
-        /// Test: ToString returns formatted string.
-        /// </summary>
+        // Tests symmetric property of Inch.Equals(object?)
         [TestMethod]
-        [Description("Verifies ToString method returns correct format")]
-        [TestCategory("UC2")]
-        public void ToString_ShouldReturnFormattedString()
+        public void Equals_SymmetricProperty_ReturnsTrue()
         {
-            // Arrange
-            var inch = new Inch(10.75);
+            var inchInstance1 = new Inch(1.5);
+            var inchInstance2 = new Inch(1.5);
+            bool firstToSecondResult = inchInstance1.Equals(inchInstance2);
+            bool secondToFirstResult = inchInstance2.Equals(inchInstance1);
+            Assert.IsTrue(firstToSecondResult && secondToFirstResult, "Equality should be symmetric");
+        }
 
-            // Act
-            string result = inch.ToString();
+        // Tests transitive property of Inch.Equals(object?)
+        [TestMethod]
+        public void Equals_TransitiveProperty_ReturnsTrue()
+        {
+            var inchFirst = new Inch(2.5);
+            var inchSecond = new Inch(2.5);
+            var inchThird = new Inch(2.5);
+            bool firstEqualsSecond = inchFirst.Equals(inchSecond);
+            bool secondEqualsThird = inchSecond.Equals(inchThird);
+            bool firstEqualsThird = inchFirst.Equals(inchThird);
+            Assert.IsTrue(firstEqualsSecond && secondEqualsThird && firstEqualsThird, "Equality should be transitive");
+        }
 
-            // Assert
-            Assert.AreEqual("10.75 Inches", result);
+        // Tests Inch.Equals(object?) method with different object type
+        [TestMethod]
+        public void Equals_DifferentType_ReturnsFalse()
+        {
+            var inchInstance = new Inch(1.0);
+            var objectInstance = new object();
+            bool comparisonResult = inchInstance.Equals(objectInstance);
+            Assert.IsFalse(comparisonResult, "Inch should not equal object of different type");
+        }
+
+        // Tests consistency of multiple calls to Inch.Equals(object?)
+        [TestMethod]
+        public void Equals_ConsistentProperty_ReturnsTrue()
+        {
+            var inchInstance1 = new Inch(3.0);
+            var inchInstance2 = new Inch(3.0);
+            bool firstCallResult = inchInstance1.Equals(inchInstance2);
+            bool secondCallResult = inchInstance1.Equals(inchInstance2);
+            bool thirdCallResult = inchInstance1.Equals(inchInstance2);
+            Assert.IsTrue(
+                firstCallResult && secondCallResult && thirdCallResult,
+                "Multiple calls should return consistent results"
+            );
+        }
+
+        // Tests Inch.Equals(object?) method for floating point precision handling
+        [TestMethod]
+        public void Equals_FloatingPointPrecision_HandlesCorrectly()
+        {
+            var inchInstance1 = new Inch(1.000001);
+            var inchInstance2 = new Inch(1.000002);
+            bool comparisonResult = inchInstance1.Equals(inchInstance2);
+            Assert.IsFalse(comparisonResult, "Even very close values should be considered different");
+        }
+
+        // Tests Inch.GetHashCode() method for equal objects
+        [TestMethod]
+        public void GetHashCode_EqualObjects_ReturnsSameHashCode()
+        {
+            var inchInstance1 = new Inch(5.0);
+            var inchInstance2 = new Inch(5.0);
+            int hashValue1 = inchInstance1.GetHashCode();
+            int hashValue2 = inchInstance2.GetHashCode();
+            Assert.AreEqual(hashValue1, hashValue2, "Equal objects should have equal hash codes");
+        }
+
+        // Tests Inch.GetHashCode() method for different objects
+        [TestMethod]
+        public void GetHashCode_DifferentObjects_ReturnsDifferentHashCode()
+        {
+            var inchInstance1 = new Inch(5.0);
+            var inchInstance2 = new Inch(6.0);
+            int hashValue1 = inchInstance1.GetHashCode();
+            int hashValue2 = inchInstance2.GetHashCode();
+            Assert.AreNotEqual(hashValue1, hashValue2, "Different objects should have different hash codes");
+        }
+
+        // Tests Inch.ToString() method formatting
+        [TestMethod]
+        public void ToString_ReturnsFormattedString()
+        {
+            var inchInstance = new Inch(7.5);
+            string stringRepresentation = inchInstance.ToString();
+            Assert.AreEqual("7.5 in", stringRepresentation, "ToString should return value with unit");
         }
     }
 }

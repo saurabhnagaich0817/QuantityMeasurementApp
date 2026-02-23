@@ -1,101 +1,140 @@
-// ===================================================
-// File: FeetTests.cs
-// Project: QuantityMeasurementApp.Tests.Models
-// Description: Unit tests for Feet class - UC1
-// Author: Development Team
-// Version: 1.0
-// ===================================================
-
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using QuantityMeasurementApp.Models;
 
 namespace QuantityMeasurementApp.Tests.Models
 {
     /// <summary>
-    /// Test class for Feet measurement functionality.
-    /// UC1: Validates feet equality implementation.
+    /// Unit tests for the Feet class
     /// </summary>
     [TestClass]
     public class FeetTests
     {
-        /// <summary>
-        /// Test: Two feet objects with same value should be equal.
-        /// </summary>
+        // Tests Feet.Equals(object?) method for same value comparison
         [TestMethod]
-        [Description("Verifies that two Feet objects with same value are equal")]
-        [TestCategory("UC1")]
-        public void GivenSameValue_ShouldBeEqual()
+        public void Equals_SameValue_ReturnsTrue()
         {
-            // Arrange
-            var first = new Feet(5);
-            var second = new Feet(5);
-
-            // Act & Assert
-            Assert.AreEqual(first, second, "Feet with value 5 should be equal");
+            var feetInstance1 = new Feet(1.0);
+            var feetInstance2 = new Feet(1.0);
+            bool comparisonResult = feetInstance1.Equals(feetInstance2);
+            Assert.IsTrue(comparisonResult, "1.0 ft should equal 1.0 ft");
         }
 
-        /// <summary>
-        /// Test: Two feet objects with different values should not be equal.
-        /// </summary>
+        // Tests Feet.Equals(object?) method for different value comparison
         [TestMethod]
-        [Description("Verifies that two Feet objects with different values are not equal")]
-        [TestCategory("UC1")]
-        public void GivenDifferentValue_ShouldNotBeEqual()
+        public void Equals_DifferentValue_ReturnsFalse()
         {
-            // Arrange
-            var first = new Feet(5);
-            var second = new Feet(6);
-
-            // Act & Assert
-            Assert.AreNotEqual(first, second, "Feet with values 5 and 6 should not be equal");
+            var feetInstance1 = new Feet(1.0);
+            var feetInstance2 = new Feet(2.0);
+            bool comparisonResult = feetInstance1.Equals(feetInstance2);
+            Assert.IsFalse(comparisonResult, "1.0 ft should not equal 2.0 ft");
         }
 
-        /// <summary>
-        /// Test: Comparing with null should return false.
-        /// </summary>
+        // Tests Feet.Equals(object?) method for same reference comparison
         [TestMethod]
-        [Description("Verifies that comparing Feet with null returns false")]
-        [TestCategory("UC1")]
-        public void GivenNullComparison_ShouldReturnFalse()
+        public void Equals_SameReference_ReturnsTrue()
         {
-            // Arrange
-            var feet = new Feet(5);
-
-            // Act & Assert
-            Assert.IsFalse(feet.Equals(null), "Feet should not equal null");
+            var feetInstance = new Feet(1.0);
+            bool comparisonResult = feetInstance.Equals(feetInstance);
+            Assert.IsTrue(comparisonResult, "Object should equal itself");
         }
 
-        /// <summary>
-        /// Test: Same object reference should return true.
-        /// </summary>
+        // Tests Feet.Equals(object?) method when compared with null
         [TestMethod]
-        [Description("Verifies reflexive property of equality")]
-        [TestCategory("UC1")]
-        public void GivenSameReference_ShouldReturnTrue()
+        public void Equals_NullComparison_ReturnsFalse()
         {
-            // Arrange
-            var feet = new Feet(5);
-
-            // Act & Assert
-            Assert.IsTrue(feet.Equals(feet), "Object should equal itself");
+            var feetInstance = new Feet(1.0);
+            bool comparisonResult = feetInstance.Equals(null);
+            Assert.IsFalse(comparisonResult, "Object should not equal null");
         }
 
-        /// <summary>
-        /// Test: ToString returns formatted string.
-        /// </summary>
+        // Tests symmetric property of Feet.Equals(object?)
         [TestMethod]
-        [Description("Verifies ToString method returns correct format")]
-        [TestCategory("UC1")]
-        public void ToString_ShouldReturnFormattedString()
+        public void Equals_SymmetricProperty_ReturnsTrue()
         {
-            // Arrange
-            var feet = new Feet(5.5);
+            var feetInstance1 = new Feet(1.5);
+            var feetInstance2 = new Feet(1.5);
+            bool firstToSecondResult = feetInstance1.Equals(feetInstance2);
+            bool secondToFirstResult = feetInstance2.Equals(feetInstance1);
+            Assert.IsTrue(firstToSecondResult && secondToFirstResult, "Equality should be symmetric");
+        }
 
-            // Act
-            string result = feet.ToString();
+        // Tests transitive property of Feet.Equals(object?)
+        [TestMethod]
+        public void Equals_TransitiveProperty_ReturnsTrue()
+        {
+            var feetFirst = new Feet(2.5);
+            var feetSecond = new Feet(2.5);
+            var feetThird = new Feet(2.5);
+            bool firstEqualsSecond = feetFirst.Equals(feetSecond);
+            bool secondEqualsThird = feetSecond.Equals(feetThird);
+            bool firstEqualsThird = feetFirst.Equals(feetThird);
+            Assert.IsTrue(firstEqualsSecond && secondEqualsThird && firstEqualsThird, "Equality should be transitive");
+        }
 
-            // Assert
-            Assert.AreEqual("5.5 Feet", result);
+        // Tests Feet.Equals(object?) method with different object type
+        [TestMethod]
+        public void Equals_DifferentType_ReturnsFalse()
+        {
+            var feetInstance = new Feet(1.0);
+            var objectInstance = new object();
+            bool comparisonResult = feetInstance.Equals(objectInstance);
+            Assert.IsFalse(comparisonResult, "Feet should not equal object of different type");
+        }
+
+        // Tests consistency of multiple calls to Feet.Equals(object?)
+        [TestMethod]
+        public void Equals_ConsistentProperty_ReturnsTrue()
+        {
+            var feetInstance1 = new Feet(3.0);
+            var feetInstance2 = new Feet(3.0);
+            bool firstCallResult = feetInstance1.Equals(feetInstance2);
+            bool secondCallResult = feetInstance1.Equals(feetInstance2);
+            bool thirdCallResult = feetInstance1.Equals(feetInstance2);
+            Assert.IsTrue(
+                firstCallResult && secondCallResult && thirdCallResult,
+                "Multiple calls should return consistent results"
+            );
+        }
+
+        // Tests Feet.Equals(object?) method for floating point precision handling
+        [TestMethod]
+        public void Equals_FloatingPointPrecision_HandlesCorrectly()
+        {
+            var feetInstance1 = new Feet(1.000001);
+            var feetInstance2 = new Feet(1.000002);
+            bool comparisonResult = feetInstance1.Equals(feetInstance2);
+            Assert.IsFalse(comparisonResult, "Even very close values should be considered different");
+        }
+
+        // Tests Feet.GetHashCode() method for equal objects
+        [TestMethod]
+        public void GetHashCode_EqualObjects_ReturnsSameHashCode()
+        {
+            var feetInstance1 = new Feet(5.0);
+            var feetInstance2 = new Feet(5.0);
+            int hashValue1 = feetInstance1.GetHashCode();
+            int hashValue2 = feetInstance2.GetHashCode();
+            Assert.AreEqual(hashValue1, hashValue2, "Equal objects should have equal hash codes");
+        }
+
+        // Tests Feet.GetHashCode() method for different objects
+        [TestMethod]
+        public void GetHashCode_DifferentObjects_ReturnsDifferentHashCode()
+        {
+            var feetInstance1 = new Feet(5.0);
+            var feetInstance2 = new Feet(6.0);
+            int hashValue1 = feetInstance1.GetHashCode();
+            int hashValue2 = feetInstance2.GetHashCode();
+            Assert.AreNotEqual(hashValue1, hashValue2, "Different objects should have different hash codes");
+        }
+
+        // Tests Feet.ToString() method formatting
+        [TestMethod]
+        public void ToString_ReturnsFormattedString()
+        {
+            var feetInstance = new Feet(7.5);
+            string stringRepresentation = feetInstance.ToString();
+            Assert.AreEqual("7.5 ft", stringRepresentation, "ToString should return value with unit");
         }
     }
 }

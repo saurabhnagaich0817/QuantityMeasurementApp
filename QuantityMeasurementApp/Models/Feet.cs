@@ -1,83 +1,73 @@
-// ===================================================
-// File: Feet.cs
-// Project: QuantityMeasurementApp.Models
-// Description: Feet measurement class - UC1 Implementation
-// Author: Development Team
-// Version: 1.0 (UC1 - Basic Feet Equality)
-// ===================================================
+using System;
 
 namespace QuantityMeasurementApp.Models
 {
     /// <summary>
-    /// Represents a measurement in Feet.
-    /// Implements Value Object pattern for immutable measurement.
-    /// UC1: Basic feet equality comparison.
+    /// Represents a feet measurement with value-based equality
+    /// This class is immutable - once created, its value cannot be changed
     /// </summary>
-    /// <remarks>
-    /// This class is kept for backward compatibility with UC1.
-    /// New code should use Quantity class instead.
-    /// </remarks>
-    public sealed class Feet
+    public class Feet
     {
-        /// <summary>
-        /// The numeric value of this feet measurement.
-        /// </summary>
-        private readonly double _value;
+        // Private field to store the measurement value
+        // Made readonly to ensure immutability
+        private readonly double _measurementValue;
 
-        /// <summary>
-        /// Initializes a new instance of the Feet class.
-        /// </summary>
-        /// <param name="value">The length in feet.</param>
-        /// <exception cref="ArgumentException">Thrown when value is NaN.</exception>
-        public Feet(double value)
+        // Constructor to initialize a new Feet object with a given value
+        // Parameter: measurement - The measurement value in feet
+        public Feet(double measurement)
         {
-            // Validate input value
-            if (double.IsNaN(value))
-                throw new ArgumentException("Invalid Feet value. Value cannot be NaN.");
-
-            _value = value;
+            _measurementValue = measurement;
         }
 
-        /// <summary>
-        /// Gets the feet value.
-        /// </summary>
-        public double Value => _value;
+        // Public property to access the measurement value
+        // Since the field is readonly, this provides read-only access
+        public double Measurement => _measurementValue;
 
-        /// <summary>
-        /// Determines whether the specified object is equal to the current Feet.
-        /// </summary>
-        /// <param name="obj">The object to compare with.</param>
-        /// <returns>true if objects have same value; otherwise, false.</returns>
-        public override bool Equals(object? obj)
+        // Determines whether the specified object is equal to the current Feet object
+        // Implements value-based equality with proper null checking and type safety
+        // Parameter: target - The object to compare with the current object
+        // Returns: true if the specified object is equal to the current object; otherwise, false
+        public override bool Equals(object? target)
         {
-            // Check if same reference (reflexive property)
-            if (ReferenceEquals(this, obj))
+            // Check if the object is the same reference (reflexive property)
+            // If both references point to the same object, they are equal
+            if (ReferenceEquals(this, target))
                 return true;
 
-            // Check for null and type mismatch
-            if (obj is not Feet other)
+            // Check if the object is null
+            // By contract, no object should equal null
+            if (target is null)
                 return false;
 
-            // Value-based equality check
-            return _value.Equals(other._value);
+            // Check if the object is of different type (type safety)
+            // We only want to compare Feet objects with other Feet objects
+            if (GetType() != target.GetType())
+                return false;
+
+            // Safe cast after type check - this will never fail due to above check
+            Feet otherFeet = (Feet)target;
+
+            // Compare double values using exact equality
+            // This ensures that 1.000001 and 1.000002 are considered different
+            // which is important for the test cases
+            return _measurementValue == otherFeet._measurementValue;
         }
 
-        /// <summary>
-        /// Serves as the default hash function.
-        /// </summary>
-        /// <returns>Hash code based on the feet value.</returns>
+        // Serves as the default hash function
+        // Returns a hash code for the current object
+        // Important: Equal objects must have equal hash codes
         public override int GetHashCode()
         {
-            return _value.GetHashCode();
+            // Use the built-in hash code of the double value
+            // This ensures that equal values produce the same hash code
+            return _measurementValue.GetHashCode();
         }
 
-        /// <summary>
-        /// Returns a string representation of the Feet object.
-        /// </summary>
-        /// <returns>Formatted string with value and unit.</returns>
+        // Returns a string representation of the Feet object
+        // Format: "{value} ft" (e.g., "1.5 ft")
         public override string ToString()
         {
-            return $"{_value} Feet";
+            return $"{_measurementValue} ft";
         }
     }
 }

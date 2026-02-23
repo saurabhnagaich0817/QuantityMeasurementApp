@@ -1,34 +1,16 @@
-﻿// ===================================================
-// File: Program.cs
-// Project: QuantityMeasurementApp
-// Description: Application entry point with main method
-
-// ===================================================
-
-using QuantityMeasurementApp.Views;
+﻿﻿using QuantityMeasurementApp.Views;
 
 namespace QuantityMeasurementApp
 {
-    /// <summary>
-    /// Main entry point for the Quantity Measurement Application.
-    /// UC3: Generic Length implementation with backward compatibility.
-    /// </summary>
-    internal class Program
+    // Main program class - now only responsible for launching the application
+    class Program
     {
-        /// <summary>
-        /// Application starting point.
-        /// Creates and starts the menu system.
-        /// </summary>
-        /// <param name="args">Command line arguments (not used)</param>
+        // Entry point of the application
         static void Main(string[] args)
         {
-            Console.WriteLine("=== Quantity Measurement App UC3 ===");
-         
-            
-            
-            // Create and start the interactive menu
-            var menu = new Menu();
-            menu.Start();
+            // Create and display the menu view
+            Menu mainMenu = new Menu();
+            mainMenu.Show();
         }
     }
 }

@@ -1,131 +1,100 @@
-// ===================================================
-// File: QuantityMeasurementService.cs
-// Project: QuantityMeasurementApp.Services
-// Description: Business logic for quantity measurement comparisons
-// Author: Development Team
-// Version: 3.0 (UC1, UC2, UC3)
-// ===================================================
-
 using QuantityMeasurementApp.Models;
 
 namespace QuantityMeasurementApp.Services
 {
     /// <summary>
-    /// Service class handling all measurement comparison logic.
-    /// UC3: Enhanced to support generic Quantity comparisons while
-    /// maintaining backward compatibility with UC1 and UC2.
+    /// Service class for quantity measurement operations
+    /// Updated to use the generic Quantity class instead of separate Feet and Inch classes
     /// </summary>
-    /// <remarks>
-    /// This service acts as a facade between UI layer and models.
-    /// It centralizes comparison logic and provides consistent API.
-    /// </remarks>
     public class QuantityMeasurementService
     {
-        // ==================== UC1 Methods (Feet) ====================
-
-        /// <summary>
-        /// Compares two Feet measurements for equality.
-        /// UC1: Legacy method kept for backward compatibility.
-        /// </summary>
-        /// <param name="first">First Feet measurement.</param>
-        /// <param name="second">Second Feet measurement.</param>
-        /// <returns>True if both measurements are equal.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if any parameter is null.</exception>
-        public bool AreEqual(Feet first, Feet second)
+        // Compares two quantity measurements for equality
+        // Parameter: firstQuantity - First quantity measurement (can be null)
+        // Parameter: secondQuantity - Second quantity measurement (can be null)
+        // Returns: True if both measurements are equal and non-null; otherwise, false
+        public bool CompareQuantities(Quantity? firstQuantity, Quantity? secondQuantity)
         {
-            // Validate inputs
-            if (first is null)
-                throw new ArgumentNullException(nameof(first), "Feet cannot be null");
+            // Handle null cases - if either measurement is null, they cannot be equal
+            if (firstQuantity is null || secondQuantity is null)
+                return false;
 
-            if (second is null)
-                throw new ArgumentNullException(nameof(second), "Feet cannot be null");
-
-            // Delegate equality check to Feet class
-            return first.Equals(second);
+            // Delegate the equality check to the Quantity class's Equals method
+            return firstQuantity.Equals(secondQuantity);
         }
 
-        // ==================== UC2 Methods (Inch) ====================
-
-        /// <summary>
-        /// Compares two Inch measurements for equality.
-        /// UC2: Legacy method kept for backward compatibility.
-        /// </summary>
-        /// <param name="first">First Inch measurement.</param>
-        /// <param name="second">Second Inch measurement.</param>
-        /// <returns>True if both measurements are equal.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if any parameter is null.</exception>
-        public bool AreEqual(Inch first, Inch second)
+        // Creates a Quantity object from a string input and unit
+        // Parameter: userInput - String input to parse (can be null or whitespace)
+        // Parameter: targetUnit - The unit of measurement
+        // Returns: Quantity object if parsing successful; otherwise, null
+        public Quantity? CreateQuantityFromInput(string? userInput, LengthUnit targetUnit)
         {
-            // Validate inputs
-            if (first is null)
-                throw new ArgumentNullException(nameof(first), "Inch cannot be null");
+            // Check for null or whitespace input
+            if (string.IsNullOrWhiteSpace(userInput))
+                return null;
 
-            if (second is null)
-                throw new ArgumentNullException(nameof(second), "Inch cannot be null");
-
-            // Delegate equality check to Inch class
-            return first.Equals(second);
-        }
-
-        // ==================== UC3 Methods (Quantity) ====================
-
-        /// <summary>
-        /// Compares two Quantity measurements for equality.
-        /// UC3: Generic method that handles all unit types.
-        /// Supports cross-unit comparison (e.g., 1 FEET vs 12 INCHES).
-        /// </summary>
-        /// <param name="first">First Quantity measurement.</param>
-        /// <param name="second">Second Quantity measurement.</param>
-        /// <returns>
-        /// True if measurements represent same length after conversion;
-        /// false otherwise.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">Thrown if any parameter is null.</exception>
-        /// <example>
-        /// service.AreEqual(
-        ///     new Quantity(1, LengthUnit.FEET),
-        ///     new Quantity(12, LengthUnit.INCH)
-        /// ) returns true
-        /// </example>
-        public bool AreEqual(Quantity first, Quantity second)
-        {
-            // Validate inputs
-            if (first is null)
-                throw new ArgumentNullException(nameof(first), "Quantity cannot be null");
-
-            if (second is null)
-                throw new ArgumentNullException(nameof(second), "Quantity cannot be null");
-
-            // Delegate equality check to Quantity class
-            // Quantity.Equals handles unit conversion internally
-            return first.Equals(second);
-        }
-
-        /// <summary>
-        /// Compares multiple Quantity measurements for equality.
-        /// UC3: Extension method to check if all provided quantities are equal.
-        /// </summary>
-        /// <param name="quantities">Array of quantities to compare.</param>
-        /// <returns>True if all quantities are equal; false otherwise.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if array is null.</exception>
-        public bool AreAllEqual(params Quantity[] quantities)
-        {
-            // Validate input
-            if (quantities is null)
-                throw new ArgumentNullException(nameof(quantities));
-
-            // If less than 2 items, trivially true
-            if (quantities.Length < 2)
-                return true;
-
-            // Compare each with first
-            for (int i = 1; i < quantities.Length; i++)
+            // Try to parse the string as a double
+            if (double.TryParse(userInput, out double parsedValue))
             {
-                if (!AreEqual(quantities[0], quantities[i]))
-                    return false;
+                // Successfully parsed, create and return a new Quantity object
+                return new Quantity(parsedValue, targetUnit);
             }
 
-            return true;
+            // Parsing failed (non-numeric input), return null
+            return null;
+        }
+
+        // Static method for quantity equality check - reduces dependency on main method
+        // Parameter: firstValue - First value
+        // Parameter: firstUnit - Unit of first value
+        // Parameter: secondValue - Second value
+        // Parameter: secondUnit - Unit of second value
+        // Returns: True if both quantities are equal
+        public static bool CheckQuantityEquality(
+            double firstValue,
+            LengthUnit firstUnit,
+            double secondValue,
+            LengthUnit secondUnit
+        )
+        {
+            Quantity quantityOne = new Quantity(firstValue, firstUnit);
+            Quantity quantityTwo = new Quantity(secondValue, secondUnit);
+            return quantityOne.Equals(quantityTwo);
+        }
+
+        // For backward compatibility - uses the new Quantity class
+        public bool CompareFeetMeasurements(Feet? firstFeet, Feet? secondFeet)
+        {
+            if (firstFeet is null || secondFeet is null)
+                return false;
+
+            Quantity q1 = new Quantity(firstFeet.Measurement, LengthUnit.FEET);
+            Quantity q2 = new Quantity(secondFeet.Measurement, LengthUnit.FEET);
+            return q1.Equals(q2);
+        }
+
+        // For backward compatibility - uses the new Quantity class
+        public Feet? CreateFeetFromString(string? userInput)
+        {
+            Quantity? quantity = CreateQuantityFromInput(userInput, LengthUnit.FEET);
+            return quantity != null ? new Feet(quantity.NumericValue) : null;
+        }
+
+        // For backward compatibility - uses the new Quantity class
+        public bool CompareInchMeasurements(Inch? firstInch, Inch? secondInch)
+        {
+            if (firstInch is null || secondInch is null)
+                return false;
+
+            Quantity q1 = new Quantity(firstInch.Measurement, LengthUnit.INCH);
+            Quantity q2 = new Quantity(secondInch.Measurement, LengthUnit.INCH);
+            return q1.Equals(q2);
+        }
+
+        // For backward compatibility - uses the new Quantity class
+        public Inch? CreateInchFromString(string? userInput)
+        {
+            Quantity? quantity = CreateQuantityFromInput(userInput, LengthUnit.INCH);
+            return quantity != null ? new Inch(quantity.NumericValue) : null;
         }
     }
 }
