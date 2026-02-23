@@ -1,16 +1,21 @@
-﻿﻿using QuantityMeasurementApp.Views;
+﻿﻿﻿using QuantityMeasurementApp.Views;
 
 namespace QuantityMeasurementApp
 {
-    // Main program class - now only responsible for launching the application
+    /// <summary>
+    /// Main program class - entry point of the application.
+    /// </summary>
     class Program
     {
-        // Entry point of the application
+        /// <summary>
+        /// Entry point of the application.
+        /// </summary>
+        /// <param name="args">Command line arguments.</param>
         static void Main(string[] args)
         {
-            // Create and display the menu view
-            Menu mainMenu = new Menu();
-            mainMenu.Show();
+            // Create and display the menu
+            Menu menu = new Menu();
+            menu.Display();
         }
     }
 }

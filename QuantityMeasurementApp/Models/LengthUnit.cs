@@ -21,7 +21,7 @@ namespace QuantityMeasurementApp.Models
     {
         // Conversion factors to feet (base unit)
         // All units are converted to feet for consistent comparison
-        private static readonly double[] FeetConversionFactors = new double[]
+        private static readonly double[] ToFeetConversionFactors = new double[]
         {
             1.0, // FEET to FEET conversion factor
             1.0 / 12.0, // INCH to FEET conversion factor (1 inch = 1/12 feet)
@@ -33,31 +33,31 @@ namespace QuantityMeasurementApp.Models
         };
 
         // Tolerance for floating point comparisons
-        public const double Tolerance = 0.000001;
+        public const double EPSILON = 0.000001;
 
         // Get the conversion factor to convert this unit to feet
-        public static double GetFeetConversionFactor(this LengthUnit unit)
+        public static double GetConversionFactorToFeet(this LengthUnit unit)
         {
-            int unitIndex = (int)unit;
-            if (unitIndex >= 0 && unitIndex < FeetConversionFactors.Length)
+            int index = (int)unit;
+            if (index >= 0 && index < ToFeetConversionFactors.Length)
             {
-                return FeetConversionFactors[unitIndex];
+                return ToFeetConversionFactors[index];
             }
             throw new ArgumentException($"Invalid unit: {unit}");
         }
 
         // Compare two double values with tolerance
         public static bool AreApproximatelyEqual(
-            double firstValue,
-            double secondValue,
-            double tolerance = Tolerance
+            double value1,
+            double value2,
+            double epsilon = EPSILON
         )
         {
-            return Math.Abs(firstValue - secondValue) < tolerance;
+            return Math.Abs(value1 - value2) < epsilon;
         }
 
         // Get the string representation of the unit
-        public static string GetSymbol(this LengthUnit unit)
+        public static string GetUnitSymbol(this LengthUnit unit)
         {
             switch (unit)
             {
@@ -75,7 +75,7 @@ namespace QuantityMeasurementApp.Models
         }
 
         // Get the full name of the unit
-        public static string GetFullName(this LengthUnit unit)
+        public static string GetUnitName(this LengthUnit unit)
         {
             switch (unit)
             {

@@ -11,163 +11,193 @@ namespace QuantityMeasurementApp.Tests.Models
     [TestClass]
     public class QuantityConversionTests
     {
-        private const double NumericTolerance = 0.000001;
+        private const double Tolerance = 0.000001;
 
         #region Basic Unit Conversion Tests
 
-        // Tests conversion from Feet to Inches.
-        // Verifies that 1 foot converts to 12 inches.
+        /// <summary>
+        /// Tests conversion from Feet to Inches.
+        /// Verifies that 1 foot converts to 12 inches.
+        /// </summary>
         [TestMethod]
         public void Convert_FeetToInches_ReturnsCorrectValue()
         {
-            double conversionResult = Quantity.ConvertValue(1.0, LengthUnit.FEET, LengthUnit.INCH);
-            Assert.AreEqual(12.0, conversionResult, NumericTolerance, "1 foot should equal 12 inches");
+            double result = Quantity.Convert(1.0, LengthUnit.FEET, LengthUnit.INCH);
+            Assert.AreEqual(12.0, result, Tolerance, "1 foot should equal 12 inches");
         }
 
-        // Tests conversion from Inches to Feet.
-        // Verifies that 24 inches convert to 2 feet.
+        /// <summary>
+        /// Tests conversion from Inches to Feet.
+        /// Verifies that 24 inches convert to 2 feet.
+        /// </summary>
         [TestMethod]
         public void Convert_InchesToFeet_ReturnsCorrectValue()
         {
-            double conversionResult = Quantity.ConvertValue(24.0, LengthUnit.INCH, LengthUnit.FEET);
-            Assert.AreEqual(2.0, conversionResult, NumericTolerance, "24 inches should equal 2 feet");
+            double result = Quantity.Convert(24.0, LengthUnit.INCH, LengthUnit.FEET);
+            Assert.AreEqual(2.0, result, Tolerance, "24 inches should equal 2 feet");
         }
 
-        // Tests conversion from Yards to Feet.
-        // Verifies that 1 yard converts to 3 feet.
+        /// <summary>
+        /// Tests conversion from Yards to Feet.
+        /// Verifies that 1 yard converts to 3 feet.
+        /// </summary>
         [TestMethod]
         public void Convert_YardsToFeet_ReturnsCorrectValue()
         {
-            double conversionResult = Quantity.ConvertValue(1.0, LengthUnit.YARD, LengthUnit.FEET);
-            Assert.AreEqual(3.0, conversionResult, NumericTolerance, "1 yard should equal 3 feet");
+            double result = Quantity.Convert(1.0, LengthUnit.YARD, LengthUnit.FEET);
+            Assert.AreEqual(3.0, result, Tolerance, "1 yard should equal 3 feet");
         }
 
-        // Tests conversion from Feet to Yards.
-        // Verifies that 6 feet convert to 2 yards.
+        /// <summary>
+        /// Tests conversion from Feet to Yards.
+        /// Verifies that 6 feet convert to 2 yards.
+        /// </summary>
         [TestMethod]
         public void Convert_FeetToYards_ReturnsCorrectValue()
         {
-            double conversionResult = Quantity.ConvertValue(6.0, LengthUnit.FEET, LengthUnit.YARD);
-            Assert.AreEqual(2.0, conversionResult, NumericTolerance, "6 feet should equal 2 yards");
+            double result = Quantity.Convert(6.0, LengthUnit.FEET, LengthUnit.YARD);
+            Assert.AreEqual(2.0, result, Tolerance, "6 feet should equal 2 yards");
         }
 
-        // Tests conversion from Yards to Inches.
-        // Verifies that 1 yard converts to 36 inches.
+        /// <summary>
+        /// Tests conversion from Yards to Inches.
+        /// Verifies that 1 yard converts to 36 inches.
+        /// </summary>
         [TestMethod]
         public void Convert_YardsToInches_ReturnsCorrectValue()
         {
-            double conversionResult = Quantity.ConvertValue(1.0, LengthUnit.YARD, LengthUnit.INCH);
-            Assert.AreEqual(36.0, conversionResult, NumericTolerance, "1 yard should equal 36 inches");
+            double result = Quantity.Convert(1.0, LengthUnit.YARD, LengthUnit.INCH);
+            Assert.AreEqual(36.0, result, Tolerance, "1 yard should equal 36 inches");
         }
 
-        // Tests conversion from Inches to Yards.
-        // Verifies that 72 inches convert to 2 yards.
+        /// <summary>
+        /// Tests conversion from Inches to Yards.
+        /// Verifies that 72 inches convert to 2 yards.
+        /// </summary>
         [TestMethod]
         public void Convert_InchesToYards_ReturnsCorrectValue()
         {
-            double conversionResult = Quantity.ConvertValue(72.0, LengthUnit.INCH, LengthUnit.YARD);
-            Assert.AreEqual(2.0, conversionResult, NumericTolerance, "72 inches should equal 2 yards");
+            double result = Quantity.Convert(72.0, LengthUnit.INCH, LengthUnit.YARD);
+            Assert.AreEqual(2.0, result, Tolerance, "72 inches should equal 2 yards");
         }
 
-        // Tests conversion from Centimeters to Inches.
-        // Verifies that 2.54 cm converts to 1 inch.
+        /// <summary>
+        /// Tests conversion from Centimeters to Inches.
+        /// Verifies that 2.54 cm converts to 1 inch.
+        /// </summary>
         [TestMethod]
         public void Convert_CentimetersToInches_ReturnsCorrectValue()
         {
-            double conversionResult = Quantity.ConvertValue(2.54, LengthUnit.CENTIMETER, LengthUnit.INCH);
-            Assert.AreEqual(1.0, conversionResult, NumericTolerance, "2.54 cm should equal 1 inch");
+            double result = Quantity.Convert(2.54, LengthUnit.CENTIMETER, LengthUnit.INCH);
+            Assert.AreEqual(1.0, result, Tolerance, "2.54 cm should equal 1 inch");
         }
 
-        // Tests conversion from Inches to Centimeters.
-        // Verifies that 1 inch converts to 2.54 cm.
+        /// <summary>
+        /// Tests conversion from Inches to Centimeters.
+        /// Verifies that 1 inch converts to 2.54 cm.
+        /// </summary>
         [TestMethod]
         public void Convert_InchesToCentimeters_ReturnsCorrectValue()
         {
-            double conversionResult = Quantity.ConvertValue(1.0, LengthUnit.INCH, LengthUnit.CENTIMETER);
-            Assert.AreEqual(2.54, conversionResult, NumericTolerance, "1 inch should equal 2.54 cm");
+            double result = Quantity.Convert(1.0, LengthUnit.INCH, LengthUnit.CENTIMETER);
+            Assert.AreEqual(2.54, result, Tolerance, "1 inch should equal 2.54 cm");
         }
 
-        // Tests conversion from Centimeters to Feet.
-        // Verifies that 30.48 cm converts to 1 foot.
+        /// <summary>
+        /// Tests conversion from Centimeters to Feet.
+        /// Verifies that 30.48 cm converts to 1 foot.
+        /// </summary>
         [TestMethod]
         public void Convert_CentimetersToFeet_ReturnsCorrectValue()
         {
-            double conversionResult = Quantity.ConvertValue(30.48, LengthUnit.CENTIMETER, LengthUnit.FEET);
-            Assert.AreEqual(1.0, conversionResult, NumericTolerance, "30.48 cm should equal 1 foot");
+            double result = Quantity.Convert(30.48, LengthUnit.CENTIMETER, LengthUnit.FEET);
+            Assert.AreEqual(1.0, result, Tolerance, "30.48 cm should equal 1 foot");
         }
 
-        // Tests conversion from Feet to Centimeters.
-        // Verifies that 1 foot converts to 30.48 cm.
+        /// <summary>
+        /// Tests conversion from Feet to Centimeters.
+        /// Verifies that 1 foot converts to 30.48 cm.
+        /// </summary>
         [TestMethod]
         public void Convert_FeetToCentimeters_ReturnsCorrectValue()
         {
-            double conversionResult = Quantity.ConvertValue(1.0, LengthUnit.FEET, LengthUnit.CENTIMETER);
-            Assert.AreEqual(30.48, conversionResult, NumericTolerance, "1 foot should equal 30.48 cm");
+            double result = Quantity.Convert(1.0, LengthUnit.FEET, LengthUnit.CENTIMETER);
+            Assert.AreEqual(30.48, result, Tolerance, "1 foot should equal 30.48 cm");
         }
 
-        // Tests conversion from Centimeters to Yards.
-        // Verifies that 91.44 cm converts to 1 yard.
+        /// <summary>
+        /// Tests conversion from Centimeters to Yards.
+        /// Verifies that 91.44 cm converts to 1 yard.
+        /// </summary>
         [TestMethod]
         public void Convert_CentimetersToYards_ReturnsCorrectValue()
         {
-            double conversionResult = Quantity.ConvertValue(91.44, LengthUnit.CENTIMETER, LengthUnit.YARD);
-            Assert.AreEqual(1.0, conversionResult, NumericTolerance, "91.44 cm should equal 1 yard");
+            double result = Quantity.Convert(91.44, LengthUnit.CENTIMETER, LengthUnit.YARD);
+            Assert.AreEqual(1.0, result, Tolerance, "91.44 cm should equal 1 yard");
         }
 
-        // Tests conversion from Yards to Centimeters.
-        // Verifies that 1 yard converts to 91.44 cm.
+        /// <summary>
+        /// Tests conversion from Yards to Centimeters.
+        /// Verifies that 1 yard converts to 91.44 cm.
+        /// </summary>
         [TestMethod]
         public void Convert_YardsToCentimeters_ReturnsCorrectValue()
         {
-            double conversionResult = Quantity.ConvertValue(1.0, LengthUnit.YARD, LengthUnit.CENTIMETER);
-            Assert.AreEqual(91.44, conversionResult, NumericTolerance, "1 yard should equal 91.44 cm");
+            double result = Quantity.Convert(1.0, LengthUnit.YARD, LengthUnit.CENTIMETER);
+            Assert.AreEqual(91.44, result, Tolerance, "1 yard should equal 91.44 cm");
         }
 
         #endregion
 
         #region Cross-Unit Conversion Tests
 
-        // Tests conversion from Yards directly to Centimeters with decimal value.
-        // Verifies the multi-step conversion through base unit is accurate.
+        /// <summary>
+        /// Tests conversion from Yards directly to Centimeters with decimal value.
+        /// Verifies the multi-step conversion through base unit is accurate.
+        /// </summary>
         [TestMethod]
         public void Convert_YardsToCentimeters_DecimalValue_ReturnsCorrectValue()
         {
-            double conversionResult = Quantity.ConvertValue(2.5, LengthUnit.YARD, LengthUnit.CENTIMETER);
-            double expectedResult = 2.5 * 91.44; // 2.5 yards * 91.44 cm per yard
+            double result = Quantity.Convert(2.5, LengthUnit.YARD, LengthUnit.CENTIMETER);
+            double expected = 2.5 * 91.44; // 2.5 yards * 91.44 cm per yard
             Assert.AreEqual(
-                expectedResult,
-                conversionResult,
-                NumericTolerance,
+                expected,
+                result,
+                Tolerance,
                 "2.5 yards should equal the expected centimeters"
             );
         }
 
-        // Tests conversion from Inches to Centimeters with fractional value.
-        // Verifies conversion between non-adjacent units.
+        /// <summary>
+        /// Tests conversion from Inches to Centimeters with fractional value.
+        /// Verifies conversion between non-adjacent units.
+        /// </summary>
         [TestMethod]
         public void Convert_InchesToCentimeters_FractionalValue_ReturnsCorrectValue()
         {
-            double conversionResult = Quantity.ConvertValue(12.5, LengthUnit.INCH, LengthUnit.CENTIMETER);
-            double expectedResult = 12.5 * 2.54; // 12.5 inches * 2.54 cm per inch
+            double result = Quantity.Convert(12.5, LengthUnit.INCH, LengthUnit.CENTIMETER);
+            double expected = 12.5 * 2.54; // 12.5 inches * 2.54 cm per inch
             Assert.AreEqual(
-                expectedResult,
-                conversionResult,
-                NumericTolerance,
+                expected,
+                result,
+                Tolerance,
                 "12.5 inches should equal correct centimeters"
             );
         }
 
-        // Tests conversion from Feet to Centimeters with decimal value.
-        // Verifies conversion between non-adjacent units.
+        /// <summary>
+        /// Tests conversion from Feet to Centimeters with decimal value.
+        /// Verifies conversion between non-adjacent units.
+        /// </summary>
         [TestMethod]
         public void Convert_FeetToCentimeters_DecimalValue_ReturnsCorrectValue()
         {
-            double conversionResult = Quantity.ConvertValue(3.5, LengthUnit.FEET, LengthUnit.CENTIMETER);
-            double expectedResult = 3.5 * 30.48; // 3.5 feet * 30.48 cm per foot
+            double result = Quantity.Convert(3.5, LengthUnit.FEET, LengthUnit.CENTIMETER);
+            double expected = 3.5 * 30.48; // 3.5 feet * 30.48 cm per foot
             Assert.AreEqual(
-                expectedResult,
-                conversionResult,
-                NumericTolerance,
+                expected,
+                result,
+                Tolerance,
                 "3.5 feet should equal correct centimeters"
             );
         }
@@ -176,54 +206,60 @@ namespace QuantityMeasurementApp.Tests.Models
 
         #region Zero Value Tests
 
-        // Tests conversion of zero value.
-        // Verifies that zero in any unit converts to zero.
+        /// <summary>
+        /// Tests conversion of zero value.
+        /// Verifies that zero in any unit converts to zero.
+        /// </summary>
         [TestMethod]
         public void Convert_ZeroValue_ReturnsZero()
         {
-            double conversionResult = Quantity.ConvertValue(0.0, LengthUnit.FEET, LengthUnit.INCH);
-            Assert.AreEqual(0.0, conversionResult, NumericTolerance, "Zero feet should convert to zero inches");
+            double result = Quantity.Convert(0.0, LengthUnit.FEET, LengthUnit.INCH);
+            Assert.AreEqual(0.0, result, Tolerance, "Zero feet should convert to zero inches");
 
-            conversionResult = Quantity.ConvertValue(0.0, LengthUnit.YARD, LengthUnit.CENTIMETER);
-            Assert.AreEqual(0.0, conversionResult, NumericTolerance, "Zero yards should convert to zero cm");
+            result = Quantity.Convert(0.0, LengthUnit.YARD, LengthUnit.CENTIMETER);
+            Assert.AreEqual(0.0, result, Tolerance, "Zero yards should convert to zero cm");
 
-            conversionResult = Quantity.ConvertValue(0.0, LengthUnit.INCH, LengthUnit.FEET);
-            Assert.AreEqual(0.0, conversionResult, NumericTolerance, "Zero inches should convert to zero feet");
+            result = Quantity.Convert(0.0, LengthUnit.INCH, LengthUnit.FEET);
+            Assert.AreEqual(0.0, result, Tolerance, "Zero inches should convert to zero feet");
         }
 
         #endregion
 
         #region Negative Value Tests
 
-        // Tests conversion of negative values.
-        // Verifies that sign is preserved during conversion.
+        /// <summary>
+        /// Tests conversion of negative values.
+        /// Verifies that sign is preserved during conversion.
+        /// </summary>
         [TestMethod]
         public void Convert_NegativeValue_PreservesSign()
         {
-            double conversionResult = Quantity.ConvertValue(-1.0, LengthUnit.FEET, LengthUnit.INCH);
-            Assert.AreEqual(-12.0, conversionResult, NumericTolerance, "-1 foot should convert to -12 inches");
+            double result = Quantity.Convert(-1.0, LengthUnit.FEET, LengthUnit.INCH);
+            Assert.AreEqual(-12.0, result, Tolerance, "-1 foot should convert to -12 inches");
 
-            conversionResult = Quantity.ConvertValue(-2.5, LengthUnit.YARD, LengthUnit.FEET);
-            Assert.AreEqual(-7.5, conversionResult, NumericTolerance, "-2.5 yards should convert to -7.5 feet");
+            result = Quantity.Convert(-2.5, LengthUnit.YARD, LengthUnit.FEET);
+            Assert.AreEqual(-7.5, result, Tolerance, "-2.5 yards should convert to -7.5 feet");
 
-            conversionResult = Quantity.ConvertValue(-30.48, LengthUnit.CENTIMETER, LengthUnit.FEET);
-            Assert.AreEqual(-1.0, conversionResult, NumericTolerance, "-30.48 cm should convert to -1 foot");
+            result = Quantity.Convert(-30.48, LengthUnit.CENTIMETER, LengthUnit.FEET);
+            Assert.AreEqual(-1.0, result, Tolerance, "-30.48 cm should convert to -1 foot");
         }
 
         #endregion
 
         #region Large Value Tests
 
-        // Tests conversion of very large values.
-        // Verifies that conversion maintains precision for large numbers.
+        /// <summary>
+        /// Tests conversion of very large values.
+        /// Verifies that conversion maintains precision for large numbers.
+        /// </summary>
         [TestMethod]
         public void Convert_LargeValues_MaintainsPrecision()
         {
-            double conversionResult = Quantity.ConvertValue(1000000.0, LengthUnit.FEET, LengthUnit.INCH);
+            double result = Quantity.Convert(1000000.0, LengthUnit.FEET, LengthUnit.INCH);
             Assert.AreEqual(
                 12000000.0,
-                conversionResult,
-                NumericTolerance * 1000000,
+                result,
+                Tolerance * 1000000,
                 "1,000,000 feet should equal 12,000,000 inches"
             );
         }
@@ -232,62 +268,66 @@ namespace QuantityMeasurementApp.Tests.Models
 
         #region Small Value Tests
 
-        // Tests conversion of very small values.
-        // Verifies that conversion maintains precision for small numbers.
+        /// <summary>
+        /// Tests conversion of very small values.
+        /// Verifies that conversion maintains precision for small numbers.
+        /// </summary>
         [TestMethod]
         public void Convert_SmallValues_MaintainsPrecision()
         {
-            double conversionResult = Quantity.ConvertValue(0.000001, LengthUnit.FEET, LengthUnit.INCH);
+            double result = Quantity.Convert(0.000001, LengthUnit.FEET, LengthUnit.INCH);
             Assert.AreEqual(
                 0.000012,
-                conversionResult,
-                NumericTolerance,
+                result,
+                Tolerance,
                 "0.000001 feet should equal 0.000012 inches"
             );
 
-            conversionResult = Quantity.ConvertValue(0.000001, LengthUnit.CENTIMETER, LengthUnit.INCH);
-            double expectedResult = 0.000001 * 0.393700787;
-            Assert.AreEqual(expectedResult, conversionResult, NumericTolerance, "0.000001 cm should convert correctly");
+            result = Quantity.Convert(0.000001, LengthUnit.CENTIMETER, LengthUnit.INCH);
+            double expected = 0.000001 * 0.393700787;
+            Assert.AreEqual(expected, result, Tolerance, "0.000001 cm should convert correctly");
         }
 
         #endregion
 
         #region Same-Unit Tests
 
-        // Tests conversion where source and target units are the same.
-        // Verifies that value remains unchanged.
+        /// <summary>
+        /// Tests conversion where source and target units are the same.
+        /// Verifies that value remains unchanged.
+        /// </summary>
         [TestMethod]
         public void Convert_SameUnit_ReturnsOriginalValue()
         {
-            double conversionResult = Quantity.ConvertValue(5.0, LengthUnit.FEET, LengthUnit.FEET);
+            double result = Quantity.Convert(5.0, LengthUnit.FEET, LengthUnit.FEET);
             Assert.AreEqual(
                 5.0,
-                conversionResult,
-                NumericTolerance,
+                result,
+                Tolerance,
                 "Converting feet to feet should return original value"
             );
 
-            conversionResult = Quantity.ConvertValue(7.5, LengthUnit.INCH, LengthUnit.INCH);
+            result = Quantity.Convert(7.5, LengthUnit.INCH, LengthUnit.INCH);
             Assert.AreEqual(
                 7.5,
-                conversionResult,
-                NumericTolerance,
+                result,
+                Tolerance,
                 "Converting inches to inches should return original value"
             );
 
-            conversionResult = Quantity.ConvertValue(3.2, LengthUnit.YARD, LengthUnit.YARD);
+            result = Quantity.Convert(3.2, LengthUnit.YARD, LengthUnit.YARD);
             Assert.AreEqual(
                 3.2,
-                conversionResult,
-                NumericTolerance,
+                result,
+                Tolerance,
                 "Converting yards to yards should return original value"
             );
 
-            conversionResult = Quantity.ConvertValue(10.0, LengthUnit.CENTIMETER, LengthUnit.CENTIMETER);
+            result = Quantity.Convert(10.0, LengthUnit.CENTIMETER, LengthUnit.CENTIMETER);
             Assert.AreEqual(
                 10.0,
-                conversionResult,
-                NumericTolerance,
+                result,
+                Tolerance,
                 "Converting cm to cm should return original value"
             );
         }
@@ -296,264 +336,230 @@ namespace QuantityMeasurementApp.Tests.Models
 
         #region Round-Trip Tests
 
-        // Tests round-trip conversion (A → B → A).
-        // Verifies that conversion is reversible within tolerance.
+        /// <summary>
+        /// Tests round-trip conversion (A → B → A).
+        /// Verifies that conversion is reversible within tolerance.
+        /// </summary>
         [TestMethod]
         public void Convert_RoundTrip_ReturnsOriginalValue()
         {
-            double originalInputValue = 3.5;
+            double originalValue = 3.5;
 
-            double toInchesResult = Quantity.ConvertValue(originalInputValue, LengthUnit.FEET, LengthUnit.INCH);
-            double backToFeetResult = Quantity.ConvertValue(toInchesResult, LengthUnit.INCH, LengthUnit.FEET);
+            double toInches = Quantity.Convert(originalValue, LengthUnit.FEET, LengthUnit.INCH);
+            double backToFeet = Quantity.Convert(toInches, LengthUnit.INCH, LengthUnit.FEET);
 
             Assert.AreEqual(
-                originalInputValue,
-                backToFeetResult,
-                NumericTolerance,
+                originalValue,
+                backToFeet,
+                Tolerance,
                 "Round-trip feet→inches→feet should return original"
             );
 
-            originalInputValue = 2.0;
-            double toCmResult = Quantity.ConvertValue(originalInputValue, LengthUnit.YARD, LengthUnit.CENTIMETER);
-            double backToYardsResult = Quantity.ConvertValue(toCmResult, LengthUnit.CENTIMETER, LengthUnit.YARD);
+            originalValue = 2.0;
+            double toCm = Quantity.Convert(originalValue, LengthUnit.YARD, LengthUnit.CENTIMETER);
+            double backToYards = Quantity.Convert(toCm, LengthUnit.CENTIMETER, LengthUnit.YARD);
 
             Assert.AreEqual(
-                originalInputValue,
-                backToYardsResult,
-                NumericTolerance,
+                originalValue,
+                backToYards,
+                Tolerance,
                 "Round-trip yards→cm→yards should return original"
             );
         }
 
-        // Tests multiple round-trip conversions through all units.
-        // Verifies that value is preserved through multiple conversions.
+        /// <summary>
+        /// Tests multiple round-trip conversions through all units.
+        /// Verifies that value is preserved through multiple conversions.
+        /// </summary>
         [TestMethod]
         public void Convert_MultiStepRoundTrip_ReturnsOriginalValue()
         {
-            double originalInputValue = 1.0;
+            double originalValue = 1.0;
 
             // Feet → Inches → Centimeters → Yards → Feet
-            double toInchesResult = Quantity.ConvertValue(originalInputValue, LengthUnit.FEET, LengthUnit.INCH);
-            double toCmResult = Quantity.ConvertValue(toInchesResult, LengthUnit.INCH, LengthUnit.CENTIMETER);
-            double toYardsResult = Quantity.ConvertValue(toCmResult, LengthUnit.CENTIMETER, LengthUnit.YARD);
-            double backToFeetResult = Quantity.ConvertValue(toYardsResult, LengthUnit.YARD, LengthUnit.FEET);
+            double toInches = Quantity.Convert(originalValue, LengthUnit.FEET, LengthUnit.INCH);
+            double toCm = Quantity.Convert(toInches, LengthUnit.INCH, LengthUnit.CENTIMETER);
+            double toYards = Quantity.Convert(toCm, LengthUnit.CENTIMETER, LengthUnit.YARD);
+            double backToFeet = Quantity.Convert(toYards, LengthUnit.YARD, LengthUnit.FEET);
 
             Assert.AreEqual(
-                originalInputValue,
-                backToFeetResult,
-                NumericTolerance,
+                originalValue,
+                backToFeet,
+                Tolerance,
                 "Multi-step conversion should return original value"
             );
         }
 
         #endregion
 
-               #region Invalid Input Tests - FIXED (Without ThrowsException)
+        #region Invalid Input Tests
 
-        // Tests conversion with invalid source unit.
-        // Verifies that ArgumentException is thrown.
+        /// <summary>
+        /// Tests conversion with invalid source unit.
+        /// Verifies that ArgumentException is thrown.
+        /// </summary>
         [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
         public void Convert_InvalidSourceUnit_ThrowsArgumentException()
         {
             LengthUnit invalidUnit = (LengthUnit)99;
-            
-            try
-            {
-                Quantity.ConvertValue(1.0, invalidUnit, LengthUnit.FEET);
-                Assert.Fail("Expected ArgumentException but no exception was thrown");
-            }
-            catch (ArgumentException)
-            {
-                // Expected exception - test passes
-            }
-            catch (Exception ex)
-            {
-                Assert.Fail($"Expected ArgumentException but got {ex.GetType().Name}");
-            }
+            Quantity.Convert(1.0, invalidUnit, LengthUnit.FEET);
         }
 
-        // Tests conversion with invalid target unit.
-        // Verifies that ArgumentException is thrown.
+        /// <summary>
+        /// Tests conversion with invalid target unit.
+        /// Verifies that ArgumentException is thrown.
+        /// </summary>
         [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
         public void Convert_InvalidTargetUnit_ThrowsArgumentException()
         {
             LengthUnit invalidUnit = (LengthUnit)99;
-            
-            try
-            {
-                Quantity.ConvertValue(1.0, LengthUnit.FEET, invalidUnit);
-                Assert.Fail("Expected ArgumentException but no exception was thrown");
-            }
-            catch (ArgumentException)
-            {
-                // Expected exception - test passes
-            }
-            catch (Exception ex)
-            {
-                Assert.Fail($"Expected ArgumentException but got {ex.GetType().Name}");
-            }
+            Quantity.Convert(1.0, LengthUnit.FEET, invalidUnit);
         }
 
-        // Tests conversion with NaN value.
-        // Verifies that ArgumentException is thrown.
+        /// <summary>
+        /// Tests conversion with NaN value.
+        /// Verifies that ArgumentException is thrown.
+        /// </summary>
         [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
         public void Convert_NaNValue_ThrowsArgumentException()
         {
-            try
-            {
-                Quantity.ConvertValue(double.NaN, LengthUnit.FEET, LengthUnit.INCH);
-                Assert.Fail("Expected ArgumentException but no exception was thrown");
-            }
-            catch (ArgumentException)
-            {
-                // Expected exception - test passes
-            }
-            catch (Exception ex)
-            {
-                Assert.Fail($"Expected ArgumentException but got {ex.GetType().Name}");
-            }
+            Quantity.Convert(double.NaN, LengthUnit.FEET, LengthUnit.INCH);
         }
 
-        // Tests conversion with Positive Infinity value.
-        // Verifies that ArgumentException is thrown.
+        /// <summary>
+        /// Tests conversion with Positive Infinity value.
+        /// Verifies that ArgumentException is thrown.
+        /// </summary>
         [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
         public void Convert_PositiveInfinity_ThrowsArgumentException()
         {
-            try
-            {
-                Quantity.ConvertValue(double.PositiveInfinity, LengthUnit.FEET, LengthUnit.INCH);
-                Assert.Fail("Expected ArgumentException but no exception was thrown");
-            }
-            catch (ArgumentException)
-            {
-                // Expected exception - test passes
-            }
-            catch (Exception ex)
-            {
-                Assert.Fail($"Expected ArgumentException but got {ex.GetType().Name}");
-            }
+            Quantity.Convert(double.PositiveInfinity, LengthUnit.FEET, LengthUnit.INCH);
         }
 
-        // Tests conversion with Negative Infinity value.
-        // Verifies that ArgumentException is thrown.
+        /// <summary>
+        /// Tests conversion with Negative Infinity value.
+        /// Verifies that ArgumentException is thrown.
+        /// </summary>
         [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
         public void Convert_NegativeInfinity_ThrowsArgumentException()
         {
-            try
-            {
-                Quantity.ConvertValue(double.NegativeInfinity, LengthUnit.FEET, LengthUnit.INCH);
-                Assert.Fail("Expected ArgumentException but no exception was thrown");
-            }
-            catch (ArgumentException)
-            {
-                // Expected exception - test passes
-            }
-            catch (Exception ex)
-            {
-                Assert.Fail($"Expected ArgumentException but got {ex.GetType().Name}");
-            }
+            Quantity.Convert(double.NegativeInfinity, LengthUnit.FEET, LengthUnit.INCH);
         }
 
         #endregion
-   
-      
+
         #region Instance Method Tests
 
-        // Tests instance ConvertTo method.
-        // Verifies that instance method returns correct converted value.
+        /// <summary>
+        /// Tests instance ConvertTo method.
+        /// Verifies that instance method returns correct converted value.
+        /// </summary>
         [TestMethod]
         public void ConvertTo_InstanceMethod_ReturnsCorrectQuantity()
         {
-            var sourceQuantity = new Quantity(1.0, LengthUnit.FEET);
-            var convertedQuantity = sourceQuantity.ConvertTo(LengthUnit.INCH);
+            var quantity = new Quantity(1.0, LengthUnit.FEET);
+            var converted = quantity.ConvertTo(LengthUnit.INCH);
 
             Assert.AreEqual(
                 12.0,
-                convertedQuantity.NumericValue,
-                NumericTolerance,
+                converted.Value,
+                Tolerance,
                 "Instance ConvertTo should return correct value"
             );
             Assert.AreEqual(
                 LengthUnit.INCH,
-                convertedQuantity.MeasurementUnit,
+                converted.Unit,
                 "Instance ConvertTo should set correct target unit"
             );
         }
 
-        // Tests instance ConvertTo method with zero value.
-        // Verifies that zero converts correctly.
+        /// <summary>
+        /// Tests instance ConvertTo method with zero value.
+        /// Verifies that zero converts correctly.
+        /// </summary>
         [TestMethod]
         public void ConvertTo_InstanceMethod_ZeroValue_ReturnsZero()
         {
-            var sourceQuantity = new Quantity(0.0, LengthUnit.FEET);
-            var convertedQuantity = sourceQuantity.ConvertTo(LengthUnit.INCH);
+            var quantity = new Quantity(0.0, LengthUnit.FEET);
+            var converted = quantity.ConvertTo(LengthUnit.INCH);
 
-            Assert.AreEqual(0.0, convertedQuantity.NumericValue, NumericTolerance, "Zero should convert to zero");
-            Assert.AreEqual(LengthUnit.INCH, convertedQuantity.MeasurementUnit);
+            Assert.AreEqual(0.0, converted.Value, Tolerance, "Zero should convert to zero");
+            Assert.AreEqual(LengthUnit.INCH, converted.Unit);
         }
 
-        // Tests instance ConvertTo method with negative value.
-        // Verifies that negative values preserve sign.
+        /// <summary>
+        /// Tests instance ConvertTo method with negative value.
+        /// Verifies that negative values preserve sign.
+        /// </summary>
         [TestMethod]
         public void ConvertTo_InstanceMethod_NegativeValue_PreservesSign()
         {
-            var sourceQuantity = new Quantity(-2.5, LengthUnit.YARD);
-            var convertedQuantity = sourceQuantity.ConvertTo(LengthUnit.FEET);
+            var quantity = new Quantity(-2.5, LengthUnit.YARD);
+            var converted = quantity.ConvertTo(LengthUnit.FEET);
 
             Assert.AreEqual(
                 -7.5,
-                convertedQuantity.NumericValue,
-                NumericTolerance,
+                converted.Value,
+                Tolerance,
                 "Negative values should preserve sign"
             );
-            Assert.AreEqual(LengthUnit.FEET, convertedQuantity.MeasurementUnit);
+            Assert.AreEqual(LengthUnit.FEET, converted.Unit);
         }
 
-        // Tests instance ConvertTo method with same unit.
-        // Verifies that value remains unchanged.
+        /// <summary>
+        /// Tests instance ConvertTo method with same unit.
+        /// Verifies that value remains unchanged.
+        /// </summary>
         [TestMethod]
         public void ConvertTo_InstanceMethod_SameUnit_ReturnsSameValue()
         {
-            var sourceQuantity = new Quantity(5.0, LengthUnit.FEET);
-            var convertedQuantity = sourceQuantity.ConvertTo(LengthUnit.FEET);
+            var quantity = new Quantity(5.0, LengthUnit.FEET);
+            var converted = quantity.ConvertTo(LengthUnit.FEET);
 
             Assert.AreEqual(
                 5.0,
-                convertedQuantity.NumericValue,
-                NumericTolerance,
+                converted.Value,
+                Tolerance,
                 "Same unit conversion should return same value"
             );
-            Assert.AreEqual(LengthUnit.FEET, convertedQuantity.MeasurementUnit);
+            Assert.AreEqual(LengthUnit.FEET, converted.Unit);
         }
 
         #endregion
 
         #region Precision Tests
 
-        // Tests conversion precision with many decimal places.
-        // Verifies that conversion maintains mathematical accuracy.
+        /// <summary>
+        /// Tests conversion precision with many decimal places.
+        /// Verifies that conversion maintains mathematical accuracy.
+        /// </summary>
         [TestMethod]
         public void Convert_PrecisionTest_MaintainsAccuracy()
         {
             // Test with values that have many decimal places
-            double conversionResult = Quantity.ConvertValue(1.23456789, LengthUnit.FEET, LengthUnit.INCH);
-            double expectedResult = 1.23456789 * 12.0;
-            Assert.AreEqual(expectedResult, conversionResult, 0.000001, "Conversion should maintain precision");
+            double result = Quantity.Convert(1.23456789, LengthUnit.FEET, LengthUnit.INCH);
+            double expected = 1.23456789 * 12.0;
+            Assert.AreEqual(expected, result, 0.000001, "Conversion should maintain precision");
 
-            conversionResult = Quantity.ConvertValue(2.3456789, LengthUnit.YARD, LengthUnit.CENTIMETER);
-            expectedResult = 2.3456789 * 91.44;
+            result = Quantity.Convert(2.3456789, LengthUnit.YARD, LengthUnit.CENTIMETER);
+            expected = 2.3456789 * 91.44;
             Assert.AreEqual(
-                expectedResult,
-                conversionResult,
+                expected,
+                result,
                 0.0001,
                 "Yard to cm conversion should maintain precision"
             );
 
-            conversionResult = Quantity.ConvertValue(3.456789, LengthUnit.CENTIMETER, LengthUnit.INCH);
-            expectedResult = 3.456789 * 0.393700787;
+            result = Quantity.Convert(3.456789, LengthUnit.CENTIMETER, LengthUnit.INCH);
+            expected = 3.456789 * 0.393700787;
             Assert.AreEqual(
-                expectedResult,
-                conversionResult,
+                expected,
+                result,
                 0.000001,
                 "Cm to inch conversion should maintain precision"
             );
@@ -563,41 +569,43 @@ namespace QuantityMeasurementApp.Tests.Models
 
         #region Bidirectional Tests
 
-        // Tests bidirectional conversion (A→B and B→A are inverses).
-        // Verifies that conversion factors are mathematically consistent.
+        /// <summary>
+        /// Tests bidirectional conversion (A→B and B→A are inverses).
+        /// Verifies that conversion factors are mathematically consistent.
+        /// </summary>
         [TestMethod]
         public void Convert_Bidirectional_AreInverses()
         {
-            double inputValue = 5.0;
+            double value = 5.0;
 
-            double feetToInchesResult = Quantity.ConvertValue(inputValue, LengthUnit.FEET, LengthUnit.INCH);
-            double inchesToFeetResult = Quantity.ConvertValue(feetToInchesResult, LengthUnit.INCH, LengthUnit.FEET);
+            double feetToInches = Quantity.Convert(value, LengthUnit.FEET, LengthUnit.INCH);
+            double inchesToFeet = Quantity.Convert(feetToInches, LengthUnit.INCH, LengthUnit.FEET);
             Assert.AreEqual(
-                inputValue,
-                inchesToFeetResult,
-                NumericTolerance,
+                value,
+                inchesToFeet,
+                Tolerance,
                 "Feet↔Inches conversions should be inverses"
             );
 
-            double yardsToFeetResult = Quantity.ConvertValue(inputValue, LengthUnit.YARD, LengthUnit.FEET);
-            double feetToYardsResult = Quantity.ConvertValue(yardsToFeetResult, LengthUnit.FEET, LengthUnit.YARD);
+            double yardsToFeet = Quantity.Convert(value, LengthUnit.YARD, LengthUnit.FEET);
+            double feetToYards = Quantity.Convert(yardsToFeet, LengthUnit.FEET, LengthUnit.YARD);
             Assert.AreEqual(
-                inputValue,
-                feetToYardsResult,
-                NumericTolerance,
+                value,
+                feetToYards,
+                Tolerance,
                 "Yards↔Feet conversions should be inverses"
             );
 
-            double cmToInchesResult = Quantity.ConvertValue(inputValue, LengthUnit.CENTIMETER, LengthUnit.INCH);
-            double inchesToCmResult = Quantity.ConvertValue(
-                cmToInchesResult,
+            double cmToInches = Quantity.Convert(value, LengthUnit.CENTIMETER, LengthUnit.INCH);
+            double inchesToCm = Quantity.Convert(
+                cmToInches,
                 LengthUnit.INCH,
                 LengthUnit.CENTIMETER
             );
             Assert.AreEqual(
-                inputValue,
-                inchesToCmResult,
-                NumericTolerance,
+                value,
+                inchesToCm,
+                Tolerance,
                 "Cm↔Inches conversions should be inverses"
             );
         }

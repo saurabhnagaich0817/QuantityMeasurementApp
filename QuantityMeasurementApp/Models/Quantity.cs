@@ -4,34 +4,37 @@ namespace QuantityMeasurementApp.Models
 {
     /// <summary>
     /// Represents a quantity with a value and unit of measurement.
-    /// This class provides functionality for equality comparison and unit conversion.
+    /// This class provides functionality for equality comparison, unit conversion, and addition operations.
     /// </summary>
     public class Quantity
     {
         // Private fields for value and unit
-        private readonly double _numericValue;
-        private readonly LengthUnit _measurementUnit;
+        private readonly double _value;
+        private readonly LengthUnit _unit;
 
         /// <summary>
         /// Initializes a new instance of the Quantity class.
         /// </summary>
-        /// <param name="numericValue">The numeric value of the measurement.</param>
-        /// <param name="measurementUnit">The unit of measurement.</param>
-        public Quantity(double numericValue, LengthUnit measurementUnit)
+        /// <param name="value">The numeric value of the measurement.</param>
+        /// <param name="unit">The unit of measurement.</param>
+        public Quantity(double value, LengthUnit unit)
         {
-            _numericValue = numericValue;
-            _measurementUnit = measurementUnit;
+            ValidateValue(value);
+            ValidateUnit(unit);
+
+            _value = value;
+            _unit = unit;
         }
 
         /// <summary>
         /// Gets the measurement value.
         /// </summary>
-        public double NumericValue => _numericValue;
+        public double Value => _value;
 
         /// <summary>
         /// Gets the measurement unit.
         /// </summary>
-        public LengthUnit MeasurementUnit => _measurementUnit;
+        public LengthUnit Unit => _unit;
 
         /// <summary>
         /// Converts the current quantity to a target unit.
@@ -43,49 +46,134 @@ namespace QuantityMeasurementApp.Models
         {
             ValidateUnit(targetUnit);
 
-            double valueInBaseUnit = _numericValue * _measurementUnit.GetFeetConversionFactor();
-            double convertedNumericValue = valueInBaseUnit / targetUnit.GetFeetConversionFactor();
+            double valueInBaseUnit = _value * _unit.GetConversionFactorToFeet();
+            double convertedValue = valueInBaseUnit / targetUnit.GetConversionFactorToFeet();
 
-            return new Quantity(convertedNumericValue, targetUnit);
+            return new Quantity(convertedValue, targetUnit);
         }
 
         /// <summary>
         /// Static method to convert a value from one unit to another.
         /// </summary>
-        /// <param name="inputValue">The value to convert.</param>
+        /// <param name="value">The value to convert.</param>
         /// <param name="sourceUnit">The source unit.</param>
         /// <param name="targetUnit">The target unit.</param>
         /// <returns>The converted value as a double.</returns>
         /// <exception cref="ArgumentException">Thrown when value is invalid or units are invalid.</exception>
-        public static double ConvertValue(double inputValue, LengthUnit sourceUnit, LengthUnit targetUnit)
+        public static double Convert(double value, LengthUnit sourceUnit, LengthUnit targetUnit)
         {
-            ValidateNumericValue(inputValue);
+            ValidateValue(value);
             ValidateUnit(sourceUnit);
             ValidateUnit(targetUnit);
 
-            Quantity sourceQuantity = new Quantity(inputValue, sourceUnit);
-            Quantity convertedQuantity = sourceQuantity.ConvertTo(targetUnit);
+            Quantity quantity = new Quantity(value, sourceUnit);
+            Quantity converted = quantity.ConvertTo(targetUnit);
 
-            return convertedQuantity.NumericValue;
+            return converted.Value;
+        }
+
+        /// <summary>
+        /// Adds this quantity to another quantity and returns the result in the specified target unit.
+        /// </summary>
+        /// <param name="other">The other quantity to add.</param>
+        /// <param name="targetUnit">The unit for the result.</param>
+        /// <returns>A new Quantity object representing the sum in the target unit.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when other quantity is null.</exception>
+        /// <exception cref="ArgumentException">Thrown when target unit is invalid.</exception>
+        public Quantity Add(Quantity other, LengthUnit targetUnit)
+        {
+            if (other == null)
+                throw new ArgumentNullException(nameof(other), "Other quantity cannot be null");
+
+            ValidateUnit(targetUnit);
+
+            // Convert both quantities to base unit (feet)
+            double thisInBase = this.ConvertTo(LengthUnit.FEET).Value;
+            double otherInBase = other.ConvertTo(LengthUnit.FEET).Value;
+
+            // Add in base unit
+            double sumInBase = thisInBase + otherInBase;
+
+            // Convert sum to target unit
+            double sumInTarget = sumInBase / targetUnit.GetConversionFactorToFeet();
+
+            return new Quantity(sumInTarget, targetUnit);
+        }
+
+        /// <summary>
+        /// Static method to add two quantities and return the result in the specified target unit.
+        /// </summary>
+        /// <param name="quantity1">First quantity.</param>
+        /// <param name="quantity2">Second quantity.</param>
+        /// <param name="targetUnit">The unit for the result.</param>
+        /// <returns>A new Quantity object representing the sum in the target unit.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when either quantity is null.</exception>
+        /// <exception cref="ArgumentException">Thrown when target unit is invalid.</exception>
+        public static Quantity Add(Quantity quantity1, Quantity quantity2, LengthUnit targetUnit)
+        {
+            if (quantity1 == null)
+                throw new ArgumentNullException(nameof(quantity1), "First quantity cannot be null");
+            if (quantity2 == null)
+                throw new ArgumentNullException(
+                    nameof(quantity2),
+                    "Second quantity cannot be null"
+                );
+
+            return quantity1.Add(quantity2, targetUnit);
+        }
+
+        /// <summary>
+        /// Static method to add two values with their units and return the result in the specified target unit.
+        /// </summary>
+        /// <param name="value1">First value.</param>
+        /// <param name="unit1">Unit of first value.</param>
+        /// <param name="value2">Second value.</param>
+        /// <param name="unit2">Unit of second value.</param>
+        /// <param name="targetUnit">The unit for the result.</param>
+        /// <returns>A new Quantity object representing the sum in the target unit.</returns>
+        /// <exception cref="ArgumentException">Thrown when values or units are invalid.</exception>
+        public static Quantity Add(
+            double value1,
+            LengthUnit unit1,
+            double value2,
+            LengthUnit unit2,
+            LengthUnit targetUnit
+        )
+        {
+            Quantity quantity1 = new Quantity(value1, unit1);
+            Quantity quantity2 = new Quantity(value2, unit2);
+
+            return quantity1.Add(quantity2, targetUnit);
+        }
+
+        /// <summary>
+        /// Adds another quantity to this quantity and returns the result in the unit of this quantity.
+        /// </summary>
+        /// <param name="other">The other quantity to add.</param>
+        /// <returns>A new Quantity object representing the sum in this quantity's unit.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when other quantity is null.</exception>
+        public Quantity Add(Quantity other)
+        {
+            return Add(other, this._unit);
         }
 
         /// <summary>
         /// Determines whether the specified object is equal to the current Quantity object.
         /// </summary>
-        /// <param name="targetObject">The object to compare with the current object.</param>
+        /// <param name="obj">The object to compare with the current object.</param>
         /// <returns>true if the specified object is equal to the current object; otherwise, false.</returns>
-        public override bool Equals(object? targetObject)
+        public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(this, targetObject))
+            if (ReferenceEquals(this, obj))
                 return true;
 
-            if (targetObject is null || GetType() != targetObject.GetType())
+            if (obj is null || GetType() != obj.GetType())
                 return false;
 
-            Quantity otherQuantity = (Quantity)targetObject;
+            Quantity other = (Quantity)obj;
 
-            double thisInFeet = this.ConvertTo(LengthUnit.FEET).NumericValue;
-            double otherInFeet = otherQuantity.ConvertTo(LengthUnit.FEET).NumericValue;
+            double thisInFeet = this.ConvertTo(LengthUnit.FEET).Value;
+            double otherInFeet = other.ConvertTo(LengthUnit.FEET).Value;
 
             return LengthUnitExtensions.AreApproximatelyEqual(thisInFeet, otherInFeet);
         }
@@ -96,7 +184,7 @@ namespace QuantityMeasurementApp.Models
         /// <returns>A hash code for the current object.</returns>
         public override int GetHashCode()
         {
-            double valueInFeet = ConvertTo(LengthUnit.FEET).NumericValue;
+            double valueInFeet = ConvertTo(LengthUnit.FEET).Value;
             return Math.Round(valueInFeet, 6).GetHashCode();
         }
 
@@ -106,7 +194,7 @@ namespace QuantityMeasurementApp.Models
         /// <returns>A string in the format "{value} {unitSymbol}".</returns>
         public override string ToString()
         {
-            return $"{_numericValue} {_measurementUnit.GetSymbol()}";
+            return $"{_value} {_unit.GetUnitSymbol()}";
         }
 
         /// <summary>
@@ -125,14 +213,14 @@ namespace QuantityMeasurementApp.Models
         /// <summary>
         /// Validates that a value is finite.
         /// </summary>
-        /// <param name="inputValue">The value to validate.</param>
+        /// <param name="value">The value to validate.</param>
         /// <exception cref="ArgumentException">Thrown when value is NaN or Infinity.</exception>
-        private static void ValidateNumericValue(double inputValue)
+        private static void ValidateValue(double value)
         {
-            if (double.IsNaN(inputValue) || double.IsInfinity(inputValue))
+            if (double.IsNaN(value) || double.IsInfinity(value))
             {
                 throw new ArgumentException(
-                    $"Invalid value: {inputValue}. Value must be a finite number."
+                    $"Invalid value: {value}. Value must be a finite number."
                 );
             }
         }

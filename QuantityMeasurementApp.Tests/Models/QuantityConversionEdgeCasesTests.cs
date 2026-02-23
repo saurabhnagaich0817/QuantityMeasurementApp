@@ -11,7 +11,7 @@ namespace QuantityMeasurementApp.Tests.Models
     [TestClass]
     public class QuantityConversionEdgeCasesTests
     {
-        private const double NumericTolerance = 0.000001;
+        private const double Tolerance = 0.000001;
 
         #region Extreme Value Tests
 
@@ -22,14 +22,14 @@ namespace QuantityMeasurementApp.Tests.Models
         [TestMethod]
         public void Convert_ExtremelyLargeValue_HandlesCorrectly()
         {
-            double largeInputValue = double.MaxValue / 1000; // Avoid overflow
+            double largeValue = double.MaxValue / 1000; // Avoid overflow
 
-            double conversionResult = Quantity.ConvertValue(largeInputValue, LengthUnit.FEET, LengthUnit.INCH);
-            double expectedResult = largeInputValue * 12.0;
+            double result = Quantity.Convert(largeValue, LengthUnit.FEET, LengthUnit.INCH);
+            double expected = largeValue * 12.0;
 
             // Check if result is finite (not overflow)
-            Assert.IsFalse(double.IsInfinity(conversionResult), "Result should not be infinite");
-            Assert.IsFalse(double.IsNaN(conversionResult), "Result should not be NaN");
+            Assert.IsFalse(double.IsInfinity(result), "Result should not be infinite");
+            Assert.IsFalse(double.IsNaN(result), "Result should not be NaN");
         }
 
         /// <summary>
@@ -39,12 +39,12 @@ namespace QuantityMeasurementApp.Tests.Models
         [TestMethod]
         public void Convert_ExtremelySmallValue_HandlesCorrectly()
         {
-            double smallInputValue = double.Epsilon;
+            double smallValue = double.Epsilon;
 
-            double conversionResult = Quantity.ConvertValue(smallInputValue, LengthUnit.FEET, LengthUnit.INCH);
+            double result = Quantity.Convert(smallValue, LengthUnit.FEET, LengthUnit.INCH);
 
-            Assert.IsFalse(double.IsInfinity(conversionResult), "Result should not be infinite");
-            Assert.IsFalse(double.IsNaN(conversionResult), "Result should not be NaN");
+            Assert.IsFalse(double.IsInfinity(result), "Result should not be infinite");
+            Assert.IsFalse(double.IsNaN(result), "Result should not be NaN");
         }
 
         #endregion
@@ -58,37 +58,37 @@ namespace QuantityMeasurementApp.Tests.Models
         [TestMethod]
         public void Convert_AllUnitCombinations_NoExceptions()
         {
-            LengthUnit[] availableUnits =
+            LengthUnit[] units =
             {
                 LengthUnit.FEET,
                 LengthUnit.INCH,
                 LengthUnit.YARD,
                 LengthUnit.CENTIMETER,
             };
-            double inputValue = 1.0;
+            double value = 1.0;
 
-            foreach (LengthUnit sourceUnit in availableUnits)
+            foreach (LengthUnit source in units)
             {
-                foreach (LengthUnit targetUnit in availableUnits)
+                foreach (LengthUnit target in units)
                 {
                     try
                     {
-                        double conversionResult = Quantity.ConvertValue(inputValue, sourceUnit, targetUnit);
+                        double result = Quantity.Convert(value, source, target);
 
                         // Basic sanity check
                         Assert.IsFalse(
-                            double.IsNaN(conversionResult),
-                            $"Conversion from {sourceUnit} to {targetUnit} produced NaN"
+                            double.IsNaN(result),
+                            $"Conversion from {source} to {target} produced NaN"
                         );
                         Assert.IsFalse(
-                            double.IsInfinity(conversionResult),
-                            $"Conversion from {sourceUnit} to {targetUnit} produced infinity"
+                            double.IsInfinity(result),
+                            $"Conversion from {source} to {target} produced infinity"
                         );
                     }
                     catch (Exception ex)
                     {
                         Assert.Fail(
-                            $"Conversion from {sourceUnit} to {targetUnit} threw exception: {ex.Message}"
+                            $"Conversion from {source} to {target} threw exception: {ex.Message}"
                         );
                     }
                 }
@@ -106,22 +106,22 @@ namespace QuantityMeasurementApp.Tests.Models
         [TestMethod]
         public void Convert_ConsistentResults_MultipleCalls()
         {
-            double inputValue = 2.5;
+            double value = 2.5;
 
-            double firstResult = Quantity.ConvertValue(inputValue, LengthUnit.YARD, LengthUnit.INCH);
-            double secondResult = Quantity.ConvertValue(inputValue, LengthUnit.YARD, LengthUnit.INCH);
-            double thirdResult = Quantity.ConvertValue(inputValue, LengthUnit.YARD, LengthUnit.INCH);
+            double result1 = Quantity.Convert(value, LengthUnit.YARD, LengthUnit.INCH);
+            double result2 = Quantity.Convert(value, LengthUnit.YARD, LengthUnit.INCH);
+            double result3 = Quantity.Convert(value, LengthUnit.YARD, LengthUnit.INCH);
 
             Assert.AreEqual(
-                firstResult,
-                secondResult,
-                NumericTolerance,
+                result1,
+                result2,
+                Tolerance,
                 "First and second conversions should match"
             );
             Assert.AreEqual(
-                secondResult,
-                thirdResult,
-                NumericTolerance,
+                result2,
+                result3,
+                Tolerance,
                 "Second and third conversions should match"
             );
         }
@@ -133,19 +133,19 @@ namespace QuantityMeasurementApp.Tests.Models
         [TestMethod]
         public void Convert_ThroughBaseUnit_MatchesDirect()
         {
-            double inputValue = 3.0;
+            double value = 3.0;
 
             // Direct: Yards to Inches
-            double directConversion = Quantity.ConvertValue(inputValue, LengthUnit.YARD, LengthUnit.INCH);
+            double direct = Quantity.Convert(value, LengthUnit.YARD, LengthUnit.INCH);
 
             // Through base (feet)
-            double toFeetConversion = Quantity.ConvertValue(inputValue, LengthUnit.YARD, LengthUnit.FEET);
-            double throughBaseConversion = Quantity.ConvertValue(toFeetConversion, LengthUnit.FEET, LengthUnit.INCH);
+            double toFeet = Quantity.Convert(value, LengthUnit.YARD, LengthUnit.FEET);
+            double throughBase = Quantity.Convert(toFeet, LengthUnit.FEET, LengthUnit.INCH);
 
             Assert.AreEqual(
-                directConversion,
-                throughBaseConversion,
-                NumericTolerance,
+                direct,
+                throughBase,
+                Tolerance,
                 "Direct conversion should match conversion through base unit"
             );
         }
@@ -162,40 +162,21 @@ namespace QuantityMeasurementApp.Tests.Models
         public void Convert_UndefinedEnumValue_ThrowsArgumentException()
         {
             // Test with various invalid enum values
-            int[] invalidEnumValues = { -1, 4, 5, 10, 100 };
+            int[] invalidValues = { -1, 4, 5, 10, 100 };
 
-            foreach (int invalidValue in invalidEnumValues)
+            foreach (int invalid in invalidValues)
             {
-                LengthUnit invalidUnit = (LengthUnit)invalidValue;
+                LengthUnit invalidUnit = (LengthUnit)invalid;
 
-                // FIXED: Without using Assert.ThrowsException
-                try
-                {
-                    Quantity.ConvertValue(1.0, invalidUnit, LengthUnit.FEET);
-                    Assert.Fail($"Expected ArgumentException for source unit {invalidValue} but no exception was thrown");
-                }
-                catch (ArgumentException)
-                {
-                    // Expected exception - test passes for this case
-                }
-                catch (Exception ex)
-                {
-                    Assert.Fail($"Expected ArgumentException for source unit {invalidValue} but got {ex.GetType().Name}");
-                }
+                Assert.ThrowsException<ArgumentException>(
+                    () => Quantity.Convert(1.0, invalidUnit, LengthUnit.FEET),
+                    $"Invalid source unit {invalid} should throw"
+                );
 
-                try
-                {
-                    Quantity.ConvertValue(1.0, LengthUnit.FEET, invalidUnit);
-                    Assert.Fail($"Expected ArgumentException for target unit {invalidValue} but no exception was thrown");
-                }
-                catch (ArgumentException)
-                {
-                    // Expected exception - test passes for this case
-                }
-                catch (Exception ex)
-                {
-                    Assert.Fail($"Expected ArgumentException for target unit {invalidValue} but got {ex.GetType().Name}");
-                }
+                Assert.ThrowsException<ArgumentException>(
+                    () => Quantity.Convert(1.0, LengthUnit.FEET, invalidUnit),
+                    $"Invalid target unit {invalid} should throw"
+                );
             }
         }
 
@@ -210,19 +191,19 @@ namespace QuantityMeasurementApp.Tests.Models
         [TestMethod]
         public void Convert_IsLinear_Proportional()
         {
-            double baseValue = 2.0;
-            double scalingFactor = 3.0;
+            double x = 2.0;
+            double k = 3.0;
 
             // convert(k*x)
-            double scaledConversion = Quantity.ConvertValue(scalingFactor * baseValue, LengthUnit.FEET, LengthUnit.INCH);
+            double scaled = Quantity.Convert(k * x, LengthUnit.FEET, LengthUnit.INCH);
 
             // k * convert(x)
-            double factorTimesConverted = scalingFactor * Quantity.ConvertValue(baseValue, LengthUnit.FEET, LengthUnit.INCH);
+            double kTimesConverted = k * Quantity.Convert(x, LengthUnit.FEET, LengthUnit.INCH);
 
             Assert.AreEqual(
-                scaledConversion,
-                factorTimesConverted,
-                NumericTolerance,
+                scaled,
+                kTimesConverted,
+                Tolerance,
                 "Conversion should be linear: convert(k*x) = k*convert(x)"
             );
         }
@@ -234,21 +215,21 @@ namespace QuantityMeasurementApp.Tests.Models
         [TestMethod]
         public void Convert_IsAdditive_SumPreserved()
         {
-            double firstValue = 1.5;
-            double secondValue = 2.5;
+            double a = 1.5;
+            double b = 2.5;
 
             // convert(a+b)
-            double sumConverted = Quantity.ConvertValue(firstValue + secondValue, LengthUnit.FEET, LengthUnit.INCH);
+            double sumConverted = Quantity.Convert(a + b, LengthUnit.FEET, LengthUnit.INCH);
 
             // convert(a) + convert(b)
             double individualSum =
-                Quantity.ConvertValue(firstValue, LengthUnit.FEET, LengthUnit.INCH)
-                + Quantity.ConvertValue(secondValue, LengthUnit.FEET, LengthUnit.INCH);
+                Quantity.Convert(a, LengthUnit.FEET, LengthUnit.INCH)
+                + Quantity.Convert(b, LengthUnit.FEET, LengthUnit.INCH);
 
             Assert.AreEqual(
                 sumConverted,
                 individualSum,
-                NumericTolerance,
+                Tolerance,
                 "Conversion should be additive: convert(a+b) = convert(a) + convert(b)"
             );
         }
@@ -264,13 +245,13 @@ namespace QuantityMeasurementApp.Tests.Models
         [TestMethod]
         public void Convert_NegativeZero_ReturnsNegativeZero()
         {
-            double negativeZeroValue = -0.0;
+            double negativeZero = -0.0;
 
-            double conversionResult = Quantity.ConvertValue(negativeZeroValue, LengthUnit.FEET, LengthUnit.INCH);
+            double result = Quantity.Convert(negativeZero, LengthUnit.FEET, LengthUnit.INCH);
 
             // Check that result is negative zero
             Assert.IsTrue(
-                double.IsNegativeInfinity(1.0 / conversionResult),
+                double.IsNegativeInfinity(1.0 / result),
                 "Negative zero should remain negative zero after conversion"
             );
         }
@@ -289,17 +270,17 @@ namespace QuantityMeasurementApp.Tests.Models
             // Test values that might cause binary floating-point rounding issues
             double[] testValues = { 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0 / 3.0 };
 
-            foreach (double testValue in testValues)
+            foreach (double value in testValues)
             {
-                double conversionResult = Quantity.ConvertValue(testValue, LengthUnit.FEET, LengthUnit.INCH);
-                double expectedResult = testValue * 12.0;
+                double result = Quantity.Convert(value, LengthUnit.FEET, LengthUnit.INCH);
+                double expected = value * 12.0;
 
                 // Should be within tolerance, even with rounding issues
                 Assert.AreEqual(
-                    expectedResult,
-                    conversionResult,
-                    NumericTolerance,
-                    $"Conversion of {testValue} feet to inches should be accurate"
+                    expected,
+                    result,
+                    Tolerance,
+                    $"Conversion of {value} feet to inches should be accurate"
                 );
             }
         }

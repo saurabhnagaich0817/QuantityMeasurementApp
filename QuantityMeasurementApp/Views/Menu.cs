@@ -10,100 +10,67 @@ namespace QuantityMeasurementApp.Views
     /// </summary>
     public class Menu
     {
-        private readonly QuantityMeasurementService _measurementService;
+        private readonly QuantityMeasurementService _service;
 
         /// <summary>
         /// Initializes a new instance of the Menu class.
         /// </summary>
         public Menu()
         {
-            _measurementService = new QuantityMeasurementService();
+            _service = new QuantityMeasurementService();
         }
 
         /// <summary>
         /// Displays the main menu and handles user interaction.
         /// </summary>
-        public void Show()
+        public void Display()
         {
-            Console.WriteLine("=== Quantity Measurement Application ===");
-            Console.WriteLine("UC5: Unit-to-Unit Conversion (Same Measurement Type)\n");
-
-            DisplayStaticExamples();
+            Console.WriteLine("╔════════════════════════════════════════╗");
+            Console.WriteLine("║     QUANTITY MEASUREMENT APP           ║");
+            Console.WriteLine("╚════════════════════════════════════════╝");
+            Console.WriteLine();
 
             while (true)
             {
-                DisplayMainMenu();
+                ShowMainMenu();
 
-                string? userChoice = Console.ReadLine();
+                string? choice = Console.ReadLine();
 
-                if (userChoice == "6" || userChoice?.ToLower() == "exit")
+                if (choice == "7")
                     break;
 
-                ProcessUserChoice(userChoice);
+                ProcessMainMenuChoice(choice);
             }
 
             Console.WriteLine("\nThank you for using Quantity Measurement Application!");
         }
 
         /// <summary>
-        /// Displays static method examples for conversion and equality.
-        /// </summary>
-        private void DisplayStaticExamples()
-        {
-            Console.WriteLine("--- Conversion Examples ---");
-            Console.WriteLine(
-                $"1.0 FEET to INCHES: {Quantity.ConvertValue(1.0, LengthUnit.FEET, LengthUnit.INCH):F6} inches"
-            );
-            Console.WriteLine(
-                $"3.0 YARDS to FEET: {Quantity.ConvertValue(3.0, LengthUnit.YARD, LengthUnit.FEET):F6} feet"
-            );
-            Console.WriteLine(
-                $"36.0 INCHES to YARDS: {Quantity.ConvertValue(36.0, LengthUnit.INCH, LengthUnit.YARD):F6} yards"
-            );
-            Console.WriteLine(
-                $"1.0 CENTIMETERS to INCHES: {Quantity.ConvertValue(1.0, LengthUnit.CENTIMETER, LengthUnit.INCH):F6} inches"
-            );
-            Console.WriteLine(
-                $"30.48 CENTIMETERS to FEET: {Quantity.ConvertValue(30.48, LengthUnit.CENTIMETER, LengthUnit.FEET):F6} feet"
-            );
-            Console.WriteLine();
-
-            Console.WriteLine("--- Equality Examples ---");
-            var quantity1 = new Quantity(1.0, LengthUnit.FEET);
-            var quantity2 = new Quantity(12.0, LengthUnit.INCH);
-            Console.WriteLine($"1 ft vs 12 in: {quantity1.Equals(quantity2)}");
-
-            var quantity3 = new Quantity(1.0, LengthUnit.YARD);
-            var quantity4 = new Quantity(36.0, LengthUnit.INCH);
-            Console.WriteLine($"1 yd vs 36 in: {quantity3.Equals(quantity4)}");
-
-            var quantity5 = new Quantity(1.0, LengthUnit.CENTIMETER);
-            var quantity6 = new Quantity(0.393701, LengthUnit.INCH);
-            Console.WriteLine($"1 cm vs 0.393701 in: {quantity5.Equals(quantity6)}\n");
-        }
-
-        /// <summary>
         /// Displays the main menu options.
         /// </summary>
-        private void DisplayMainMenu()
+        private void ShowMainMenu()
         {
-            Console.WriteLine("Choose operation:");
-            Console.WriteLine("1. Unit Conversion");
-            Console.WriteLine("2. Equality Comparison");
-            Console.WriteLine("3. Round-trip Conversion Demo");
-            Console.WriteLine("4. Batch Conversion Demo");
-            Console.WriteLine("5. Backward compatibility (Original Feet/Inch classes)");
-            Console.WriteLine("6. Exit");
-            Console.Write("Enter your choice (1-6): ");
+            Console.WriteLine("┌────────────────────────────────────┐");
+            Console.WriteLine("│            MAIN MENU               │");
+            Console.WriteLine("├────────────────────────────────────┤");
+            Console.WriteLine("│ 1. Convert Units                   │");
+            Console.WriteLine("│ 2. Compare Measurements            │");
+            Console.WriteLine("│ 3. Add Measurements                │");
+            Console.WriteLine("│ 4. View Commutativity Demo         │");
+            Console.WriteLine("│ 5. Batch Operations                │");
+            Console.WriteLine("│ 6. Legacy Mode (Original Classes)  │");
+            Console.WriteLine("│ 7. Exit                            │");
+            Console.WriteLine("└────────────────────────────────────┘");
+            Console.Write("Enter your choice (1-7): ");
         }
 
         /// <summary>
         /// Processes the user's main menu choice.
         /// </summary>
-        /// <param name="userChoice">The user's menu choice.</param>
-        private void ProcessUserChoice(string? userChoice)
+        /// <param name="choice">The user's menu choice.</param>
+        private void ProcessMainMenuChoice(string? choice)
         {
-            switch (userChoice)
+            switch (choice)
             {
                 case "1":
                     ShowConversionScreen();
@@ -112,16 +79,19 @@ namespace QuantityMeasurementApp.Views
                     ShowEqualityComparisonScreen();
                     break;
                 case "3":
-                    ShowRoundTripConversionDemo();
+                    ShowAdditionScreen();
                     break;
                 case "4":
-                    ShowBatchConversionDemo();
+                    ShowCommutativityDemo();
                     break;
                 case "5":
-                    ShowBackwardCompatibilityScreen();
+                    ShowBatchOperationsScreen();
+                    break;
+                case "6":
+                    ShowLegacyModeScreen();
                     break;
                 default:
-                    Console.WriteLine("Invalid choice! Please try again.\n");
+                    Console.WriteLine("❌ Invalid choice! Please try again.\n");
                     break;
             }
         }
@@ -131,85 +101,43 @@ namespace QuantityMeasurementApp.Views
         /// </summary>
         private void ShowConversionScreen()
         {
-            Console.WriteLine("\n--- Unit Conversion ---");
+            Console.WriteLine("\n┌────────────────────────────────────┐");
+            Console.WriteLine("│         UNIT CONVERSION            │");
+            Console.WriteLine("└────────────────────────────────────┘\n");
 
-            Console.WriteLine("Select source unit:");
-            Console.WriteLine("1. Feet");
-            Console.WriteLine("2. Inches");
-            Console.WriteLine("3. Yards");
-            Console.WriteLine("4. Centimeters");
-            Console.Write("Enter choice (1-4): ");
-
-            string? sourceChoice = Console.ReadLine();
-            LengthUnit sourceUnit = GetUnitFromChoice(sourceChoice);
-
-            if (sourceUnit == LengthUnit.FEET && sourceChoice != "1")
+            try
             {
-                DisplayErrorMessage("Invalid source unit choice!");
-                return;
-            }
+                // Get source unit
+                LengthUnit sourceUnit = SelectUnit("Select SOURCE unit:");
 
-            Console.WriteLine("\nSelect target unit:");
-            Console.WriteLine("1. Feet");
-            Console.WriteLine("2. Inches");
-            Console.WriteLine("3. Yards");
-            Console.WriteLine("4. Centimeters");
-            Console.Write("Enter choice (1-4): ");
+                // Get target unit
+                LengthUnit targetUnit = SelectUnit("Select TARGET unit:");
 
-            string? targetChoice = Console.ReadLine();
-            LengthUnit targetUnit = GetUnitFromChoice(targetChoice);
+                // Get value to convert
+                Console.Write($"\nEnter value in {sourceUnit.GetUnitName()}: ");
+                string? valueInput = Console.ReadLine();
 
-            if (targetUnit == LengthUnit.FEET && targetChoice != "1")
-            {
-                DisplayErrorMessage("Invalid target unit choice!");
-                return;
-            }
-
-            Console.WriteLine($"\nEnter value in {sourceUnit.GetFullName()}:");
-            string? valueInput = Console.ReadLine();
-
-            if (double.TryParse(valueInput, out double inputValue))
-            {
-                try
+                if (double.TryParse(valueInput, out double value))
                 {
-                    double conversionResult = Quantity.ConvertValue(inputValue, sourceUnit, targetUnit);
+                    double result = Quantity.Convert(value, sourceUnit, targetUnit);
+
+                    Console.WriteLine("\n┌────────────────────────────────────┐");
+                    Console.WriteLine("│          CONVERSION RESULT         │");
+                    Console.WriteLine("├────────────────────────────────────┤");
                     Console.WriteLine(
-                        $"\n{inputValue} {sourceUnit.GetSymbol()} = {conversionResult:F6} {targetUnit.GetSymbol()}"
+                        $"│ {value} {sourceUnit.GetUnitSymbol(), -3} = {result, 10:F6} {targetUnit.GetUnitSymbol(), -3} │"
                     );
-
-                    // Show conversion formula
-                    DisplayConversionFormula(inputValue, sourceUnit, targetUnit, conversionResult);
+                    Console.WriteLine("└────────────────────────────────────┘\n");
                 }
-                catch (ArgumentException ex)
+                else
                 {
-                    DisplayErrorMessage($"Conversion error: {ex.Message}");
+                    Console.WriteLine("❌ Invalid numeric value!\n");
                 }
             }
-            else
+            catch (ArgumentException ex)
             {
-                DisplayErrorMessage("Invalid numeric value!");
+                Console.WriteLine($"❌ Error: {ex.Message}\n");
             }
-
-            Console.WriteLine("----------------------------------------\n");
-        }
-
-        /// <summary>
-        /// Displays the conversion formula.
-        /// </summary>
-        private void DisplayConversionFormula(
-            double originalValue,
-            LengthUnit sourceUnit,
-            LengthUnit targetUnit,
-            double convertedValue
-        )
-        {
-            double sourceToFeet = sourceUnit.GetFeetConversionFactor();
-            double targetToFeet = targetUnit.GetFeetConversionFactor();
-
-            Console.WriteLine($"\nConversion formula:");
-            Console.WriteLine(
-                $"{originalValue} {sourceUnit.GetSymbol()} × ({sourceToFeet:F6} / {targetToFeet:F6}) = {convertedValue:F6} {targetUnit.GetSymbol()}"
-            );
         }
 
         /// <summary>
@@ -217,308 +145,452 @@ namespace QuantityMeasurementApp.Views
         /// </summary>
         private void ShowEqualityComparisonScreen()
         {
-            Console.WriteLine("\n--- Equality Comparison ---");
+            Console.WriteLine("\n┌────────────────────────────────────┐");
+            Console.WriteLine("│      MEASUREMENT COMPARISON        │");
+            Console.WriteLine("└────────────────────────────────────┘\n");
 
-            Console.WriteLine("Select first unit:");
-            Console.WriteLine("1. Feet");
-            Console.WriteLine("2. Inches");
-            Console.WriteLine("3. Yards");
-            Console.WriteLine("4. Centimeters");
-            Console.Write("Enter choice (1-4): ");
-
-            string? firstUnitChoice = Console.ReadLine();
-            LengthUnit firstUnit = GetUnitFromChoice(firstUnitChoice);
-
-            if (firstUnit == LengthUnit.FEET && firstUnitChoice != "1")
+            try
             {
-                DisplayErrorMessage("Invalid first unit choice!");
-                return;
-            }
+                // Get first measurement
+                Console.WriteLine("--- FIRST MEASUREMENT ---");
+                LengthUnit unit1 = SelectUnit("Select unit:");
+                Console.Write($"Enter value in {unit1.GetUnitName()}: ");
+                string? value1Input = Console.ReadLine();
 
-            Console.WriteLine($"\nEnter value in {firstUnit.GetFullName()}:");
-            string? firstValueInput = Console.ReadLine();
+                // Get second measurement
+                Console.WriteLine("\n--- SECOND MEASUREMENT ---");
+                LengthUnit unit2 = SelectUnit("Select unit:");
+                Console.Write($"Enter value in {unit2.GetUnitName()}: ");
+                string? value2Input = Console.ReadLine();
 
-            Console.WriteLine("\nSelect second unit:");
-            Console.WriteLine("1. Feet");
-            Console.WriteLine("2. Inches");
-            Console.WriteLine("3. Yards");
-            Console.WriteLine("4. Centimeters");
-            Console.Write("Enter choice (1-4): ");
-
-            string? secondUnitChoice = Console.ReadLine();
-            LengthUnit secondUnit = GetUnitFromChoice(secondUnitChoice);
-
-            if (secondUnit == LengthUnit.FEET && secondUnitChoice != "1")
-            {
-                DisplayErrorMessage("Invalid second unit choice!");
-                return;
-            }
-
-            Console.WriteLine($"\nEnter value in {secondUnit.GetFullName()}:");
-            string? secondValueInput = Console.ReadLine();
-
-            if (
-                double.TryParse(firstValueInput, out double firstNumericValue)
-                && double.TryParse(secondValueInput, out double secondNumericValue)
-            )
-            {
-                try
+                if (
+                    double.TryParse(value1Input, out double value1)
+                    && double.TryParse(value2Input, out double value2)
+                )
                 {
-                    var quantityFirst = new Quantity(firstNumericValue, firstUnit);
-                    var quantitySecond = new Quantity(secondNumericValue, secondUnit);
+                    var q1 = new Quantity(value1, unit1);
+                    var q2 = new Quantity(value2, unit2);
 
-                    bool quantitiesEqual = quantityFirst.Equals(quantitySecond);
+                    bool areEqual = q1.Equals(q2);
 
-                    Console.WriteLine($"\nFirst: {quantityFirst}");
-                    Console.WriteLine($"Second: {quantitySecond}");
-                    Console.WriteLine(
-                        $"Are they equal? {quantitiesEqual} ({(quantitiesEqual ? "Equal" : "Not Equal")})"
-                    );
+                    Console.WriteLine("\n┌────────────────────────────────────┐");
+                    Console.WriteLine("│         COMPARISON RESULT          │");
+                    Console.WriteLine("├────────────────────────────────────┤");
+                    Console.WriteLine($"│ {q1, -12} vs {q2, -12} │");
+                    Console.WriteLine($"│                                     │");
 
-                    // Show converted values
-                    Console.WriteLine($"\nBoth in feet:");
+                    if (areEqual)
+                    {
+                        Console.WriteLine("│        ✅ Measurements are EQUAL        │");
+                    }
+                    else
+                    {
+                        Console.WriteLine("│      ❌ Measurements are NOT EQUAL      │");
+                    }
+
+                    Console.WriteLine("├────────────────────────────────────┤");
+                    Console.WriteLine($"│ Both in feet:                         │");
                     Console.WriteLine(
-                        $"First in feet: {quantityFirst.ConvertTo(LengthUnit.FEET).NumericValue:F6} ft"
+                        $"│   First:  {q1.ConvertTo(LengthUnit.FEET).Value, 10:F6} ft    │"
                     );
                     Console.WriteLine(
-                        $"Second in feet: {quantitySecond.ConvertTo(LengthUnit.FEET).NumericValue:F6} ft"
+                        $"│   Second: {q2.ConvertTo(LengthUnit.FEET).Value, 10:F6} ft    │"
                     );
+                    Console.WriteLine("└────────────────────────────────────┘\n");
                 }
-                catch (ArgumentException ex)
+                else
                 {
-                    DisplayErrorMessage($"Error: {ex.Message}");
+                    Console.WriteLine("❌ Invalid numeric value(s)!\n");
                 }
             }
-            else
+            catch (ArgumentException ex)
             {
-                DisplayErrorMessage("Invalid numeric values!");
+                Console.WriteLine($"❌ Error: {ex.Message}\n");
             }
-
-            Console.WriteLine("----------------------------------------\n");
         }
 
         /// <summary>
-        /// Displays round-trip conversion demonstration.
+        /// Displays the addition operation screen.
         /// </summary>
-        private void ShowRoundTripConversionDemo()
+        private void ShowAdditionScreen()
         {
-            Console.WriteLine("\n--- Round-trip Conversion Demo ---");
-            Console.WriteLine(
-                "This demonstrates that converting A→B→A returns the original value.\n"
-            );
+            Console.WriteLine("\n┌────────────────────────────────────┐");
+            Console.WriteLine("│         MEASUREMENT ADDITION       │");
+            Console.WriteLine("└────────────────────────────────────┘\n");
 
-            double[] testValues = { 1.0, 2.5, 10.0, -3.0 };
-            LengthUnit[] availableUnits =
+            try
             {
-                LengthUnit.FEET,
-                LengthUnit.INCH,
-                LengthUnit.YARD,
-                LengthUnit.CENTIMETER,
-            };
+                // Get first measurement
+                Console.WriteLine("--- FIRST MEASUREMENT ---");
+                LengthUnit unit1 = SelectUnit("Select unit:");
+                Console.Write($"Enter value in {unit1.GetUnitName()}: ");
+                string? value1Input = Console.ReadLine();
 
-            foreach (double originalValue in testValues)
-            {
-                foreach (LengthUnit sourceUnit in availableUnits)
+                // Get second measurement
+                Console.WriteLine("\n--- SECOND MEASUREMENT ---");
+                LengthUnit unit2 = SelectUnit("Select unit:");
+                Console.Write($"Enter value in {unit2.GetUnitName()}: ");
+                string? value2Input = Console.ReadLine();
+
+                // Get result unit
+                Console.WriteLine("\n--- RESULT UNIT ---");
+                LengthUnit resultUnit = SelectUnit("Select unit for result:");
+
+                if (
+                    double.TryParse(value1Input, out double value1)
+                    && double.TryParse(value2Input, out double value2)
+                )
                 {
-                    foreach (LengthUnit targetUnit in availableUnits)
+                    var q1 = new Quantity(value1, unit1);
+                    var q2 = new Quantity(value2, unit2);
+
+                    var sum = Quantity.Add(q1, q2, resultUnit);
+
+                    Console.WriteLine("\n┌────────────────────────────────────┐");
+                    Console.WriteLine("│           ADDITION RESULT          │");
+                    Console.WriteLine("├────────────────────────────────────┤");
+                    Console.WriteLine($"│ {q1, -8} + {q2, -8}                 │");
+                    Console.WriteLine($"│                                     │");
+                    Console.WriteLine(
+                        $"│ = {sum.Value, 10:F6} {sum.Unit.GetUnitSymbol(), -3}                │"
+                    );
+                    Console.WriteLine("├────────────────────────────────────┤");
+
+                    // Show calculation details
+                    Quantity q1InFeet = q1.ConvertTo(LengthUnit.FEET);
+                    Quantity q2InFeet = q2.ConvertTo(LengthUnit.FEET);
+                    double sumInFeet = q1InFeet.Value + q2InFeet.Value;
+
+                    Console.WriteLine($"│ Calculation:                         │");
+                    Console.WriteLine(
+                        $"│   {q1InFeet.Value, 8:F6} ft + {q2InFeet.Value, 8:F6} ft = {sumInFeet, 8:F6} ft │"
+                    );
+                    Console.WriteLine("└────────────────────────────────────┘\n");
+                }
+                else
+                {
+                    Console.WriteLine("❌ Invalid numeric value(s)!\n");
+                }
+            }
+            catch (ArgumentException ex)
+            {
+                Console.WriteLine($"❌ Error: {ex.Message}\n");
+            }
+        }
+
+        /// <summary>
+        /// Displays commutativity demonstration with user input.
+        /// </summary>
+        private void ShowCommutativityDemo()
+        {
+            Console.WriteLine("\n┌────────────────────────────────────┐");
+            Console.WriteLine("│     COMMUTATIVITY DEMONSTRATION    │");
+            Console.WriteLine("│        (a + b = b + a)             │");
+            Console.WriteLine("└────────────────────────────────────┘\n");
+
+            try
+            {
+                // Get first measurement
+                Console.WriteLine("--- FIRST MEASUREMENT ---");
+                LengthUnit unit1 = SelectUnit("Select unit:");
+                Console.Write($"Enter value in {unit1.GetUnitName()}: ");
+                string? value1Input = Console.ReadLine();
+
+                // Get second measurement
+                Console.WriteLine("\n--- SECOND MEASUREMENT ---");
+                LengthUnit unit2 = SelectUnit("Select unit:");
+                Console.Write($"Enter value in {unit2.GetUnitName()}: ");
+                string? value2Input = Console.ReadLine();
+
+                if (
+                    double.TryParse(value1Input, out double value1)
+                    && double.TryParse(value2Input, out double value2)
+                )
+                {
+                    var a = new Quantity(value1, unit1);
+                    var b = new Quantity(value2, unit2);
+
+                    // Add in both orders
+                    var aPlusB = a.Add(b); // Result in unit1
+                    var bPlusA = b.Add(a); // Result in unit2
+
+                    Console.WriteLine("\n┌────────────────────────────────────┐");
+                    Console.WriteLine("│         COMMUTATIVITY CHECK        │");
+                    Console.WriteLine("├────────────────────────────────────┤");
+                    Console.WriteLine($"│ a = {a, -10} b = {b, -10} │");
+                    Console.WriteLine($"│                                     │");
+                    Console.WriteLine(
+                        $"│ a + b = {aPlusB.Value, 10:F6} {aPlusB.Unit.GetUnitSymbol(), -3}            │"
+                    );
+                    Console.WriteLine(
+                        $"│ b + a = {bPlusA.Value, 10:F6} {bPlusA.Unit.GetUnitSymbol(), -3}            │"
+                    );
+                    Console.WriteLine("├────────────────────────────────────┤");
+
+                    // Check if they represent the same physical quantity
+                    bool areEqual = aPlusB
+                        .ConvertTo(LengthUnit.FEET)
+                        .Equals(bPlusA.ConvertTo(LengthUnit.FEET));
+
+                    if (areEqual)
                     {
-                        if (sourceUnit != targetUnit)
+                        Console.WriteLine("│ ✅ Addition is COMMUTATIVE!            │");
+                        Console.WriteLine("│    a + b = b + a in physical terms    │");
+                    }
+                    else
+                    {
+                        Console.WriteLine("│ ❌ Addition is NOT commutative!        │");
+                    }
+                    Console.WriteLine("└────────────────────────────────────┘\n");
+                }
+                else
+                {
+                    Console.WriteLine("❌ Invalid numeric value(s)!\n");
+                }
+            }
+            catch (ArgumentException ex)
+            {
+                Console.WriteLine($"❌ Error: {ex.Message}\n");
+            }
+        }
+
+        /// <summary>
+        /// Displays batch operations screen.
+        /// </summary>
+        private void ShowBatchOperationsScreen()
+        {
+            Console.WriteLine("\n┌────────────────────────────────────┐");
+            Console.WriteLine("│         BATCH OPERATIONS           │");
+            Console.WriteLine("├────────────────────────────────────┤");
+            Console.WriteLine("│ 1. Batch Unit Conversion           │");
+            Console.WriteLine("│ 2. Batch Addition Demo             │");
+            Console.WriteLine("│ 3. Back to Main Menu               │");
+            Console.WriteLine("└────────────────────────────────────┘");
+            Console.Write("Enter your choice (1-3): ");
+
+            string? choice = Console.ReadLine();
+
+            switch (choice)
+            {
+                case "1":
+                    ShowBatchConversion();
+                    break;
+                case "2":
+                    ShowBatchAdditionDemo();
+                    break;
+                default:
+                    Console.WriteLine("Returning to main menu...\n");
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Displays batch conversion with user-defined values.
+        /// </summary>
+        private void ShowBatchConversion()
+        {
+            Console.WriteLine("\n┌────────────────────────────────────┐");
+            Console.WriteLine("│        BATCH UNIT CONVERSION       │");
+            Console.WriteLine("└────────────────────────────────────┘\n");
+
+            try
+            {
+                Console.Write("Enter values to convert (comma-separated, e.g., 1,2.5,3.7): ");
+                string? valuesInput = Console.ReadLine();
+
+                LengthUnit sourceUnit = SelectUnit("Select SOURCE unit:");
+                LengthUnit targetUnit = SelectUnit("Select TARGET unit:");
+
+                if (!string.IsNullOrWhiteSpace(valuesInput))
+                {
+                    string[] valueStrings = valuesInput.Split(
+                        ',',
+                        StringSplitOptions.RemoveEmptyEntries
+                    );
+
+                    Console.WriteLine("\n┌────────────────────────────────────┐");
+                    Console.WriteLine("│         CONVERSION RESULTS         │");
+                    Console.WriteLine("├────────────────────────────────────┤");
+
+                    foreach (string valueStr in valueStrings)
+                    {
+                        if (double.TryParse(valueStr.Trim(), out double value))
                         {
-                            try
-                            {
-                                double convertedValue = Quantity.ConvertValue(originalValue, sourceUnit, targetUnit);
-                                double roundTripValue = Quantity.ConvertValue(convertedValue, targetUnit, sourceUnit);
-
-                                bool preservesOriginalValue =
-                                    Math.Abs(originalValue - roundTripValue) < 0.000001;
-
-                                Console.WriteLine(
-                                    $"{originalValue} {sourceUnit.GetSymbol()} → {targetUnit.GetSymbol()} → {sourceUnit.GetSymbol()}: "
-                                        + $"{convertedValue:F6} → {roundTripValue:F6} {(preservesOriginalValue ? "✓" : "✗")}"
-                                );
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine($"Error: {ex.Message}");
-                            }
+                            double result = Quantity.Convert(value, sourceUnit, targetUnit);
+                            Console.WriteLine(
+                                $"│ {value, 8:F3} {sourceUnit.GetUnitSymbol(), -3} = {result, 10:F6} {targetUnit.GetUnitSymbol(), -3} │"
+                            );
                         }
                     }
+
+                    Console.WriteLine("└────────────────────────────────────┘\n");
                 }
             }
-
-            Console.WriteLine(
-                "\nAll round-trip conversions preserve the original value within tolerance.\n"
-            );
-            Console.WriteLine("----------------------------------------\n");
+            catch (ArgumentException ex)
+            {
+                Console.WriteLine($"❌ Error: {ex.Message}\n");
+            }
         }
 
         /// <summary>
-        /// Displays batch conversion demonstration.
+        /// Displays batch addition demonstration with predefined combinations.
         /// </summary>
-        private void ShowBatchConversionDemo()
+        private void ShowBatchAdditionDemo()
         {
-            Console.WriteLine("\n--- Batch Conversion Demo ---");
-            Console.WriteLine("Converting common measurements between all units:\n");
+            Console.WriteLine("\n┌────────────────────────────────────┐");
+            Console.WriteLine("│        BATCH ADDITION DEMO         │");
+            Console.WriteLine("└────────────────────────────────────┘\n");
 
-            double[] testValues = { 1, 12, 36, 2.54, 30.48, 91.44 };
-            LengthUnit[] availableUnits =
+            try
             {
-                LengthUnit.FEET,
-                LengthUnit.INCH,
-                LengthUnit.YARD,
-                LengthUnit.CENTIMETER,
-            };
+                Console.Write("Enter a base value (e.g., 2): ");
+                string? baseValueInput = Console.ReadLine();
 
-            foreach (double testValue in testValues)
-            {
-                foreach (LengthUnit sourceUnit in availableUnits)
+                if (!double.TryParse(baseValueInput, out double baseValue))
                 {
-                    Console.WriteLine($"\n{testValue} {sourceUnit.GetSymbol()} equals:");
-                    foreach (LengthUnit targetUnit in availableUnits)
-                    {
-                        if (sourceUnit != targetUnit)
-                        {
-                            try
-                            {
-                                double resultValue = Quantity.ConvertValue(testValue, sourceUnit, targetUnit);
-                                Console.WriteLine($"  {resultValue:F6} {targetUnit.GetSymbol()}");
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine(
-                                    $"  Error converting to {targetUnit.GetSymbol()}: {ex.Message}"
-                                );
-                            }
-                        }
-                    }
+                    Console.WriteLine("❌ Invalid base value!\n");
+                    return;
                 }
-                Console.WriteLine();
+
+                LengthUnit[] units =
+                {
+                    LengthUnit.FEET,
+                    LengthUnit.INCH,
+                    LengthUnit.YARD,
+                    LengthUnit.CENTIMETER,
+                };
+
+                Console.WriteLine($"\nAdding {baseValue} to various units:");
+                Console.WriteLine("┌────────────────────────────────────┐");
+
+                foreach (var unit in units)
+                {
+                    var q = new Quantity(baseValue, unit);
+                    var oneUnit = new Quantity(1.0, unit);
+                    var sum = q.Add(oneUnit);
+
+                    Console.WriteLine(
+                        $"│ {q, -8} + 1 {unit.GetUnitSymbol(), -2} = {sum.Value, 10:F6} {unit.GetUnitSymbol(), -3} │"
+                    );
+                }
+
+                Console.WriteLine("└────────────────────────────────────┘\n");
             }
-
-            Console.WriteLine("----------------------------------------\n");
-        }
-
-        /// <summary>
-        /// Displays backward compatibility screen using original classes.
-        /// </summary>
-        private void ShowBackwardCompatibilityScreen()
-        {
-            Console.WriteLine("\n--- Backward Compatibility (Original Classes) ---");
-            Console.WriteLine("Choose measurement type:");
-            Console.WriteLine("1. Feet comparison");
-            Console.WriteLine("2. Inch comparison");
-            Console.Write("Enter your choice (1-2): ");
-
-            string? userChoice = Console.ReadLine();
-
-            if (userChoice == "1")
+            catch (ArgumentException ex)
             {
-                ShowFeetComparisonScreen();
-            }
-            else if (userChoice == "2")
-            {
-                ShowInchComparisonScreen();
-            }
-            else
-            {
-                Console.WriteLine("Invalid choice!\n");
+                Console.WriteLine($"❌ Error: {ex.Message}\n");
             }
         }
 
         /// <summary>
-        /// Displays feet comparison screen.
+        /// Displays legacy mode screen (original classes).
         /// </summary>
-        private void ShowFeetComparisonScreen()
+        private void ShowLegacyModeScreen()
         {
-            Console.WriteLine("\n--- Feet Comparison (Original) ---");
+            Console.WriteLine("\n┌────────────────────────────────────┐");
+            Console.WriteLine("│          LEGACY MODE                │");
+            Console.WriteLine("│   (Original Feet/Inch Classes)     │");
+            Console.WriteLine("├────────────────────────────────────┤");
+            Console.WriteLine("│ 1. Compare Feet                    │");
+            Console.WriteLine("│ 2. Compare Inches                  │");
+            Console.WriteLine("│ 3. Back to Main Menu               │");
+            Console.WriteLine("└────────────────────────────────────┘");
+            Console.Write("Enter your choice (1-3): ");
 
-            string? firstInput = GetUserInput("Enter first measurement in feet:");
-            string? secondInput = GetUserInput("Enter second measurement in feet:");
+            string? choice = Console.ReadLine();
 
-            Feet? firstFeet = _measurementService.CreateFeetFromString(firstInput);
-            Feet? secondFeet = _measurementService.CreateFeetFromString(secondInput);
-
-            if (firstFeet is null || secondFeet is null)
+            switch (choice)
             {
-                DisplayErrorMessage("Invalid input! Please enter valid numeric values.");
+                case "1":
+                    ShowLegacyFeetComparison();
+                    break;
+                case "2":
+                    ShowLegacyInchComparison();
+                    break;
+                default:
+                    Console.WriteLine("Returning to main menu...\n");
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Displays legacy feet comparison screen.
+        /// </summary>
+        private void ShowLegacyFeetComparison()
+        {
+            Console.WriteLine("\n--- Feet Comparison (Legacy) ---\n");
+
+            Console.Write("Enter first measurement in feet: ");
+            string? input1 = Console.ReadLine();
+
+            Console.Write("Enter second measurement in feet: ");
+            string? input2 = Console.ReadLine();
+
+            Feet? feet1 = _service.ParseFeetInput(input1);
+            Feet? feet2 = _service.ParseFeetInput(input2);
+
+            if (feet1 is null || feet2 is null)
+            {
+                Console.WriteLine("❌ Invalid input! Please enter valid numeric values.\n");
                 return;
             }
 
-            bool areEqual = _measurementService.CompareFeetMeasurements(firstFeet, secondFeet);
-            DisplayComparisonResult(firstFeet.ToString(), secondFeet.ToString(), areEqual);
+            bool areEqual = _service.CompareFeetEquality(feet1, feet2);
+
+            Console.WriteLine($"\n{feet1} vs {feet2}: {(areEqual ? "✅ Equal" : "❌ Not Equal")}\n");
         }
 
         /// <summary>
-        /// Displays inch comparison screen.
+        /// Displays legacy inch comparison screen.
         /// </summary>
-        private void ShowInchComparisonScreen()
+        private void ShowLegacyInchComparison()
         {
-            Console.WriteLine("\n--- Inch Comparison (Original) ---");
+            Console.WriteLine("\n--- Inch Comparison (Legacy) ---\n");
 
-            string? firstInput = GetUserInput("Enter first measurement in inches:");
-            string? secondInput = GetUserInput("Enter second measurement in inches:");
+            Console.Write("Enter first measurement in inches: ");
+            string? input1 = Console.ReadLine();
 
-            Inch? firstInch = _measurementService.CreateInchFromString(firstInput);
-            Inch? secondInch = _measurementService.CreateInchFromString(secondInput);
+            Console.Write("Enter second measurement in inches: ");
+            string? input2 = Console.ReadLine();
 
-            if (firstInch is null || secondInch is null)
+            Inch? inch1 = _service.ParseInchInput(input1);
+            Inch? inch2 = _service.ParseInchInput(input2);
+
+            if (inch1 is null || inch2 is null)
             {
-                DisplayErrorMessage("Invalid input! Please enter valid numeric values.");
+                Console.WriteLine("❌ Invalid input! Please enter valid numeric values.\n");
                 return;
             }
 
-            bool areEqual = _measurementService.CompareInchMeasurements(firstInch, secondInch);
-            DisplayComparisonResult(firstInch.ToString(), secondInch.ToString(), areEqual);
+            bool areEqual = _service.CompareInchEquality(inch1, inch2);
+
+            Console.WriteLine($"\n{inch1} vs {inch2}: {(areEqual ? "✅ Equal" : "❌ Not Equal")}\n");
         }
 
         /// <summary>
-        /// Gets unit from menu choice.
+        /// Helper method to let user select a unit from a menu.
         /// </summary>
-        /// <param name="menuChoice">The menu choice.</param>
-        /// <returns>The corresponding LengthUnit.</returns>
-        private LengthUnit GetUnitFromChoice(string? menuChoice)
+        /// <param name="prompt">The prompt to display.</param>
+        /// <returns>The selected LengthUnit.</returns>
+        private LengthUnit SelectUnit(string prompt)
         {
-            return menuChoice switch
+            Console.WriteLine($"\n{prompt}");
+            Console.WriteLine("  1. Feet (ft)");
+            Console.WriteLine("  2. Inches (in)");
+            Console.WriteLine("  3. Yards (yd)");
+            Console.WriteLine("  4. Centimeters (cm)");
+            Console.Write("Enter choice (1-4): ");
+
+            string? choice = Console.ReadLine();
+
+            return choice switch
             {
                 "1" => LengthUnit.FEET,
                 "2" => LengthUnit.INCH,
                 "3" => LengthUnit.YARD,
                 "4" => LengthUnit.CENTIMETER,
-                _ => LengthUnit.FEET,
+                _ => throw new ArgumentException("Invalid unit choice"),
             };
-        }
-
-        /// <summary>
-        /// Gets user input with prompt.
-        /// </summary>
-        /// <param name="promptMessage">The prompt to display.</param>
-        /// <returns>The user's input.</returns>
-        private string? GetUserInput(string promptMessage)
-        {
-            Console.WriteLine(promptMessage);
-            return Console.ReadLine();
-        }
-
-        /// <summary>
-        /// Displays comparison result.
-        /// </summary>
-        private void DisplayComparisonResult(string firstMeasurement, string secondMeasurement, bool areEqual)
-        {
-            Console.WriteLine($"\nFirst measurement: {firstMeasurement}");
-            Console.WriteLine($"Second measurement: {secondMeasurement}");
-            Console.WriteLine(
-                $"Are they equal? {areEqual} ({(areEqual ? "Equal" : "Not Equal")})\n"
-            );
-            Console.WriteLine("----------------------------------------\n");
-        }
-
-        /// <summary>
-        /// Displays error message.
-        /// </summary>
-        /// <param name="errorMessage">The error message.</param>
-        private void DisplayErrorMessage(string errorMessage)
-        {
-            Console.WriteLine($"{errorMessage}\n");
         }
     }
 }
