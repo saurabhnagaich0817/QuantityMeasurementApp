@@ -4,7 +4,8 @@ namespace QuantityMeasurementApp.Models
 {
     /// <summary>
     /// Represents a quantity with a value and unit of measurement.
-    /// This class provides functionality for equality comparison, unit conversion, and addition operations.
+    /// This class provides functionality for equality comparison, unit conversion, and addition operations
+    /// with flexible target unit specification.
     /// </summary>
     public class Quantity
     {
@@ -12,11 +13,14 @@ namespace QuantityMeasurementApp.Models
         private readonly double _value;
         private readonly LengthUnit _unit;
 
+        private readonly UnitConverter _unitConverter;
+
         /// <summary>
         /// Initializes a new instance of the Quantity class.
         /// </summary>
         /// <param name="value">The numeric value of the measurement.</param>
         /// <param name="unit">The unit of measurement.</param>
+        /// <exception cref="ArgumentException">Thrown when value is invalid or unit is invalid.</exception>
         public Quantity(double value, LengthUnit unit)
         {
             ValidateValue(value);
@@ -24,6 +28,7 @@ namespace QuantityMeasurementApp.Models
 
             _value = value;
             _unit = unit;
+            _unitConverter = new UnitConverter();
         }
 
         /// <summary>
@@ -46,8 +51,9 @@ namespace QuantityMeasurementApp.Models
         {
             ValidateUnit(targetUnit);
 
-            double valueInBaseUnit = _value * _unit.GetConversionFactorToFeet();
-            double convertedValue = valueInBaseUnit / targetUnit.GetConversionFactorToFeet();
+            double valueInBaseUnit = _value * _unitConverter.GetConversionFactorToFeet(_unit);
+            double convertedValue =
+                valueInBaseUnit / _unitConverter.GetConversionFactorToFeet(targetUnit);
 
             return new Quantity(convertedValue, targetUnit);
         }
@@ -73,7 +79,51 @@ namespace QuantityMeasurementApp.Models
         }
 
         /// <summary>
-        /// Adds this quantity to another quantity and returns the result in the specified target unit.
+        /// Private utility method to add two quantities in base unit and convert to target unit.
+        /// This method centralizes the addition logic to avoid code duplication (DRY principle).
+        /// </summary>
+        /// <param name="first">First quantity.</param>
+        /// <param name="second">Second quantity.</param>
+        /// <param name="targetUnit">Target unit for result.</param>
+        /// <returns>A new Quantity object with the sum in target unit.</returns>
+        private static Quantity AddInBaseUnit(
+            Quantity first,
+            Quantity second,
+            LengthUnit targetUnit,
+            UnitConverter unitConverter
+        )
+        {
+            // Convert both quantities to base unit (feet)
+            double firstInBase = first.ConvertTo(LengthUnit.FEET).Value;
+            double secondInBase = second.ConvertTo(LengthUnit.FEET).Value;
+
+            // Add in base unit
+            double sumInBase = firstInBase + secondInBase;
+
+            // Convert sum to target unit
+            double sumInTarget = sumInBase / unitConverter.GetConversionFactorToFeet(targetUnit); // Note: targetUnit is enum, need UnitConverter instance
+
+            return new Quantity(sumInTarget, targetUnit);
+        }
+
+        /// <summary>
+        /// Adds another quantity to this quantity and returns the result in the unit of this quantity.
+        /// (UC6 - Implicit target unit)
+        /// </summary>
+        /// <param name="other">The other quantity to add.</param>
+        /// <returns>A new Quantity object representing the sum in this quantity's unit.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when other quantity is null.</exception>
+        public Quantity Add(Quantity other)
+        {
+            if (other == null)
+                throw new ArgumentNullException(nameof(other), "Other quantity cannot be null");
+
+            return Add(other, this._unit);
+        }
+
+        /// <summary>
+        /// Adds another quantity to this quantity and returns the result in the specified target unit.
+        /// (UC7 - Explicit target unit specification)
         /// </summary>
         /// <param name="other">The other quantity to add.</param>
         /// <param name="targetUnit">The unit for the result.</param>
@@ -87,21 +137,12 @@ namespace QuantityMeasurementApp.Models
 
             ValidateUnit(targetUnit);
 
-            // Convert both quantities to base unit (feet)
-            double thisInBase = this.ConvertTo(LengthUnit.FEET).Value;
-            double otherInBase = other.ConvertTo(LengthUnit.FEET).Value;
-
-            // Add in base unit
-            double sumInBase = thisInBase + otherInBase;
-
-            // Convert sum to target unit
-            double sumInTarget = sumInBase / targetUnit.GetConversionFactorToFeet();
-
-            return new Quantity(sumInTarget, targetUnit);
+            return AddInBaseUnit(this, other, targetUnit, _unitConverter);
         }
 
         /// <summary>
         /// Static method to add two quantities and return the result in the specified target unit.
+        /// (UC7 - Explicit target unit specification with Quantity objects)
         /// </summary>
         /// <param name="quantity1">First quantity.</param>
         /// <param name="quantity2">Second quantity.</param>
@@ -119,11 +160,15 @@ namespace QuantityMeasurementApp.Models
                     "Second quantity cannot be null"
                 );
 
-            return quantity1.Add(quantity2, targetUnit);
+            ValidateUnit(targetUnit);
+
+            var converter = new UnitConverter();
+            return AddInBaseUnit(quantity1, quantity2, targetUnit, converter);
         }
 
         /// <summary>
         /// Static method to add two values with their units and return the result in the specified target unit.
+        /// (UC7 - Explicit target unit specification with raw values)
         /// </summary>
         /// <param name="value1">First value.</param>
         /// <param name="unit1">Unit of first value.</param>
@@ -143,18 +188,7 @@ namespace QuantityMeasurementApp.Models
             Quantity quantity1 = new Quantity(value1, unit1);
             Quantity quantity2 = new Quantity(value2, unit2);
 
-            return quantity1.Add(quantity2, targetUnit);
-        }
-
-        /// <summary>
-        /// Adds another quantity to this quantity and returns the result in the unit of this quantity.
-        /// </summary>
-        /// <param name="other">The other quantity to add.</param>
-        /// <returns>A new Quantity object representing the sum in this quantity's unit.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when other quantity is null.</exception>
-        public Quantity Add(Quantity other)
-        {
-            return Add(other, this._unit);
+            return Add(quantity1, quantity2, targetUnit);
         }
 
         /// <summary>
@@ -175,7 +209,7 @@ namespace QuantityMeasurementApp.Models
             double thisInFeet = this.ConvertTo(LengthUnit.FEET).Value;
             double otherInFeet = other.ConvertTo(LengthUnit.FEET).Value;
 
-            return LengthUnitExtensions.AreApproximatelyEqual(thisInFeet, otherInFeet);
+            return _unitConverter.AreApproximatelyEqual(thisInFeet, otherInFeet);
         }
 
         /// <summary>

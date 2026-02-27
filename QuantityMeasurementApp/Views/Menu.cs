@@ -26,7 +26,7 @@ namespace QuantityMeasurementApp.Views
         public void Display()
         {
             Console.WriteLine("╔════════════════════════════════════════╗");
-            Console.WriteLine("║     QUANTITY MEASUREMENT APP           ║");
+            Console.WriteLine("║     QUANTITY MEASUREMENT APP          ║");
             Console.WriteLine("╚════════════════════════════════════════╝");
             Console.WriteLine();
 
@@ -36,7 +36,7 @@ namespace QuantityMeasurementApp.Views
 
                 string? choice = Console.ReadLine();
 
-                if (choice == "7")
+                if (choice == "8")
                     break;
 
                 ProcessMainMenuChoice(choice);
@@ -55,13 +55,14 @@ namespace QuantityMeasurementApp.Views
             Console.WriteLine("├────────────────────────────────────┤");
             Console.WriteLine("│ 1. Convert Units                   │");
             Console.WriteLine("│ 2. Compare Measurements            │");
-            Console.WriteLine("│ 3. Add Measurements                │");
-            Console.WriteLine("│ 4. View Commutativity Demo         │");
-            Console.WriteLine("│ 5. Batch Operations                │");
-            Console.WriteLine("│ 6. Legacy Mode (Original Classes)  │");
-            Console.WriteLine("│ 7. Exit                            │");
+            Console.WriteLine("│ 3. Add Measurements (Default Unit) │");
+            Console.WriteLine("│ 4. Add Measurements (Choose Unit)  │");
+            Console.WriteLine("│ 5. View Commutativity Demo         │");
+            Console.WriteLine("│ 6. Batch Operations                │");
+            Console.WriteLine("│ 7. Legacy Mode (Original Classes)  │");
+            Console.WriteLine("│ 8. Exit                            │");
             Console.WriteLine("└────────────────────────────────────┘");
-            Console.Write("Enter your choice (1-7): ");
+            Console.Write("Enter your choice (1-8): ");
         }
 
         /// <summary>
@@ -79,15 +80,18 @@ namespace QuantityMeasurementApp.Views
                     ShowEqualityComparisonScreen();
                     break;
                 case "3":
-                    ShowAdditionScreen();
+                    ShowAdditionDefaultUnitScreen();
                     break;
                 case "4":
-                    ShowCommutativityDemo();
+                    ShowAdditionChooseUnitScreen();
                     break;
                 case "5":
-                    ShowBatchOperationsScreen();
+                    ShowCommutativityDemo();
                     break;
                 case "6":
+                    ShowBatchOperationsScreen();
+                    break;
+                case "7":
                     ShowLegacyModeScreen();
                     break;
                 default:
@@ -210,12 +214,70 @@ namespace QuantityMeasurementApp.Views
         }
 
         /// <summary>
-        /// Displays the addition operation screen.
+        /// Displays the addition operation screen with default unit (UC6).
         /// </summary>
-        private void ShowAdditionScreen()
+        private void ShowAdditionDefaultUnitScreen()
         {
             Console.WriteLine("\n┌────────────────────────────────────┐");
-            Console.WriteLine("│         MEASUREMENT ADDITION       │");
+            Console.WriteLine("│   ADDITION (RESULT IN FIRST UNIT)  │");
+            Console.WriteLine("└────────────────────────────────────┘\n");
+
+            try
+            {
+                // Get first measurement
+                Console.WriteLine("--- FIRST MEASUREMENT ---");
+                LengthUnit unit1 = SelectUnit("Select unit:");
+                Console.Write($"Enter value in {unit1.GetUnitName()}: ");
+                string? value1Input = Console.ReadLine();
+
+                // Get second measurement
+                Console.WriteLine("\n--- SECOND MEASUREMENT ---");
+                LengthUnit unit2 = SelectUnit("Select unit:");
+                Console.Write($"Enter value in {unit2.GetUnitName()}: ");
+                string? value2Input = Console.ReadLine();
+
+                if (
+                    double.TryParse(value1Input, out double value1)
+                    && double.TryParse(value2Input, out double value2)
+                )
+                {
+                    var q1 = new Quantity(value1, unit1);
+                    var q2 = new Quantity(value2, unit2);
+
+                    // Add with result in first operand's unit (UC6 behavior)
+                    var sum = q1.Add(q2);
+
+                    Console.WriteLine("\n┌────────────────────────────────────┐");
+                    Console.WriteLine("│           ADDITION RESULT          │");
+                    Console.WriteLine("├────────────────────────────────────┤");
+                    Console.WriteLine($"│ {q1, -8} + {q2, -8}                 │");
+                    Console.WriteLine($"│                                     │");
+                    Console.WriteLine(
+                        $"│ = {sum.Value, 10:F6} {sum.Unit.GetUnitSymbol(), -3}                │"
+                    );
+                    Console.WriteLine("├────────────────────────────────────┤");
+
+                    // Show calculation details
+                    ShowAdditionDetails(q1, q2, sum.Unit, sum);
+                }
+                else
+                {
+                    Console.WriteLine("❌ Invalid numeric value(s)!\n");
+                }
+            }
+            catch (ArgumentException ex)
+            {
+                Console.WriteLine($"❌ Error: {ex.Message}\n");
+            }
+        }
+
+        /// <summary>
+        /// Displays the addition operation screen with user-chosen target unit (UC7).
+        /// </summary>
+        private void ShowAdditionChooseUnitScreen()
+        {
+            Console.WriteLine("\n┌────────────────────────────────────┐");
+            Console.WriteLine("│   ADDITION (CHOOSE RESULT UNIT)    │");
             Console.WriteLine("└────────────────────────────────────┘\n");
 
             try
@@ -244,6 +306,7 @@ namespace QuantityMeasurementApp.Views
                     var q1 = new Quantity(value1, unit1);
                     var q2 = new Quantity(value2, unit2);
 
+                    // Add with explicit target unit (UC7 behavior)
                     var sum = Quantity.Add(q1, q2, resultUnit);
 
                     Console.WriteLine("\n┌────────────────────────────────────┐");
@@ -257,15 +320,10 @@ namespace QuantityMeasurementApp.Views
                     Console.WriteLine("├────────────────────────────────────┤");
 
                     // Show calculation details
-                    Quantity q1InFeet = q1.ConvertTo(LengthUnit.FEET);
-                    Quantity q2InFeet = q2.ConvertTo(LengthUnit.FEET);
-                    double sumInFeet = q1InFeet.Value + q2InFeet.Value;
+                    ShowAdditionDetails(q1, q2, resultUnit, sum);
 
-                    Console.WriteLine($"│ Calculation:                         │");
-                    Console.WriteLine(
-                        $"│   {q1InFeet.Value, 8:F6} ft + {q2InFeet.Value, 8:F6} ft = {sumInFeet, 8:F6} ft │"
-                    );
-                    Console.WriteLine("└────────────────────────────────────┘\n");
+                    // Show alternative results in other units for comparison
+                    ShowAlternativeResults(q1, q2);
                 }
                 else
                 {
@@ -276,6 +334,58 @@ namespace QuantityMeasurementApp.Views
             {
                 Console.WriteLine($"❌ Error: {ex.Message}\n");
             }
+        }
+
+        /// <summary>
+        /// Shows calculation details for addition.
+        /// </summary>
+        private void ShowAdditionDetails(
+            Quantity q1,
+            Quantity q2,
+            LengthUnit resultUnit,
+            Quantity sum
+        )
+        {
+            Quantity q1InFeet = q1.ConvertTo(LengthUnit.FEET);
+            Quantity q2InFeet = q2.ConvertTo(LengthUnit.FEET);
+            double sumInFeet = q1InFeet.Value + q2InFeet.Value;
+
+            Console.WriteLine("├────────────────────────────────────┤");
+            Console.WriteLine($"│ Calculation:                         │");
+            Console.WriteLine(
+                $"│   {q1InFeet.Value, 8:F6} ft + {q2InFeet.Value, 8:F6} ft = {sumInFeet, 8:F6} ft │"
+            );
+            Console.WriteLine(
+                $"│   {sumInFeet, 8:F6} ft = {sum.Value, 8:F6} {resultUnit.GetUnitSymbol(), -3}            │"
+            );
+            Console.WriteLine("└────────────────────────────────────┘\n");
+        }
+
+        /// <summary>
+        /// Shows alternative results in different units for comparison.
+        /// </summary>
+        private void ShowAlternativeResults(Quantity q1, Quantity q2)
+        {
+            Console.WriteLine("Alternative results in different units:");
+            Console.WriteLine("┌────────────────────────────────────┐");
+
+            LengthUnit[] units =
+            {
+                LengthUnit.FEET,
+                LengthUnit.INCH,
+                LengthUnit.YARD,
+                LengthUnit.CENTIMETER,
+            };
+
+            foreach (var unit in units)
+            {
+                var sum = Quantity.Add(q1, q2, unit);
+                Console.WriteLine(
+                    $"│ {unit.GetUnitName(), -11} : {sum.Value, 10:F6} {sum.Unit.GetUnitSymbol(), -3} │"
+                );
+            }
+
+            Console.WriteLine("└────────────────────────────────────┘\n");
         }
 
         /// <summary>
@@ -302,6 +412,10 @@ namespace QuantityMeasurementApp.Views
                 Console.Write($"Enter value in {unit2.GetUnitName()}: ");
                 string? value2Input = Console.ReadLine();
 
+                // Get test unit for comparison
+                Console.WriteLine("\n--- TEST UNIT ---");
+                LengthUnit testUnit = SelectUnit("Select unit for commutativity test:");
+
                 if (
                     double.TryParse(value1Input, out double value1)
                     && double.TryParse(value2Input, out double value2)
@@ -310,9 +424,9 @@ namespace QuantityMeasurementApp.Views
                     var a = new Quantity(value1, unit1);
                     var b = new Quantity(value2, unit2);
 
-                    // Add in both orders
-                    var aPlusB = a.Add(b); // Result in unit1
-                    var bPlusA = b.Add(a); // Result in unit2
+                    // Add in both orders with same target unit
+                    var aPlusB = Quantity.Add(a, b, testUnit);
+                    var bPlusA = Quantity.Add(b, a, testUnit);
 
                     Console.WriteLine("\n┌────────────────────────────────────┐");
                     Console.WriteLine("│         COMMUTATIVITY CHECK        │");
@@ -320,22 +434,20 @@ namespace QuantityMeasurementApp.Views
                     Console.WriteLine($"│ a = {a, -10} b = {b, -10} │");
                     Console.WriteLine($"│                                     │");
                     Console.WriteLine(
-                        $"│ a + b = {aPlusB.Value, 10:F6} {aPlusB.Unit.GetUnitSymbol(), -3}            │"
+                        $"│ a + b (in {testUnit.GetUnitSymbol(), -2}) = {aPlusB.Value, 10:F6} {testUnit.GetUnitSymbol(), -3} │"
                     );
                     Console.WriteLine(
-                        $"│ b + a = {bPlusA.Value, 10:F6} {bPlusA.Unit.GetUnitSymbol(), -3}            │"
+                        $"│ b + a (in {testUnit.GetUnitSymbol(), -2}) = {bPlusA.Value, 10:F6} {testUnit.GetUnitSymbol(), -3} │"
                     );
                     Console.WriteLine("├────────────────────────────────────┤");
 
                     // Check if they represent the same physical quantity
-                    bool areEqual = aPlusB
-                        .ConvertTo(LengthUnit.FEET)
-                        .Equals(bPlusA.ConvertTo(LengthUnit.FEET));
+                    bool areEqual = Math.Abs(aPlusB.Value - bPlusA.Value) < 0.000001;
 
                     if (areEqual)
                     {
                         Console.WriteLine("│ ✅ Addition is COMMUTATIVE!            │");
-                        Console.WriteLine("│    a + b = b + a in physical terms    │");
+                        Console.WriteLine("│    a + b = b + a                      │");
                     }
                     else
                     {
@@ -364,9 +476,10 @@ namespace QuantityMeasurementApp.Views
             Console.WriteLine("├────────────────────────────────────┤");
             Console.WriteLine("│ 1. Batch Unit Conversion           │");
             Console.WriteLine("│ 2. Batch Addition Demo             │");
-            Console.WriteLine("│ 3. Back to Main Menu               │");
+            Console.WriteLine("│ 3. Multi-Unit Results Demo         │");
+            Console.WriteLine("│ 4. Back to Main Menu               │");
             Console.WriteLine("└────────────────────────────────────┘");
-            Console.Write("Enter your choice (1-3): ");
+            Console.Write("Enter your choice (1-4): ");
 
             string? choice = Console.ReadLine();
 
@@ -377,6 +490,9 @@ namespace QuantityMeasurementApp.Views
                     break;
                 case "2":
                     ShowBatchAdditionDemo();
+                    break;
+                case "3":
+                    ShowMultiUnitResultsDemo();
                     break;
                 default:
                     Console.WriteLine("Returning to main menu...\n");
@@ -460,7 +576,7 @@ namespace QuantityMeasurementApp.Views
                     LengthUnit.CENTIMETER,
                 };
 
-                Console.WriteLine($"\nAdding {baseValue} to various units:");
+                Console.WriteLine($"\nAdding {baseValue} to various units (result in same unit):");
                 Console.WriteLine("┌────────────────────────────────────┐");
 
                 foreach (var unit in units)
@@ -475,6 +591,74 @@ namespace QuantityMeasurementApp.Views
                 }
 
                 Console.WriteLine("└────────────────────────────────────┘\n");
+            }
+            catch (ArgumentException ex)
+            {
+                Console.WriteLine($"❌ Error: {ex.Message}\n");
+            }
+        }
+
+        /// <summary>
+        /// Displays multi-unit results demonstration (UC7 feature).
+        /// </summary>
+        private void ShowMultiUnitResultsDemo()
+        {
+            Console.WriteLine("\n┌────────────────────────────────────┐");
+            Console.WriteLine("│      MULTI-UNIT RESULTS DEMO       │");
+            Console.WriteLine("│  Same addition in different units  │");
+            Console.WriteLine("└────────────────────────────────────┘\n");
+
+            try
+            {
+                // Get first measurement
+                Console.WriteLine("--- FIRST MEASUREMENT ---");
+                LengthUnit unit1 = SelectUnit("Select unit:");
+                Console.Write($"Enter value in {unit1.GetUnitName()}: ");
+                string? value1Input = Console.ReadLine();
+
+                // Get second measurement
+                Console.WriteLine("\n--- SECOND MEASUREMENT ---");
+                LengthUnit unit2 = SelectUnit("Select unit:");
+                Console.Write($"Enter value in {unit2.GetUnitName()}: ");
+                string? value2Input = Console.ReadLine();
+
+                if (
+                    double.TryParse(value1Input, out double value1)
+                    && double.TryParse(value2Input, out double value2)
+                )
+                {
+                    var q1 = new Quantity(value1, unit1);
+                    var q2 = new Quantity(value2, unit2);
+
+                    Console.WriteLine($"\n{q1} + {q2} expressed in different units:");
+                    Console.WriteLine("┌────────────────────────────────────┐");
+
+                    LengthUnit[] units =
+                    {
+                        LengthUnit.FEET,
+                        LengthUnit.INCH,
+                        LengthUnit.YARD,
+                        LengthUnit.CENTIMETER,
+                    };
+
+                    foreach (var unit in units)
+                    {
+                        var sum = Quantity.Add(q1, q2, unit);
+                        Console.WriteLine(
+                            $"│ {unit.GetUnitName(), -11} : {sum.Value, 12:F6} {sum.Unit.GetUnitSymbol(), -3} │"
+                        );
+                    }
+
+                    Console.WriteLine("└────────────────────────────────────┘\n");
+
+                    // Show conversion factors explanation
+                    Console.WriteLine("Note: All results represent the same physical length,");
+                    Console.WriteLine("just expressed in different units.\n");
+                }
+                else
+                {
+                    Console.WriteLine("❌ Invalid numeric value(s)!\n");
+                }
             }
             catch (ArgumentException ex)
             {
