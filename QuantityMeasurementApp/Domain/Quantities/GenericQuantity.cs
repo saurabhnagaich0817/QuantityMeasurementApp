@@ -8,6 +8,7 @@ namespace QuantityMeasurementApp.Domain.Quantities
     /// UC10: Single class replaces both Quantity and WeightQuantity, eliminating code duplication.
     /// UC12: Added Subtraction and Division operations.
     /// UC13: Centralized arithmetic logic to enforce DRY principle.
+    /// UC14: Added operation support validation for categories like Temperature.
     /// </summary>
     /// <typeparam name="T">The unit type (must implement IMeasurable).</typeparam>
     public class GenericQuantity<T>
@@ -43,6 +44,7 @@ namespace QuantityMeasurementApp.Domain.Quantities
         /// <summary>
         /// Converts this quantity to a target unit.
         /// UC5: Unit conversion feature for any unit type.
+        /// UC14: Works with temperature units using their conversion functions.
         /// </summary>
         /// <param name="targetUnit">The unit to convert to.</param>
         /// <returns>A new GenericQuantity in the target unit.</returns>
@@ -84,16 +86,20 @@ namespace QuantityMeasurementApp.Domain.Quantities
         /// Validates arithmetic operands for null, and finiteness.
         /// Note: Category compatibility is enforced by the generic type parameter T.
         /// UC13: Centralized validation for all arithmetic operations.
+        /// UC14: Also validates that the unit supports arithmetic operations.
         /// </summary>
         /// <param name="other">The other quantity.</param>
         /// <param name="targetUnit">The target unit (may be null for division).</param>
         /// <param name="isTargetUnitRequired">Whether target unit validation is required.</param>
+        /// <param name="operation">The arithmetic operation being performed.</param>
         /// <exception cref="ArgumentNullException">Thrown when other is null or targetUnit required but null.</exception>
         /// <exception cref="InvalidValueException">Thrown when values are invalid.</exception>
+        /// <exception cref="NotSupportedException">Thrown when the unit does not support arithmetic operations.</exception>
         private void ValidateArithmeticOperands(
             GenericQuantity<T> other,
             T? targetUnit,
-            bool isTargetUnitRequired
+            bool isTargetUnitRequired,
+            ArithmeticOperation operation
         )
         {
             // Validate other quantity
@@ -104,12 +110,15 @@ namespace QuantityMeasurementApp.Domain.Quantities
             if (isTargetUnitRequired && targetUnit == null)
                 throw new ArgumentNullException(nameof(targetUnit), "Target unit cannot be null");
 
-            // Note: We don't need to validate that targetUnit is a valid unit because
-            // the type parameter T ensures it's the correct type.
-
             // Validate values are finite
             if (!IsFinite(_value) || !IsFinite(other._value))
                 throw new InvalidValueException("Both quantities must have finite values");
+
+            // Validate that this unit supports arithmetic operations
+            if (!_unit.SupportsArithmeticOperation())
+            {
+                _unit.ValidateOperationSupport(operation.ToString());
+            }
         }
 
         /// <summary>
@@ -170,6 +179,7 @@ namespace QuantityMeasurementApp.Domain.Quantities
         /// Adds another quantity to this quantity.
         /// UC6: Addition with result in this quantity's unit.
         /// UC13: Delegates to centralized arithmetic helpers.
+        /// UC14: Validates operation support before performing addition.
         /// </summary>
         /// <param name="other">The other quantity to add.</param>
         /// <returns>A new GenericQuantity representing the sum.</returns>
@@ -182,14 +192,15 @@ namespace QuantityMeasurementApp.Domain.Quantities
         /// Adds another quantity to this quantity with result in specified unit.
         /// UC7: Addition with explicit target unit.
         /// UC13: Delegates to centralized arithmetic helpers.
+        /// UC14: Validates operation support before performing addition.
         /// </summary>
         /// <param name="other">The other quantity to add.</param>
         /// <param name="targetUnit">The unit for the result.</param>
         /// <returns>A new GenericQuantity representing the sum in the target unit.</returns>
         public GenericQuantity<T> Add(GenericQuantity<T> other, T targetUnit)
         {
-            // Validate operands
-            ValidateArithmeticOperands(other, targetUnit, true);
+            // Validate operands and operation support
+            ValidateArithmeticOperands(other, targetUnit, true, ArithmeticOperation.ADD);
 
             // Perform addition in base unit
             double resultInBase = PerformBaseArithmetic(other, ArithmeticOperation.ADD);
@@ -241,6 +252,7 @@ namespace QuantityMeasurementApp.Domain.Quantities
         /// Subtracts another quantity from this quantity.
         /// UC12: Subtraction with result in this quantity's unit.
         /// UC13: Delegates to centralized arithmetic helpers.
+        /// UC14: Validates operation support before performing subtraction.
         /// </summary>
         /// <param name="other">The other quantity to subtract.</param>
         /// <returns>A new GenericQuantity representing the difference.</returns>
@@ -253,14 +265,15 @@ namespace QuantityMeasurementApp.Domain.Quantities
         /// Subtracts another quantity from this quantity with result in specified unit.
         /// UC12: Subtraction with explicit target unit.
         /// UC13: Delegates to centralized arithmetic helpers.
+        /// UC14: Validates operation support before performing subtraction.
         /// </summary>
         /// <param name="other">The other quantity to subtract.</param>
         /// <param name="targetUnit">The unit for the result.</param>
         /// <returns>A new GenericQuantity representing the difference in the target unit.</returns>
         public GenericQuantity<T> Subtract(GenericQuantity<T> other, T targetUnit)
         {
-            // Validate operands
-            ValidateArithmeticOperands(other, targetUnit, true);
+            // Validate operands and operation support
+            ValidateArithmeticOperands(other, targetUnit, true, ArithmeticOperation.SUBTRACT);
 
             // Perform subtraction in base unit
             double resultInBase = PerformBaseArithmetic(other, ArithmeticOperation.SUBTRACT);
@@ -312,13 +325,14 @@ namespace QuantityMeasurementApp.Domain.Quantities
         /// Divides this quantity by another quantity.
         /// UC12: Division returning a dimensionless scalar ratio.
         /// UC13: Delegates to centralized arithmetic helpers.
+        /// UC14: Validates operation support before performing division.
         /// </summary>
         /// <param name="other">The other quantity (divisor).</param>
         /// <returns>The ratio as a double (dimensionless).</returns>
         public double Divide(GenericQuantity<T> other)
         {
-            // Validate operands (no target unit needed for division)
-            ValidateArithmeticOperands(other, null, false);
+            // Validate operands and operation support (no target unit needed for division)
+            ValidateArithmeticOperands(other, null, false, ArithmeticOperation.DIVIDE);
 
             // Perform division in base unit
             double resultInBase = PerformBaseArithmetic(other, ArithmeticOperation.DIVIDE);
@@ -359,6 +373,7 @@ namespace QuantityMeasurementApp.Domain.Quantities
         /// <summary>
         /// Determines whether the specified object is equal to the current quantity.
         /// UC1-UC4, UC9: Value-based equality across all units of same category.
+        /// UC14: Works with temperature units using their conversion functions.
         /// </summary>
         /// <param name="other">The object to compare.</param>
         /// <returns>True if equal.</returns>

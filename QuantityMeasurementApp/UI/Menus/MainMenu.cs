@@ -7,7 +7,7 @@ namespace QuantityMeasurementApp.UI.Menus
     /// <summary>
     /// Main menu of the application.
     /// Provides access to all features using generic implementations.
-    /// UC11: Added Volume measurements to the menu.
+    /// UC14: Added Temperature measurements to the menu.
     /// </summary>
     public class MainMenu
     {
@@ -15,6 +15,7 @@ namespace QuantityMeasurementApp.UI.Menus
         private readonly GenericLengthMenu _lengthMenu;
         private readonly GenericWeightMenu _weightMenu;
         private readonly GenericVolumeMenu _volumeMenu;
+        private readonly GenericTemperatureMenu _temperatureMenu;
 
         /// <summary>
         /// Initializes a new instance of the MainMenu class.
@@ -25,6 +26,7 @@ namespace QuantityMeasurementApp.UI.Menus
             _lengthMenu = new GenericLengthMenu(_measurementService);
             _weightMenu = new GenericWeightMenu(_measurementService);
             _volumeMenu = new GenericVolumeMenu(_measurementService);
+            _temperatureMenu = new GenericTemperatureMenu(_measurementService);
         }
 
         /// <summary>
@@ -32,6 +34,7 @@ namespace QuantityMeasurementApp.UI.Menus
         /// </summary>
         public void Display()
         {
+            ConsoleHelper.ClearScreen();
             ConsoleHelper.DisplayHeader("QUANTITY MEASUREMENT APPLICATION");
 
             while (true)
@@ -39,7 +42,7 @@ namespace QuantityMeasurementApp.UI.Menus
                 DisplayOptions();
                 string? userChoice = ConsoleHelper.GetInput("Enter your choice");
 
-                if (userChoice == "4")
+                if (userChoice == "5")
                     break;
 
                 ProcessUserChoice(userChoice);
@@ -54,13 +57,14 @@ namespace QuantityMeasurementApp.UI.Menus
         private void DisplayOptions()
         {
             Console.WriteLine("╔════════════════════════════════════════════════════════╗");
-            Console.WriteLine("║                         MAIN MENU                      ║");
+            Console.WriteLine("║                        MAIN MENU                       ║");
             Console.WriteLine("╠════════════════════════════════════════════════════════╣");
             Console.WriteLine("║                                                        ║");
             Console.WriteLine("║    1.  Length Measurements (ft, in, yd, cm)            ║");
             Console.WriteLine("║    2.  Weight Measurements (kg, g, lb)                 ║");
             Console.WriteLine("║    3.  Volume Measurements (L, mL, gal)                ║");
-            Console.WriteLine("║    4.  Exit                                            ║");
+            Console.WriteLine("║    4.  Temperature Measurements (°C, °F, K)            ║");
+            Console.WriteLine("║    5.  Exit                                            ║");
             Console.WriteLine("║                                                        ║");
             Console.WriteLine("╚════════════════════════════════════════════════════════╝");
         }
@@ -77,6 +81,9 @@ namespace QuantityMeasurementApp.UI.Menus
                     break;
                 case "3":
                     _volumeMenu.Display();
+                    break;
+                case "4":
+                    _temperatureMenu.Display();
                     break;
                 default:
                     ConsoleHelper.DisplayError("Invalid choice!");

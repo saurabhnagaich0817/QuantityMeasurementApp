@@ -1,3 +1,4 @@
+using System;
 using QuantityMeasurementApp.Core.Abstractions;
 using QuantityMeasurementApp.Core.Exceptions;
 
@@ -6,6 +7,7 @@ namespace QuantityMeasurementApp.Domain.Units
     /// <summary>
     /// Class representing length units.
     /// UC10: Implements IMeasurable interface for standardized unit behavior.
+    /// UC14: Supports all arithmetic operations (true by default).
     /// </summary>
     public class LengthUnit : IMeasurable
     {
@@ -16,6 +18,13 @@ namespace QuantityMeasurementApp.Domain.Units
             Symbol = symbol;
             ConversionFactor = conversionFactor;
         }
+
+        /// <summary>
+        /// Lambda expression indicating that LengthUnit supports arithmetic operations.
+        /// UC14: Length measurements fully support addition, subtraction, and division.
+        /// </summary>
+        public ISupportsArithmetic SupportsArithmetic { get; } =
+            new SupportsArithmeticImpl(() => true);
 
         /// <summary>
         /// Gets the name of the unit.
@@ -92,6 +101,23 @@ namespace QuantityMeasurementApp.Domain.Units
         public string GetName() => Name;
 
         /// <summary>
+        /// Checks if this unit supports arithmetic operations.
+        /// Implements IMeasurable.SupportsArithmeticOperation.
+        /// </summary>
+        public bool SupportsArithmeticOperation() => SupportsArithmetic.IsSupported();
+
+        /// <summary>
+        /// Validates whether a specific arithmetic operation is supported.
+        /// Implements IMeasurable.ValidateOperationSupport.
+        /// </summary>
+        /// <param name="operation">The arithmetic operation to validate.</param>
+        /// <exception cref="NotSupportedException">Thrown when the operation is not supported.</exception>
+        public void ValidateOperationSupport(string operation)
+        {
+            // Length supports all operations, so no validation needed
+        }
+
+        /// <summary>
         /// Returns a string representation of the unit.
         /// </summary>
         public override string ToString() => $"{Name} ({Symbol})";
@@ -125,5 +151,20 @@ namespace QuantityMeasurementApp.Domain.Units
         /// Serves as the default hash function.
         /// </summary>
         public override int GetHashCode() => HashCode.Combine(Name, Symbol, ConversionFactor);
+
+        /// <summary>
+        /// Private implementation of ISupportsArithmetic.
+        /// </summary>
+        private class SupportsArithmeticImpl : ISupportsArithmetic
+        {
+            private readonly Func<bool> _isSupported;
+
+            public SupportsArithmeticImpl(Func<bool> isSupported)
+            {
+                _isSupported = isSupported;
+            }
+
+            public bool IsSupported() => _isSupported();
+        }
     }
 }
