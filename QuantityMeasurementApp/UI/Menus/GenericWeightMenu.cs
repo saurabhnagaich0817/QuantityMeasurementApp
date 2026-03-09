@@ -6,18 +6,20 @@ using QuantityMeasurementApp.UI.Helpers;
 namespace QuantityMeasurementApp.UI.Menus
 {
     /// <summary>
-    /// Menu for weight measurement operations (UC9).
+    /// Menu for weight measurement operations using generic Quantity class.
+    /// UC10: Consolidated menu for all weight operations.
     /// </summary>
-    public class WeightMenu
+    public class GenericWeightMenu
     {
-        private readonly WeightMeasurementService _weightService;
+        private readonly GenericMeasurementService _measurementService;
 
         /// <summary>
-        /// Initializes a new instance of the WeightMenu class.
+        /// Initializes a new instance of the GenericWeightMenu class.
         /// </summary>
-        public WeightMenu()
+        /// <param name="measurementService">The measurement service.</param>
+        public GenericWeightMenu(GenericMeasurementService measurementService)
         {
-            _weightService = new WeightMeasurementService();
+            _measurementService = measurementService;
         }
 
         /// <summary>
@@ -44,9 +46,6 @@ namespace QuantityMeasurementApp.UI.Menus
                         DisplayWeightAddition();
                         break;
                     case "4":
-                        DisplayWeightVsLengthDemo();
-                        break;
-                    case "5":
                         return;
                     default:
                         ConsoleHelper.DisplayError("Invalid choice! Press any key to continue...");
@@ -73,10 +72,7 @@ namespace QuantityMeasurementApp.UI.Menus
             Console.WriteLine("║    3.  Add Weights                                    ║");
             Console.WriteLine("║        (e.g., 1 kg + 500 g = 1.5 kg)                  ║");
             Console.WriteLine("║                                                        ║");
-            Console.WriteLine("║    4.  Weight vs Length (Incompatible Demo)           ║");
-            Console.WriteLine("║        (Shows that weight and length cannot mix)      ║");
-            Console.WriteLine("║                                                        ║");
-            Console.WriteLine("║    5.  Back to Main Menu                              ║");
+            Console.WriteLine("║    4.  Back to Main Menu                              ║");
             Console.WriteLine("║                                                        ║");
             Console.WriteLine("╚════════════════════════════════════════════════════════╝");
         }
@@ -91,8 +87,8 @@ namespace QuantityMeasurementApp.UI.Menus
 
             try
             {
-                WeightUnit sourceUnit = WeightUnitSelector.SelectUnit("Select SOURCE unit");
-                WeightUnit targetUnit = WeightUnitSelector.SelectUnit("Select TARGET unit");
+                WeightUnit sourceUnit = GenericUnitSelector.SelectWeightUnit("Select SOURCE unit");
+                WeightUnit targetUnit = GenericUnitSelector.SelectWeightUnit("Select TARGET unit");
 
                 string? userInput = ConsoleHelper.GetInput(
                     $"Enter value in {sourceUnit.GetName()}"
@@ -100,7 +96,7 @@ namespace QuantityMeasurementApp.UI.Menus
 
                 if (double.TryParse(userInput, out double inputValue))
                 {
-                    double convertedValue = _weightService.ConvertWeightValue(
+                    double convertedValue = _measurementService.ConvertValue(
                         inputValue,
                         sourceUnit,
                         targetUnit
@@ -157,7 +153,7 @@ namespace QuantityMeasurementApp.UI.Menus
             {
                 // First weight
                 Console.WriteLine("\n┌────────── FIRST WEIGHT ──────────┐");
-                WeightUnit firstUnit = WeightUnitSelector.SelectUnit(
+                WeightUnit firstUnit = GenericUnitSelector.SelectWeightUnit(
                     "Select unit for first weight"
                 );
                 Console.Write("│ Enter value: ");
@@ -166,7 +162,7 @@ namespace QuantityMeasurementApp.UI.Menus
 
                 // Second weight
                 Console.WriteLine("\n┌────────── SECOND WEIGHT ─────────┐");
-                WeightUnit secondUnit = WeightUnitSelector.SelectUnit(
+                WeightUnit secondUnit = GenericUnitSelector.SelectWeightUnit(
                     "Select unit for second weight"
                 );
                 Console.Write("│ Enter value: ");
@@ -178,34 +174,34 @@ namespace QuantityMeasurementApp.UI.Menus
                     && double.TryParse(secondInput, out double secondValue)
                 )
                 {
-                    var firstWeight = new WeightQuantity(firstValue, firstUnit);
-                    var secondWeight = new WeightQuantity(secondValue, secondUnit);
+                    var firstQuantity = new GenericQuantity<WeightUnit>(firstValue, firstUnit);
+                    var secondQuantity = new GenericQuantity<WeightUnit>(secondValue, secondUnit);
 
-                    bool areWeightsEqual = _weightService.AreWeightsEqual(
-                        firstWeight,
-                        secondWeight
+                    bool areEqual = _measurementService.AreQuantitiesEqual(
+                        firstQuantity,
+                        secondQuantity
                     );
 
                     Console.WriteLine("\n╔════════════════════════════════════════╗");
                     Console.WriteLine("║         COMPARISON RESULT             ║");
                     Console.WriteLine("╠════════════════════════════════════════╣");
-                    Console.WriteLine($"║  {firstWeight, -8} vs {secondWeight, -8}      ║");
+                    Console.WriteLine($"║  {firstQuantity, -8} vs {secondQuantity, -8}      ║");
                     Console.WriteLine("╠════════════════════════════════════════╣");
 
-                    if (areWeightsEqual)
+                    if (areEqual)
                     {
-                        Console.WriteLine("║     ✅ Weights are EQUAL              ║");
+                        Console.WriteLine("║     ✅ Weights are EQUAL               ║");
                     }
                     else
                     {
-                        Console.WriteLine("║     ❌ Weights are NOT EQUAL          ║");
+                        Console.WriteLine("║     ❌ Weights are NOT EQUAL           ║");
                     }
 
                     Console.WriteLine("╚════════════════════════════════════════╝");
 
                     // Show in base unit for reference
-                    WeightQuantity firstInKg = firstWeight.ConvertTo(WeightUnit.KILOGRAM);
-                    WeightQuantity secondInKg = secondWeight.ConvertTo(WeightUnit.KILOGRAM);
+                    var firstInKg = firstQuantity.ConvertTo(WeightUnit.KILOGRAM);
+                    var secondInKg = secondQuantity.ConvertTo(WeightUnit.KILOGRAM);
 
                     Console.WriteLine($"\n📊 In kilograms:");
                     Console.WriteLine($"   First:  {firstInKg.Value:F6} kg");
@@ -283,7 +279,7 @@ namespace QuantityMeasurementApp.UI.Menus
             {
                 // First weight
                 Console.WriteLine("\n┌────────── FIRST WEIGHT ──────────┐");
-                WeightUnit firstUnit = WeightUnitSelector.SelectUnit(
+                WeightUnit firstUnit = GenericUnitSelector.SelectWeightUnit(
                     "Select unit for first weight"
                 );
                 Console.Write("│ Enter value: ");
@@ -292,7 +288,7 @@ namespace QuantityMeasurementApp.UI.Menus
 
                 // Second weight
                 Console.WriteLine("\n┌────────── SECOND WEIGHT ─────────┐");
-                WeightUnit secondUnit = WeightUnitSelector.SelectUnit(
+                WeightUnit secondUnit = GenericUnitSelector.SelectWeightUnit(
                     "Select unit for second weight"
                 );
                 Console.Write("│ Enter value: ");
@@ -304,15 +300,18 @@ namespace QuantityMeasurementApp.UI.Menus
                     && double.TryParse(secondInput, out double secondValue)
                 )
                 {
-                    var firstWeight = new WeightQuantity(firstValue, firstUnit);
-                    var secondWeight = new WeightQuantity(secondValue, secondUnit);
+                    var firstQuantity = new GenericQuantity<WeightUnit>(firstValue, firstUnit);
+                    var secondQuantity = new GenericQuantity<WeightUnit>(secondValue, secondUnit);
 
-                    var sumInFirstUnit = _weightService.AddWeights(firstWeight, secondWeight);
+                    var sumInFirstUnit = _measurementService.AddQuantities(
+                        firstQuantity,
+                        secondQuantity
+                    );
 
-                    DisplayWeightResultBox(firstWeight, secondWeight, sumInFirstUnit);
+                    DisplayWeightResultBox(firstQuantity, secondQuantity, sumInFirstUnit);
                     ShowWeightCalculationDetails(
-                        firstWeight,
-                        secondWeight,
+                        firstQuantity,
+                        secondQuantity,
                         sumInFirstUnit.Unit,
                         sumInFirstUnit
                     );
@@ -342,7 +341,7 @@ namespace QuantityMeasurementApp.UI.Menus
             {
                 // First weight
                 Console.WriteLine("\n┌────────── FIRST WEIGHT ──────────┐");
-                WeightUnit firstUnit = WeightUnitSelector.SelectUnit(
+                WeightUnit firstUnit = GenericUnitSelector.SelectWeightUnit(
                     "Select unit for first weight"
                 );
                 Console.Write("│ Enter value: ");
@@ -351,7 +350,7 @@ namespace QuantityMeasurementApp.UI.Menus
 
                 // Second weight
                 Console.WriteLine("\n┌────────── SECOND WEIGHT ─────────┐");
-                WeightUnit secondUnit = WeightUnitSelector.SelectUnit(
+                WeightUnit secondUnit = GenericUnitSelector.SelectWeightUnit(
                     "Select unit for second weight"
                 );
                 Console.Write("│ Enter value: ");
@@ -363,19 +362,19 @@ namespace QuantityMeasurementApp.UI.Menus
                     && double.TryParse(secondInput, out double secondValue)
                 )
                 {
-                    var firstWeight = new WeightQuantity(firstValue, firstUnit);
-                    var secondWeight = new WeightQuantity(secondValue, secondUnit);
+                    var firstQuantity = new GenericQuantity<WeightUnit>(firstValue, firstUnit);
+                    var secondQuantity = new GenericQuantity<WeightUnit>(secondValue, secondUnit);
 
-                    var sumInSecondUnit = _weightService.AddWeightsWithTarget(
-                        firstWeight,
-                        secondWeight,
+                    var sumInSecondUnit = _measurementService.AddQuantitiesWithTarget(
+                        firstQuantity,
+                        secondQuantity,
                         secondUnit
                     );
 
-                    DisplayWeightResultBox(firstWeight, secondWeight, sumInSecondUnit);
+                    DisplayWeightResultBox(firstQuantity, secondQuantity, sumInSecondUnit);
                     ShowWeightCalculationDetails(
-                        firstWeight,
-                        secondWeight,
+                        firstQuantity,
+                        secondQuantity,
                         secondUnit,
                         sumInSecondUnit
                     );
@@ -405,7 +404,7 @@ namespace QuantityMeasurementApp.UI.Menus
             {
                 // First weight
                 Console.WriteLine("\n┌────────── FIRST WEIGHT ──────────┐");
-                WeightUnit firstUnit = WeightUnitSelector.SelectUnit(
+                WeightUnit firstUnit = GenericUnitSelector.SelectWeightUnit(
                     "Select unit for first weight"
                 );
                 Console.Write("│ Enter value: ");
@@ -414,7 +413,7 @@ namespace QuantityMeasurementApp.UI.Menus
 
                 // Second weight
                 Console.WriteLine("\n┌────────── SECOND WEIGHT ─────────┐");
-                WeightUnit secondUnit = WeightUnitSelector.SelectUnit(
+                WeightUnit secondUnit = GenericUnitSelector.SelectWeightUnit(
                     "Select unit for second weight"
                 );
                 Console.Write("│ Enter value: ");
@@ -426,29 +425,29 @@ namespace QuantityMeasurementApp.UI.Menus
                     && double.TryParse(secondInput, out double secondValue)
                 )
                 {
-                    var firstWeight = new WeightQuantity(firstValue, firstUnit);
-                    var secondWeight = new WeightQuantity(secondValue, secondUnit);
+                    var firstQuantity = new GenericQuantity<WeightUnit>(firstValue, firstUnit);
+                    var secondQuantity = new GenericQuantity<WeightUnit>(secondValue, secondUnit);
 
-                    var sumInFirstUnit = _weightService.AddWeightsWithTarget(
-                        firstWeight,
-                        secondWeight,
+                    var sumInFirstUnit = _measurementService.AddQuantitiesWithTarget(
+                        firstQuantity,
+                        secondQuantity,
                         firstUnit
                     );
-                    var sumInSecondUnit = _weightService.AddWeightsWithTarget(
-                        firstWeight,
-                        secondWeight,
+                    var sumInSecondUnit = _measurementService.AddQuantitiesWithTarget(
+                        firstQuantity,
+                        secondQuantity,
                         secondUnit
                     );
 
                     DisplayWeightComparisonBox(
-                        firstWeight,
-                        secondWeight,
+                        firstQuantity,
+                        secondQuantity,
                         sumInFirstUnit,
                         sumInSecondUnit
                     );
                     ShowWeightCalculationDetails(
-                        firstWeight,
-                        secondWeight,
+                        firstQuantity,
+                        secondQuantity,
                         firstUnit,
                         sumInFirstUnit
                     );
@@ -467,15 +466,15 @@ namespace QuantityMeasurementApp.UI.Menus
         }
 
         private void DisplayWeightResultBox(
-            WeightQuantity firstWeight,
-            WeightQuantity secondWeight,
-            WeightQuantity sumQuantity
+            GenericQuantity<WeightUnit> firstQuantity,
+            GenericQuantity<WeightUnit> secondQuantity,
+            GenericQuantity<WeightUnit> sumQuantity
         )
         {
             Console.WriteLine("\n╔════════════════════════════════════════╗");
             Console.WriteLine("║           WEIGHT ADDITION RESULT      ║");
             Console.WriteLine("╠════════════════════════════════════════╣");
-            Console.WriteLine($"║  {firstWeight, -8} + {secondWeight, -8}          ║");
+            Console.WriteLine($"║  {firstQuantity, -8} + {secondQuantity, -8}          ║");
             Console.WriteLine("║                                        ║");
             Console.WriteLine(
                 $"║  = {sumQuantity.Value, 10:F6} {sumQuantity.Unit.GetSymbol(), -3}               ║"
@@ -484,16 +483,16 @@ namespace QuantityMeasurementApp.UI.Menus
         }
 
         private void DisplayWeightComparisonBox(
-            WeightQuantity firstWeight,
-            WeightQuantity secondWeight,
-            WeightQuantity sumInFirstUnit,
-            WeightQuantity sumInSecondUnit
+            GenericQuantity<WeightUnit> firstQuantity,
+            GenericQuantity<WeightUnit> secondQuantity,
+            GenericQuantity<WeightUnit> sumInFirstUnit,
+            GenericQuantity<WeightUnit> sumInSecondUnit
         )
         {
             Console.WriteLine("\n╔════════════════════════════════════════╗");
             Console.WriteLine("║         COMPARISON RESULTS             ║");
             Console.WriteLine("╠════════════════════════════════════════╣");
-            Console.WriteLine($"║  {firstWeight, -8} + {secondWeight, -8}          ║");
+            Console.WriteLine($"║  {firstQuantity, -8} + {secondQuantity, -8}          ║");
             Console.WriteLine("╠════════════════════════════════════════╣");
             Console.WriteLine(
                 $"║  In {sumInFirstUnit.Unit.GetName(), -8}: {sumInFirstUnit.Value, 10:F6} {sumInFirstUnit.Unit.GetSymbol(), -3}  ║"
@@ -505,20 +504,20 @@ namespace QuantityMeasurementApp.UI.Menus
         }
 
         private void ShowWeightCalculationDetails(
-            WeightQuantity firstWeight,
-            WeightQuantity secondWeight,
+            GenericQuantity<WeightUnit> firstQuantity,
+            GenericQuantity<WeightUnit> secondQuantity,
             WeightUnit resultUnit,
-            WeightQuantity sumQuantity
+            GenericQuantity<WeightUnit> sumQuantity
         )
         {
-            WeightQuantity firstInKg = firstWeight.ConvertTo(WeightUnit.KILOGRAM);
-            WeightQuantity secondInKg = secondWeight.ConvertTo(WeightUnit.KILOGRAM);
+            var firstInKg = firstQuantity.ConvertTo(WeightUnit.KILOGRAM);
+            var secondInKg = secondQuantity.ConvertTo(WeightUnit.KILOGRAM);
             double totalInKg = firstInKg.Value + secondInKg.Value;
 
             Console.WriteLine("\n┌────────── CALCULATION DETAILS ──────────┐");
             Console.WriteLine("│  Step 1: Convert to base unit (kg)     │");
-            Console.WriteLine($"│    {firstWeight} = {firstInKg.Value, 8:F6} kg           │");
-            Console.WriteLine($"│    {secondWeight} = {secondInKg.Value, 8:F6} kg           │");
+            Console.WriteLine($"│    {firstQuantity} = {firstInKg.Value, 8:F6} kg           │");
+            Console.WriteLine($"│    {secondQuantity} = {secondInKg.Value, 8:F6} kg           │");
             Console.WriteLine("│                                          │");
             Console.WriteLine("│  Step 2: Add in kilograms               │");
             Console.WriteLine(
@@ -530,41 +529,6 @@ namespace QuantityMeasurementApp.UI.Menus
                 $"│    {totalInKg:F6} kg = {sumQuantity.Value:F6} {resultUnit.GetSymbol()}         │"
             );
             Console.WriteLine("└──────────────────────────────────────────┘");
-        }
-
-        private void DisplayWeightVsLengthDemo()
-        {
-            ConsoleHelper.ClearScreen();
-            ConsoleHelper.DisplayAttributedHeader(
-                "WEIGHT VS LENGTH",
-                "Demonstrating Category Incompatibility"
-            );
-
-            Console.WriteLine("\n╔════════════════════════════════════════════════════════╗");
-            Console.WriteLine("║     WEIGHT AND LENGTH ARE DIFFERENT CATEGORIES        ║");
-            Console.WriteLine("╠════════════════════════════════════════════════════════╣");
-            Console.WriteLine("║                                                        ║");
-            Console.WriteLine("║  • 1 kilogram is NOT equal to 1 foot                  ║");
-            Console.WriteLine("║  • 500 grams is NOT equal to 12 inches                ║");
-            Console.WriteLine("║  • Weight and length cannot be compared               ║");
-            Console.WriteLine("║  • They cannot be added or converted                  ║");
-            Console.WriteLine("║                                                        ║");
-            Console.WriteLine("╚════════════════════════════════════════════════════════╝\n");
-
-            // Demo with actual objects - FIXED: Changed FOOT to FEET
-            var weight = new WeightQuantity(1.0, WeightUnit.KILOGRAM);
-            var length = new Quantity(1.0, LengthUnit.FEET);
-
-            Console.WriteLine($"  Weight: {weight}");
-            Console.WriteLine($"  Length: {length}");
-            Console.WriteLine($"  Are they equal? {weight.Equals(length)} (Always false)");
-            Console.WriteLine($"  Same type check: {weight.GetType() == length.GetType()}");
-
-            Console.WriteLine("\n📌 Key Takeaway:");
-            Console.WriteLine("   Different measurement categories are type-safe and");
-            Console.WriteLine("   cannot be mixed. This prevents logical errors.");
-
-            ConsoleHelper.WaitForKeyPress();
         }
     }
 }

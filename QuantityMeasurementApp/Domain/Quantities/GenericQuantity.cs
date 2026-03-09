@@ -1,116 +1,119 @@
+using QuantityMeasurementApp.Core.Abstractions;
 using QuantityMeasurementApp.Core.Exceptions;
-using QuantityMeasurementApp.Domain.Units;
 
 namespace QuantityMeasurementApp.Domain.Quantities
 {
     /// <summary>
-    /// Represents a weight quantity with a value and unit of measurement.
-    /// UC9: Weight measurements with kilogram as base unit.
-    /// This class follows the same pattern as Quantity for length.
+    /// Generic quantity class that works with any measurement unit implementing IMeasurable.
+    /// UC10: Single class replaces both Quantity and WeightQuantity, eliminating code duplication.
     /// </summary>
-    public class WeightQuantity
+    /// <typeparam name="T">The unit type (must implement IMeasurable).</typeparam>
+    public class GenericQuantity<T>
+        where T : class, IMeasurable
     {
         private readonly double _value;
-        private readonly WeightUnit _unit;
+        private readonly T _unit;
 
         /// <summary>
-        /// Initializes a new instance of the WeightQuantity class.
+        /// Initializes a new instance of the GenericQuantity class.
         /// </summary>
-        /// <param name="value">The numeric value of the weight.</param>
+        /// <param name="value">The numeric value of the measurement.</param>
         /// <param name="unit">The unit of measurement.</param>
         /// <exception cref="InvalidValueException">Thrown when value is invalid.</exception>
-        /// <exception cref="InvalidUnitException">Thrown when unit is invalid.</exception>
-        public WeightQuantity(double value, WeightUnit unit)
+        /// <exception cref="ArgumentNullException">Thrown when unit is null.</exception>
+        public GenericQuantity(double value, T unit)
         {
             ValidateValue(value);
-            ValidateUnit(unit);
-
+            _unit = unit ?? throw new ArgumentNullException(nameof(unit));
             _value = value;
-            _unit = unit;
         }
 
         /// <summary>
-        /// Gets the weight value.
+        /// Gets the measurement value.
         /// </summary>
         public double Value => _value;
 
         /// <summary>
-        /// Gets the weight unit.
+        /// Gets the measurement unit.
         /// </summary>
-        public WeightUnit Unit => _unit;
+        public T Unit => _unit;
 
         /// <summary>
-        /// Converts this weight to a target unit.
+        /// Converts this quantity to a target unit.
+        /// UC5: Unit conversion feature for any unit type.
         /// </summary>
         /// <param name="targetUnit">The unit to convert to.</param>
-        /// <returns>A new WeightQuantity in the target unit.</returns>
-        public WeightQuantity ConvertTo(WeightUnit targetUnit)
+        /// <returns>A new GenericQuantity in the target unit.</returns>
+        public GenericQuantity<T> ConvertTo(T targetUnit)
         {
-            ValidateUnit(targetUnit);
+            if (targetUnit == null)
+                throw new ArgumentNullException(nameof(targetUnit));
+
             double valueInBase = _unit.ToBaseUnit(_value);
             double convertedValue = targetUnit.FromBaseUnit(valueInBase);
-            return new WeightQuantity(convertedValue, targetUnit);
+
+            return new GenericQuantity<T>(convertedValue, targetUnit);
         }
 
         /// <summary>
-        /// Converts this weight to a double value in the target unit.
+        /// Converts this quantity to a double value in the target unit.
         /// </summary>
         /// <param name="targetUnit">The unit to convert to.</param>
         /// <returns>The converted value as double.</returns>
-        public double ConvertToDouble(WeightUnit targetUnit)
+        public double ConvertToDouble(T targetUnit)
         {
             return ConvertTo(targetUnit).Value;
         }
 
         /// <summary>
-        /// Adds another weight to this weight.
-        /// UC6 pattern: Result in this weight's unit.
+        /// Adds another quantity to this quantity.
+        /// UC6: Addition with result in this quantity's unit.
         /// </summary>
-        /// <param name="other">The other weight to add.</param>
-        /// <returns>A new WeightQuantity representing the sum.</returns>
+        /// <param name="other">The other quantity to add.</param>
+        /// <returns>A new GenericQuantity representing the sum.</returns>
         /// <exception cref="ArgumentNullException">Thrown when other is null.</exception>
-        public WeightQuantity Add(WeightQuantity other)
+        public GenericQuantity<T> Add(GenericQuantity<T> other)
         {
             if (other == null)
                 throw new ArgumentNullException(nameof(other));
 
-            return Add(other, this._unit);
+            return Add(other, _unit);
         }
 
         /// <summary>
-        /// Adds another weight to this weight with result in specified unit.
-        /// UC7 pattern: Addition with explicit target unit.
+        /// Adds another quantity to this quantity with result in specified unit.
+        /// UC7: Addition with explicit target unit.
         /// </summary>
-        /// <param name="other">The other weight to add.</param>
+        /// <param name="other">The other quantity to add.</param>
         /// <param name="targetUnit">The unit for the result.</param>
-        /// <returns>A new WeightQuantity representing the sum in the target unit.</returns>
+        /// <returns>A new GenericQuantity representing the sum in the target unit.</returns>
         /// <exception cref="ArgumentNullException">Thrown when other is null.</exception>
-        public WeightQuantity Add(WeightQuantity other, WeightUnit targetUnit)
+        public GenericQuantity<T> Add(GenericQuantity<T> other, T targetUnit)
         {
             if (other == null)
                 throw new ArgumentNullException(nameof(other));
-
-            ValidateUnit(targetUnit);
+            if (targetUnit == null)
+                throw new ArgumentNullException(nameof(targetUnit));
 
             double thisInBase = _unit.ToBaseUnit(_value);
             double otherInBase = other._unit.ToBaseUnit(other._value);
             double sumInBase = thisInBase + otherInBase;
             double sumInTarget = targetUnit.FromBaseUnit(sumInBase);
 
-            return new WeightQuantity(sumInTarget, targetUnit);
+            return new GenericQuantity<T>(sumInTarget, targetUnit);
         }
 
         /// <summary>
-        /// Static method to add two weights.
+        /// Static method to add two quantities.
         /// </summary>
-        /// <param name="first">First weight.</param>
-        /// <param name="second">Second weight.</param>
+        /// <param name="first">First quantity.</param>
+        /// <param name="second">Second quantity.</param>
         /// <param name="targetUnit">Target unit for result.</param>
         /// <returns>The sum in target unit.</returns>
-        public static WeightQuantity Add(
-            WeightQuantity first,
-            WeightQuantity second,
-            WeightUnit targetUnit
+        public static GenericQuantity<T> Add(
+            GenericQuantity<T> first,
+            GenericQuantity<T> second,
+            T targetUnit
         )
         {
             if (first == null)
@@ -130,21 +133,22 @@ namespace QuantityMeasurementApp.Domain.Quantities
         /// <param name="secondUnit">Unit of second value.</param>
         /// <param name="targetUnit">Target unit for result.</param>
         /// <returns>The sum in target unit.</returns>
-        public static WeightQuantity Add(
+        public static GenericQuantity<T> Add(
             double firstValue,
-            WeightUnit firstUnit,
+            T firstUnit,
             double secondValue,
-            WeightUnit secondUnit,
-            WeightUnit targetUnit
+            T secondUnit,
+            T targetUnit
         )
         {
-            var firstQuantity = new WeightQuantity(firstValue, firstUnit);
-            var secondQuantity = new WeightQuantity(secondValue, secondUnit);
+            var firstQuantity = new GenericQuantity<T>(firstValue, firstUnit);
+            var secondQuantity = new GenericQuantity<T>(secondValue, secondUnit);
             return firstQuantity.Add(secondQuantity, targetUnit);
         }
 
         /// <summary>
-        /// Determines whether the specified object is equal to the current weight.
+        /// Determines whether the specified object is equal to the current quantity.
+        /// UC1-UC4, UC9: Value-based equality across all units of same category.
         /// </summary>
         /// <param name="other">The object to compare.</param>
         /// <returns>True if equal.</returns>
@@ -152,14 +156,18 @@ namespace QuantityMeasurementApp.Domain.Quantities
         {
             if (ReferenceEquals(this, other))
                 return true;
-            if (other is null || GetType() != other.GetType())
+            if (other is null)
                 return false;
 
-            WeightQuantity otherWeight = (WeightQuantity)other;
-            double thisInBase = _unit.ToBaseUnit(_value);
-            double otherInBase = otherWeight._unit.ToBaseUnit(otherWeight._value);
+            if (other.GetType() != GetType())
+                return false;
 
-            return WeightUnitExtensions.AreApproximatelyEqual(thisInBase, otherInBase);
+            var otherQuantity = (GenericQuantity<T>)other;
+
+            double thisInBase = _unit.ToBaseUnit(_value);
+            double otherInBase = otherQuantity._unit.ToBaseUnit(otherQuantity._value);
+
+            return AreApproximatelyEqual(thisInBase, otherInBase);
         }
 
         /// <summary>
@@ -173,20 +181,12 @@ namespace QuantityMeasurementApp.Domain.Quantities
         }
 
         /// <summary>
-        /// Returns a string representation of the weight.
+        /// Returns a string representation of the quantity.
         /// </summary>
         /// <returns>String in format "{value} {symbol}".</returns>
         public override string ToString()
         {
             return $"{_value} {_unit.GetSymbol()}";
-        }
-
-        private static void ValidateUnit(WeightUnit unit)
-        {
-            if (!Enum.IsDefined(typeof(WeightUnit), unit))
-            {
-                throw new InvalidUnitException(unit);
-            }
         }
 
         private static void ValidateValue(double value)
@@ -195,6 +195,11 @@ namespace QuantityMeasurementApp.Domain.Quantities
             {
                 throw new InvalidValueException(value);
             }
+        }
+
+        private static bool AreApproximatelyEqual(double value1, double value2)
+        {
+            return Math.Abs(value1 - value2) < 0.000001;
         }
     }
 }

@@ -1,141 +1,95 @@
+using QuantityMeasurementApp.Core.Abstractions;
 using QuantityMeasurementApp.Core.Exceptions;
 
 namespace QuantityMeasurementApp.Domain.Units
 {
     /// <summary>
-    /// Enum representing different weight units with their properties.
-    /// UC9: Weight measurements with kilogram as base unit.
+    /// Class representing weight units.
+    /// UC10: Implements IMeasurable interface for standardized unit behavior.
     /// </summary>
-    public enum WeightUnit
+    public class WeightUnit : IMeasurable
     {
-        /// <summary>Kilogram - base unit for weight measurements.</summary>
-        KILOGRAM,
-
-        /// <summary>Gram - 1 kilogram = 1000 grams.</summary>
-        GRAM,
-
-        /// <summary>Pound - 1 pound ≈ 0.453592 kilograms.</summary>
-        POUND,
-    }
-
-    /// <summary>
-    /// Extension methods for WeightUnit providing conversion functionality.
-    /// UC9: All weight conversion logic is centralized here.
-    /// </summary>
-    public static class WeightUnitExtensions
-    {
-        // Tolerance for floating point comparisons
-        private const double EPSILON = 0.000001;
-
-        // Conversion factors to kilograms (base unit)
-        private static readonly double[] ToKilogramConversionFactors = new double[]
+        // Private constructor to prevent direct instantiation
+        private WeightUnit(string name, string symbol, double conversionFactor)
         {
-            1.0, // KILOGRAM to KILOGRAM
-            0.001, // GRAM to KILOGRAM (1 g = 0.001 kg)
-            0.453592, // POUND to KILOGRAM (1 lb ≈ 0.453592 kg)
-        };
-
-        /// <summary>
-        /// Gets the conversion factor for this unit to the base unit (kilogram).
-        /// </summary>
-        /// <param name="unit">The weight unit.</param>
-        /// <returns>The conversion factor to kilograms.</returns>
-        /// <exception cref="InvalidUnitException">Thrown when unit is invalid.</exception>
-        public static double GetConversionFactor(this WeightUnit unit)
-        {
-            int index = (int)unit;
-            if (index >= 0 && index < ToKilogramConversionFactors.Length)
-            {
-                return ToKilogramConversionFactors[index];
-            }
-            throw new InvalidUnitException(unit);
+            Name = name;
+            Symbol = symbol;
+            ConversionFactor = conversionFactor;
         }
 
         /// <summary>
-        /// Converts a value from this unit to the base unit (kilogram).
+        /// Gets the name of the unit.
         /// </summary>
-        /// <param name="unit">The source unit.</param>
+        public string Name { get; }
+
+        /// <summary>
+        /// Gets the symbol of the unit.
+        /// </summary>
+        public string Symbol { get; }
+
+        /// <summary>
+        /// Gets the conversion factor to the base unit (kilogram).
+        /// </summary>
+        public double ConversionFactor { get; }
+
+        // Static instances for each weight unit
+        public static readonly WeightUnit KILOGRAM = new WeightUnit("kilograms", "kg", 1.0);
+        public static readonly WeightUnit GRAM = new WeightUnit("grams", "g", 0.001);
+        public static readonly WeightUnit POUND = new WeightUnit("pounds", "lb", 0.45359237);
+
+        /// <summary>
+        /// Gets all available weight units.
+        /// </summary>
+        public static WeightUnit[] GetAllUnits() => new[] { KILOGRAM, GRAM, POUND };
+
+        /// <summary>
+        /// Gets the conversion factor for this unit to the base unit (kilogram).
+        /// Implements IMeasurable.GetConversionFactor.
+        /// </summary>
+        public double GetConversionFactor() => ConversionFactor;
+
+        /// <summary>
+        /// Converts a value from this unit to the base unit (kilogram).
+        /// Implements IMeasurable.ToBaseUnit.
+        /// </summary>
         /// <param name="value">The value to convert.</param>
         /// <returns>The value converted to kilograms.</returns>
         /// <exception cref="InvalidValueException">Thrown when value is invalid.</exception>
-        public static double ToBaseUnit(this WeightUnit unit, double value)
+        public double ToBaseUnit(double value)
         {
             ValidateValue(value);
-            return value * unit.GetConversionFactor();
+            return value * ConversionFactor;
         }
 
         /// <summary>
         /// Converts a value from the base unit (kilogram) to this unit.
+        /// Implements IMeasurable.FromBaseUnit.
         /// </summary>
-        /// <param name="unit">The target unit.</param>
         /// <param name="valueInBaseUnit">The value in kilograms to convert.</param>
         /// <returns>The value converted from kilograms to this unit.</returns>
         /// <exception cref="InvalidValueException">Thrown when value is invalid.</exception>
-        public static double FromBaseUnit(this WeightUnit unit, double valueInBaseUnit)
+        public double FromBaseUnit(double valueInBaseUnit)
         {
             ValidateValue(valueInBaseUnit);
-            return valueInBaseUnit / unit.GetConversionFactor();
+            return valueInBaseUnit / ConversionFactor;
         }
 
         /// <summary>
-        /// Directly converts a value from one weight unit to another.
+        /// Gets the symbol for the unit.
+        /// Implements IMeasurable.GetSymbol.
         /// </summary>
-        /// <param name="sourceUnit">The source unit.</param>
-        /// <param name="targetUnit">The target unit.</param>
-        /// <param name="value">The value to convert.</param>
-        /// <returns>The converted value.</returns>
-        public static double ConvertTo(
-            this WeightUnit sourceUnit,
-            WeightUnit targetUnit,
-            double value
-        )
-        {
-            double valueInBase = sourceUnit.ToBaseUnit(value);
-            return targetUnit.FromBaseUnit(valueInBase);
-        }
+        public string GetSymbol() => Symbol;
 
         /// <summary>
-        /// Gets the symbol for the weight unit.
+        /// Gets the full name of the unit.
+        /// Implements IMeasurable.GetName.
         /// </summary>
-        /// <param name="unit">The weight unit.</param>
-        /// <returns>The unit symbol.</returns>
-        public static string GetSymbol(this WeightUnit unit)
-        {
-            return unit switch
-            {
-                WeightUnit.KILOGRAM => "kg",
-                WeightUnit.GRAM => "g",
-                WeightUnit.POUND => "lb",
-                _ => unit.ToString().ToLower(),
-            };
-        }
+        public string GetName() => Name;
 
         /// <summary>
-        /// Gets the full name of the weight unit.
+        /// Returns a string representation of the unit.
         /// </summary>
-        /// <param name="unit">The weight unit.</param>
-        /// <returns>The full unit name.</returns>
-        public static string GetName(this WeightUnit unit)
-        {
-            return unit switch
-            {
-                WeightUnit.KILOGRAM => "kilograms",
-                WeightUnit.GRAM => "grams",
-                WeightUnit.POUND => "pounds",
-                _ => unit.ToString().ToLower(),
-            };
-        }
-
-        /// <summary>
-        /// Compares two double values with tolerance.
-        /// </summary>
-        /// <param name="value1">First value.</param>
-        /// <param name="value2">Second value.</param>
-        /// <returns>True if values are approximately equal.</returns>
-        public static bool AreApproximatelyEqual(double value1, double value2)
-        {
-            return Math.Abs(value1 - value2) < EPSILON;
-        }
+        public override string ToString() => $"{Name} ({Symbol})";
 
         /// <summary>
         /// Validates that a value is finite.
@@ -149,5 +103,22 @@ namespace QuantityMeasurementApp.Domain.Units
                 throw new InvalidValueException(value);
             }
         }
+
+        /// <summary>
+        /// Determines whether the specified object is equal to the current unit.
+        /// </summary>
+        public override bool Equals(object? obj)
+        {
+            if (obj is not WeightUnit other)
+                return false;
+            return Name == other.Name
+                && Symbol == other.Symbol
+                && Math.Abs(ConversionFactor - other.ConversionFactor) < 0.000001;
+        }
+
+        /// <summary>
+        /// Serves as the default hash function.
+        /// </summary>
+        public override int GetHashCode() => HashCode.Combine(Name, Symbol, ConversionFactor);
     }
 }

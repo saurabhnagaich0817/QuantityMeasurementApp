@@ -1,149 +1,100 @@
+using QuantityMeasurementApp.Core.Abstractions;
 using QuantityMeasurementApp.Core.Exceptions;
 
 namespace QuantityMeasurementApp.Domain.Units
 {
     /// <summary>
-    /// Enum representing different length units with their properties.
-    /// UC3, UC4: Extended unit support with yards and centimeters.
-    /// UC8: Standalone unit enum with conversion responsibility.
+    /// Class representing length units.
+    /// UC10: Implements IMeasurable interface for standardized unit behavior.
     /// </summary>
-    public enum LengthUnit
+    public class LengthUnit : IMeasurable
     {
-        /// <summary>Feet - base unit for length measurements.</summary>
-        FEET,
-
-        /// <summary>Inches - 1 foot = 12 inches.</summary>
-        INCH,
-
-        /// <summary>Yards - 1 yard = 3 feet.</summary>
-        YARD,
-
-        /// <summary>Centimeters - 1 cm = 0.393700787 inches.</summary>
-        CENTIMETER,
-    }
-
-    /// <summary>
-    /// Extension methods for LengthUnit providing conversion functionality.
-    /// UC8: All conversion logic is centralized here.
-    /// </summary>
-    public static class LengthUnitExtensions
-    {
-        // Tolerance for floating point comparisons
-        private const double EPSILON = 0.000001;
-
-        // Conversion factors to feet (base unit)
-        private static readonly double[] ToFeetConversionFactors = new double[]
+        // Private constructor to prevent direct instantiation
+        private LengthUnit(string name, string symbol, double conversionFactor)
         {
-            1.0, // FEET to FEET
-            1.0 / 12.0, // INCH to FEET
-            3.0, // YARD to FEET
-            1.0 / (2.54 * 12.0), // CENTIMETER to FEET
-        };
-
-        /// <summary>
-        /// Gets the conversion factor for this unit to the base unit (feet).
-        /// </summary>
-        /// <param name="unit">The length unit.</param>
-        /// <returns>The conversion factor to feet.</returns>
-        /// <exception cref="InvalidUnitException">Thrown when unit is invalid.</exception>
-        public static double GetConversionFactor(this LengthUnit unit)
-        {
-            int index = (int)unit;
-            if (index >= 0 && index < ToFeetConversionFactors.Length)
-            {
-                return ToFeetConversionFactors[index];
-            }
-            throw new InvalidUnitException(unit);
+            Name = name;
+            Symbol = symbol;
+            ConversionFactor = conversionFactor;
         }
 
         /// <summary>
-        /// Converts a value from this unit to the base unit (feet).
+        /// Gets the name of the unit.
         /// </summary>
-        /// <param name="unit">The source unit.</param>
+        public string Name { get; }
+
+        /// <summary>
+        /// Gets the symbol of the unit.
+        /// </summary>
+        public string Symbol { get; }
+
+        /// <summary>
+        /// Gets the conversion factor to the base unit (feet).
+        /// </summary>
+        public double ConversionFactor { get; }
+
+        // Static instances for each length unit
+        public static readonly LengthUnit FEET = new LengthUnit("feet", "ft", 1.0);
+        public static readonly LengthUnit INCH = new LengthUnit("inches", "in", 1.0 / 12.0);
+        public static readonly LengthUnit YARD = new LengthUnit("yards", "yd", 3.0);
+        public static readonly LengthUnit CENTIMETER = new LengthUnit(
+            "centimeters",
+            "cm",
+            1.0 / (2.54 * 12.0)
+        );
+
+        /// <summary>
+        /// Gets all available length units.
+        /// </summary>
+        public static LengthUnit[] GetAllUnits() => new[] { FEET, INCH, YARD, CENTIMETER };
+
+        /// <summary>
+        /// Gets the conversion factor for this unit to the base unit (feet).
+        /// Implements IMeasurable.GetConversionFactor.
+        /// </summary>
+        public double GetConversionFactor() => ConversionFactor;
+
+        /// <summary>
+        /// Converts a value from this unit to the base unit (feet).
+        /// Implements IMeasurable.ToBaseUnit.
+        /// </summary>
         /// <param name="value">The value to convert.</param>
         /// <returns>The value converted to feet.</returns>
         /// <exception cref="InvalidValueException">Thrown when value is invalid.</exception>
-        public static double ToBaseUnit(this LengthUnit unit, double value)
+        public double ToBaseUnit(double value)
         {
             ValidateValue(value);
-            return value * unit.GetConversionFactor();
+            return value * ConversionFactor;
         }
 
         /// <summary>
         /// Converts a value from the base unit (feet) to this unit.
+        /// Implements IMeasurable.FromBaseUnit.
         /// </summary>
-        /// <param name="unit">The target unit.</param>
         /// <param name="valueInBaseUnit">The value in feet to convert.</param>
         /// <returns>The value converted from feet to this unit.</returns>
         /// <exception cref="InvalidValueException">Thrown when value is invalid.</exception>
-        public static double FromBaseUnit(this LengthUnit unit, double valueInBaseUnit)
+        public double FromBaseUnit(double valueInBaseUnit)
         {
             ValidateValue(valueInBaseUnit);
-            return valueInBaseUnit / unit.GetConversionFactor();
-        }
-
-        /// <summary>
-        /// Directly converts a value from one unit to another.
-        /// UC5: Unit-to-unit conversion.
-        /// </summary>
-        /// <param name="sourceUnit">The source unit.</param>
-        /// <param name="targetUnit">The target unit.</param>
-        /// <param name="value">The value to convert.</param>
-        /// <returns>The converted value.</returns>
-        public static double ConvertTo(
-            this LengthUnit sourceUnit,
-            LengthUnit targetUnit,
-            double value
-        )
-        {
-            double valueInBase = sourceUnit.ToBaseUnit(value);
-            return targetUnit.FromBaseUnit(valueInBase);
+            return valueInBaseUnit / ConversionFactor;
         }
 
         /// <summary>
         /// Gets the symbol for the unit.
+        /// Implements IMeasurable.GetSymbol.
         /// </summary>
-        /// <param name="unit">The length unit.</param>
-        /// <returns>The unit symbol.</returns>
-        public static string GetSymbol(this LengthUnit unit)
-        {
-            return unit switch
-            {
-                LengthUnit.FEET => "ft",
-                LengthUnit.INCH => "in",
-                LengthUnit.YARD => "yd",
-                LengthUnit.CENTIMETER => "cm",
-                _ => unit.ToString().ToLower(),
-            };
-        }
+        public string GetSymbol() => Symbol;
 
         /// <summary>
         /// Gets the full name of the unit.
+        /// Implements IMeasurable.GetName.
         /// </summary>
-        /// <param name="unit">The length unit.</param>
-        /// <returns>The full unit name.</returns>
-        public static string GetName(this LengthUnit unit)
-        {
-            return unit switch
-            {
-                LengthUnit.FEET => "feet",
-                LengthUnit.INCH => "inches",
-                LengthUnit.YARD => "yards",
-                LengthUnit.CENTIMETER => "centimeters",
-                _ => unit.ToString().ToLower(),
-            };
-        }
+        public string GetName() => Name;
 
         /// <summary>
-        /// Compares two double values with tolerance.
+        /// Returns a string representation of the unit.
         /// </summary>
-        /// <param name="value1">First value.</param>
-        /// <param name="value2">Second value.</param>
-        /// <returns>True if values are approximately equal.</returns>
-        public static bool AreApproximatelyEqual(double value1, double value2)
-        {
-            return Math.Abs(value1 - value2) < EPSILON;
-        }
+        public override string ToString() => $"{Name} ({Symbol})";
 
         /// <summary>
         /// Validates that a value is finite.
@@ -157,5 +108,22 @@ namespace QuantityMeasurementApp.Domain.Units
                 throw new InvalidValueException(value);
             }
         }
+
+        /// <summary>
+        /// Determines whether the specified object is equal to the current unit.
+        /// </summary>
+        public override bool Equals(object? obj)
+        {
+            if (obj is not LengthUnit other)
+                return false;
+            return Name == other.Name
+                && Symbol == other.Symbol
+                && Math.Abs(ConversionFactor - other.ConversionFactor) < 0.000001;
+        }
+
+        /// <summary>
+        /// Serves as the default hash function.
+        /// </summary>
+        public override int GetHashCode() => HashCode.Combine(Name, Symbol, ConversionFactor);
     }
 }

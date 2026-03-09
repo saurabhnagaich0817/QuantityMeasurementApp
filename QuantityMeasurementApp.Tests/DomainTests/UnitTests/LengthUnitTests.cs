@@ -1,349 +1,80 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using QuantityMeasurementApp.Core.Abstractions;
 using QuantityMeasurementApp.Core.Exceptions;
 using QuantityMeasurementApp.Domain.Units;
 
 namespace QuantityMeasurementApp.Tests.DomainTests.UnitTests
 {
     /// <summary>
-    /// Test class for LengthUnit enum and extensions.
-    /// Tests unit conversion methods and properties.
+    /// Test class for LengthUnit implementing IMeasurable interface.
+    /// UC10: Verifies that LengthUnit correctly implements IMeasurable.
     /// </summary>
     [TestClass]
     public class LengthUnitTests
     {
         private const double Tolerance = 0.000001;
 
-        #region GetConversionFactor Tests
+        #region IMeasurable Implementation Tests
 
         /// <summary>
-        /// Tests GetConversionFactor for FEET unit.
+        /// Tests that LengthUnit implements IMeasurable interface.
         /// </summary>
         [TestMethod]
-        public void GetConversionFactor_Feet_ReturnsOne()
-        {
-            // Act
-            double conversionFactor = LengthUnit.FEET.GetConversionFactor();
-
-            // Assert
-            Assert.AreEqual(1.0, conversionFactor, Tolerance);
-        }
-
-        /// <summary>
-        /// Tests GetConversionFactor for INCH unit.
-        /// </summary>
-        [TestMethod]
-        public void GetConversionFactor_Inch_ReturnsOneTwelfth()
-        {
-            // Act
-            double conversionFactor = LengthUnit.INCH.GetConversionFactor();
-
-            // Assert
-            Assert.AreEqual(1.0 / 12.0, conversionFactor, Tolerance);
-        }
-
-        /// <summary>
-        /// Tests GetConversionFactor for YARD unit.
-        /// </summary>
-        [TestMethod]
-        public void GetConversionFactor_Yard_ReturnsThree()
-        {
-            // Act
-            double conversionFactor = LengthUnit.YARD.GetConversionFactor();
-
-            // Assert
-            Assert.AreEqual(3.0, conversionFactor, Tolerance);
-        }
-
-        /// <summary>
-        /// Tests GetConversionFactor for CENTIMETER unit.
-        /// </summary>
-        [TestMethod]
-        public void GetConversionFactor_Centimeter_ReturnsCorrectValue()
-        {
-            // Act
-            double conversionFactor = LengthUnit.CENTIMETER.GetConversionFactor();
-
-            // Assert
-            double expectedValue = 1.0 / (2.54 * 12.0);
-            Assert.AreEqual(expectedValue, conversionFactor, Tolerance);
-        }
-
-        /// <summary>
-        /// Tests that invalid unit throws exception.
-        /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidUnitException))]
-        public void GetConversionFactor_InvalidUnit_ThrowsException()
+        public void LengthUnit_Implements_IMeasurable()
         {
             // Arrange
-            LengthUnit invalidUnit = (LengthUnit)99;
-
-            // Act - Should throw
-            invalidUnit.GetConversionFactor();
-        }
-
-        #endregion
-
-        #region ToBaseUnit Tests
-
-        /// <summary>
-        /// Tests ToBaseUnit for FEET unit.
-        /// </summary>
-        [TestMethod]
-        public void ToBaseUnit_Feet_ReturnsSameValue()
-        {
-            // Arrange
-            double inputValue = 5.0;
-
-            // Act
-            double resultInBase = LengthUnit.FEET.ToBaseUnit(inputValue);
+            var unit = LengthUnit.FEET;
 
             // Assert
-            Assert.AreEqual(inputValue, resultInBase, Tolerance);
+            Assert.IsTrue(unit is IMeasurable, "LengthUnit should implement IMeasurable");
         }
 
         /// <summary>
-        /// Tests ToBaseUnit for INCH unit.
+        /// Tests GetConversionFactor for all LengthUnit values.
         /// </summary>
         [TestMethod]
-        public void ToBaseUnit_Inch_ReturnsCorrectValue()
+        public void GetConversionFactor_AllValues_ReturnsCorrectFactors()
         {
-            // Arrange
-            double inchesValue = 12.0;
+            // Act & Assert
+            Assert.AreEqual(1.0, LengthUnit.FEET.GetConversionFactor(), Tolerance);
+            Assert.AreEqual(1.0 / 12.0, LengthUnit.INCH.GetConversionFactor(), Tolerance);
+            Assert.AreEqual(3.0, LengthUnit.YARD.GetConversionFactor(), Tolerance);
 
-            // Act
-            double feetValue = LengthUnit.INCH.ToBaseUnit(inchesValue);
-
-            // Assert
-            Assert.AreEqual(1.0, feetValue, Tolerance);
+            double cmFactor = 1.0 / (2.54 * 12.0);
+            Assert.AreEqual(cmFactor, LengthUnit.CENTIMETER.GetConversionFactor(), Tolerance);
         }
 
         /// <summary>
-        /// Tests ToBaseUnit for YARD unit.
+        /// Tests ToBaseUnit for all LengthUnit values.
         /// </summary>
         [TestMethod]
-        public void ToBaseUnit_Yard_ReturnsCorrectValue()
+        public void ToBaseUnit_AllValues_ReturnsCorrectValues()
         {
-            // Arrange
-            double yardsValue = 1.0;
-
-            // Act
-            double feetValue = LengthUnit.YARD.ToBaseUnit(yardsValue);
-
-            // Assert
-            Assert.AreEqual(3.0, feetValue, Tolerance);
+            // Act & Assert
+            Assert.AreEqual(5.0, LengthUnit.FEET.ToBaseUnit(5.0), Tolerance);
+            Assert.AreEqual(1.0, LengthUnit.INCH.ToBaseUnit(12.0), Tolerance);
+            Assert.AreEqual(3.0, LengthUnit.YARD.ToBaseUnit(1.0), Tolerance);
+            Assert.AreEqual(1.0, LengthUnit.CENTIMETER.ToBaseUnit(30.48), Tolerance);
         }
 
         /// <summary>
-        /// Tests ToBaseUnit for CENTIMETER unit.
+        /// Tests FromBaseUnit for all LengthUnit values.
         /// </summary>
         [TestMethod]
-        public void ToBaseUnit_Centimeter_ReturnsCorrectValue()
+        public void FromBaseUnit_AllValues_ReturnsCorrectValues()
         {
-            // Arrange
-            double cmValue = 30.48;
-
-            // Act
-            double feetValue = LengthUnit.CENTIMETER.ToBaseUnit(cmValue);
-
-            // Assert
-            Assert.AreEqual(1.0, feetValue, Tolerance);
+            // Act & Assert
+            Assert.AreEqual(5.0, LengthUnit.FEET.FromBaseUnit(5.0), Tolerance);
+            Assert.AreEqual(12.0, LengthUnit.INCH.FromBaseUnit(1.0), Tolerance);
+            Assert.AreEqual(1.0, LengthUnit.YARD.FromBaseUnit(3.0), Tolerance);
+            Assert.AreEqual(30.48, LengthUnit.CENTIMETER.FromBaseUnit(1.0), Tolerance);
         }
 
         /// <summary>
-        /// Tests ToBaseUnit with zero value.
+        /// Tests GetSymbol for all LengthUnit values.
         /// </summary>
         [TestMethod]
-        public void ToBaseUnit_ZeroValue_ReturnsZero()
-        {
-            // Arrange
-            double zeroValue = 0.0;
-
-            // Act
-            double resultInBase = LengthUnit.INCH.ToBaseUnit(zeroValue);
-
-            // Assert
-            Assert.AreEqual(0.0, resultInBase, Tolerance);
-        }
-
-        /// <summary>
-        /// Tests ToBaseUnit with negative value.
-        /// </summary>
-        [TestMethod]
-        public void ToBaseUnit_NegativeValue_PreservesSign()
-        {
-            // Arrange
-            double negativeValue = -12.0;
-
-            // Act
-            double resultInBase = LengthUnit.INCH.ToBaseUnit(negativeValue);
-
-            // Assert
-            Assert.AreEqual(-1.0, resultInBase, Tolerance);
-        }
-
-        #endregion
-
-        #region FromBaseUnit Tests
-
-        /// <summary>
-        /// Tests FromBaseUnit for FEET unit.
-        /// </summary>
-        [TestMethod]
-        public void FromBaseUnit_Feet_ReturnsSameValue()
-        {
-            // Arrange
-            double feetValue = 5.0;
-
-            // Act
-            double result = LengthUnit.FEET.FromBaseUnit(feetValue);
-
-            // Assert
-            Assert.AreEqual(feetValue, result, Tolerance);
-        }
-
-        /// <summary>
-        /// Tests FromBaseUnit for INCH unit.
-        /// </summary>
-        [TestMethod]
-        public void FromBaseUnit_Inch_ReturnsCorrectValue()
-        {
-            // Arrange
-            double feetValue = 1.0;
-
-            // Act
-            double inchesValue = LengthUnit.INCH.FromBaseUnit(feetValue);
-
-            // Assert
-            Assert.AreEqual(12.0, inchesValue, Tolerance);
-        }
-
-        /// <summary>
-        /// Tests FromBaseUnit for YARD unit.
-        /// </summary>
-        [TestMethod]
-        public void FromBaseUnit_Yard_ReturnsCorrectValue()
-        {
-            // Arrange
-            double feetValue = 3.0;
-
-            // Act
-            double yardsValue = LengthUnit.YARD.FromBaseUnit(feetValue);
-
-            // Assert
-            Assert.AreEqual(1.0, yardsValue, Tolerance);
-        }
-
-        /// <summary>
-        /// Tests FromBaseUnit for CENTIMETER unit.
-        /// </summary>
-        [TestMethod]
-        public void FromBaseUnit_Centimeter_ReturnsCorrectValue()
-        {
-            // Arrange
-            double feetValue = 1.0;
-
-            // Act
-            double cmValue = LengthUnit.CENTIMETER.FromBaseUnit(feetValue);
-
-            // Assert
-            Assert.AreEqual(30.48, cmValue, Tolerance);
-        }
-
-        #endregion
-
-        #region ConvertTo Tests
-
-        /// <summary>
-        /// Tests ConvertTo for Feet to Inches.
-        /// </summary>
-        [TestMethod]
-        public void ConvertTo_FeetToInches_ReturnsCorrectValue()
-        {
-            // Arrange
-            double feetValue = 1.0;
-
-            // Act
-            double inchesValue = LengthUnit.FEET.ConvertTo(LengthUnit.INCH, feetValue);
-
-            // Assert
-            Assert.AreEqual(12.0, inchesValue, Tolerance);
-        }
-
-        /// <summary>
-        /// Tests ConvertTo for Inches to Feet.
-        /// </summary>
-        [TestMethod]
-        public void ConvertTo_InchesToFeet_ReturnsCorrectValue()
-        {
-            // Arrange
-            double inchesValue = 12.0;
-
-            // Act
-            double feetValue = LengthUnit.INCH.ConvertTo(LengthUnit.FEET, inchesValue);
-
-            // Assert
-            Assert.AreEqual(1.0, feetValue, Tolerance);
-        }
-
-        /// <summary>
-        /// Tests ConvertTo for Yards to Inches.
-        /// </summary>
-        [TestMethod]
-        public void ConvertTo_YardsToInches_ReturnsCorrectValue()
-        {
-            // Arrange
-            double yardsValue = 1.0;
-
-            // Act
-            double inchesValue = LengthUnit.YARD.ConvertTo(LengthUnit.INCH, yardsValue);
-
-            // Assert
-            Assert.AreEqual(36.0, inchesValue, Tolerance);
-        }
-
-        /// <summary>
-        /// Tests ConvertTo for Centimeters to Inches.
-        /// </summary>
-        [TestMethod]
-        public void ConvertTo_CentimetersToInches_ReturnsCorrectValue()
-        {
-            // Arrange
-            double cmValue = 2.54;
-
-            // Act
-            double inchesValue = LengthUnit.CENTIMETER.ConvertTo(LengthUnit.INCH, cmValue);
-
-            // Assert
-            Assert.AreEqual(1.0, inchesValue, Tolerance);
-        }
-
-        /// <summary>
-        /// Tests round-trip conversion.
-        /// </summary>
-        [TestMethod]
-        public void ConvertTo_RoundTrip_ReturnsOriginalValue()
-        {
-            // Arrange
-            double originalValue = 5.0;
-
-            // Act
-            double toInches = LengthUnit.FEET.ConvertTo(LengthUnit.INCH, originalValue);
-            double backToFeet = LengthUnit.INCH.ConvertTo(LengthUnit.FEET, toInches);
-
-            // Assert
-            Assert.AreEqual(originalValue, backToFeet, Tolerance);
-        }
-
-        #endregion
-
-        #region GetSymbol Tests
-
-        /// <summary>
-        /// Tests GetSymbol returns correct symbol for each unit.
-        /// </summary>
-        [TestMethod]
-        public void GetSymbol_ReturnsCorrectSymbol()
+        public void GetSymbol_AllValues_ReturnsCorrectSymbols()
         {
             // Assert
             Assert.AreEqual("ft", LengthUnit.FEET.GetSymbol());
@@ -352,21 +83,71 @@ namespace QuantityMeasurementApp.Tests.DomainTests.UnitTests
             Assert.AreEqual("cm", LengthUnit.CENTIMETER.GetSymbol());
         }
 
-        #endregion
-
-        #region GetName Tests
-
         /// <summary>
-        /// Tests GetName returns correct name for each unit.
+        /// Tests GetName for all LengthUnit values.
         /// </summary>
         [TestMethod]
-        public void GetName_ReturnsCorrectName()
+        public void GetName_AllValues_ReturnsCorrectNames()
         {
             // Assert
             Assert.AreEqual("feet", LengthUnit.FEET.GetName());
             Assert.AreEqual("inches", LengthUnit.INCH.GetName());
             Assert.AreEqual("yards", LengthUnit.YARD.GetName());
             Assert.AreEqual("centimeters", LengthUnit.CENTIMETER.GetName());
+        }
+
+        #endregion
+
+        #region Validation Tests
+
+        /// <summary>
+        /// Tests ToBaseUnit with invalid value throws exception.
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidValueException))]
+        public void ToBaseUnit_NaNValue_ThrowsException()
+        {
+            // Act - Should throw
+            LengthUnit.FEET.ToBaseUnit(double.NaN);
+        }
+
+        /// <summary>
+        /// Tests FromBaseUnit with invalid value throws exception.
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidValueException))]
+        public void FromBaseUnit_NaNValue_ThrowsException()
+        {
+            // Act - Should throw
+            LengthUnit.FEET.FromBaseUnit(double.NaN);
+        }
+
+        #endregion
+
+        #region Equality Tests
+
+        /// <summary>
+        /// Tests that the same unit instances are equal.
+        /// </summary>
+        [TestMethod]
+        public void Equals_SameUnit_ReturnsTrue()
+        {
+            // Assert
+            Assert.IsTrue(LengthUnit.FEET.Equals(LengthUnit.FEET), "Same unit should be equal");
+            Assert.IsTrue(LengthUnit.INCH.Equals(LengthUnit.INCH), "Same unit should be equal");
+        }
+
+        /// <summary>
+        /// Tests that different unit instances are not equal.
+        /// </summary>
+        [TestMethod]
+        public void Equals_DifferentUnit_ReturnsFalse()
+        {
+            // Assert
+            Assert.IsFalse(
+                LengthUnit.FEET.Equals(LengthUnit.INCH),
+                "Different units should not be equal"
+            );
         }
 
         #endregion

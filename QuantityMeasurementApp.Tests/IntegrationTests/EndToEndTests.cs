@@ -6,115 +6,148 @@ using QuantityMeasurementApp.Services;
 namespace QuantityMeasurementApp.Tests.IntegrationTests
 {
     /// <summary>
-    /// Integration tests covering end-to-end scenarios.
+    /// Integration tests covering end-to-end scenarios with generic implementation.
+    /// UC10: Tests complete workflows across all measurement categories.
     /// </summary>
     [TestClass]
     public class EndToEndTests
     {
-        private QuantityMeasurementService _measurementService = null!;
+        private GenericMeasurementService _measurementService = null!;
         private const double Tolerance = 0.000001;
+        private const double PoundTolerance = 0.001;
 
         [TestInitialize]
         public void Setup()
         {
-            _measurementService = new QuantityMeasurementService();
+            _measurementService = new GenericMeasurementService();
         }
 
         /// <summary>
-        /// Tests a complete workflow: create quantities, convert, add, compare.
+        /// Tests a complete length workflow: create, convert, add, compare.
         /// </summary>
         [TestMethod]
-        public void CompleteWorkflow_AllOperations_WorkCorrectly()
+        public void CompleteWorkflow_Length_AllOperations_WorkCorrectly()
         {
             // Step 1: Create quantities from string inputs
-            var firstQuantity = _measurementService.CreateQuantityFromString("2", LengthUnit.YARD);
-            var secondQuantity = _measurementService.CreateQuantityFromString(
-                "36",
-                LengthUnit.INCH
-            );
+            var firstLength = _measurementService.CreateQuantityFromString("2", LengthUnit.YARD);
+            var secondLength = _measurementService.CreateQuantityFromString("36", LengthUnit.INCH);
 
-            Assert.IsNotNull(firstQuantity, "First quantity should not be null");
-            Assert.IsNotNull(secondQuantity, "Second quantity should not be null");
+            Assert.IsNotNull(firstLength, "First length should not be null");
+            Assert.IsNotNull(secondLength, "Second length should not be null");
 
-            // Step 2: Convert first quantity to feet
-            var firstQuantityInFeet = firstQuantity!.ConvertTo(LengthUnit.FEET);
-            Assert.AreEqual(
-                6.0,
-                firstQuantityInFeet.Value,
-                Tolerance,
-                "2 yards should equal 6 feet"
-            );
+            // Step 2: Convert first length to feet
+            var firstLengthInFeet = firstLength!.ConvertTo(LengthUnit.FEET);
+            Assert.AreEqual(6.0, firstLengthInFeet.Value, Tolerance, "2 yards should equal 6 feet");
 
-            // Step 3: Add both quantities and get result in yards
+            // Step 3: Add both lengths and get result in yards
             var sumInYards = _measurementService.AddQuantitiesWithTarget(
-                firstQuantity,
-                secondQuantity!,
+                firstLength,
+                secondLength!,
                 LengthUnit.YARD
             );
 
             // 2 yd + 36 in = 2 yd + 1 yd = 3 yd
             Assert.AreEqual(3.0, sumInYards.Value, Tolerance, "2 yd + 36 in should equal 3 yd");
 
-            // Step 4: Compare with expected quantity
-            var expectedQuantity = new Quantity(3.0, LengthUnit.YARD);
-            bool areQuantitiesEqual = _measurementService.AreQuantitiesEqual(
-                sumInYards,
-                expectedQuantity
-            );
+            // Step 4: Compare with expected length
+            var expectedLength = new GenericQuantity<LengthUnit>(3.0, LengthUnit.YARD);
+            bool areEqual = _measurementService.AreQuantitiesEqual(sumInYards, expectedLength);
 
-            Assert.IsTrue(areQuantitiesEqual, "Sum should equal expected quantity");
+            Assert.IsTrue(areEqual, "Sum should equal expected length");
         }
 
         /// <summary>
-        /// Tests conversion followed by addition workflow.
+        /// Tests a complete weight workflow: create, convert, add, compare.
         /// </summary>
         [TestMethod]
-        public void ConvertThenAdd_Workflow_ReturnsCorrectResult()
+        public void CompleteWorkflow_Weight_AllOperations_WorkCorrectly()
+        {
+            // Step 1: Create quantities from string inputs
+            var firstWeight = _measurementService.CreateQuantityFromString(
+                "2",
+                WeightUnit.KILOGRAM
+            );
+            var secondWeight = _measurementService.CreateQuantityFromString(
+                "2000",
+                WeightUnit.GRAM
+            );
+
+            Assert.IsNotNull(firstWeight, "First weight should not be null");
+            Assert.IsNotNull(secondWeight, "Second weight should not be null");
+
+            // Step 2: Convert first weight to grams
+            var firstWeightInGrams = firstWeight!.ConvertTo(WeightUnit.GRAM);
+            Assert.AreEqual(
+                2000.0,
+                firstWeightInGrams.Value,
+                Tolerance,
+                "2 kg should equal 2000 g"
+            );
+
+            // Step 3: Add both weights and get result in kilograms
+            var sumInKg = _measurementService.AddQuantitiesWithTarget(
+                firstWeight,
+                secondWeight!,
+                WeightUnit.KILOGRAM
+            );
+
+            // 2 kg + 2000 g = 2 kg + 2 kg = 4 kg
+            Assert.AreEqual(4.0, sumInKg.Value, Tolerance, "2 kg + 2000 g should equal 4 kg");
+
+            // Step 4: Compare with expected weight
+            var expectedWeight = new GenericQuantity<WeightUnit>(4.0, WeightUnit.KILOGRAM);
+            bool areEqual = _measurementService.AreQuantitiesEqual(sumInKg, expectedWeight);
+
+            Assert.IsTrue(areEqual, "Sum should equal expected weight");
+        }
+
+        /// <summary>
+        /// Tests cross-unit comparison across length units.
+        /// </summary>
+        [TestMethod]
+        public void CompareAcrossUnits_Length_ReturnsCorrectResult()
         {
             // Arrange
-            var feetQuantity = new Quantity(3.0, LengthUnit.FEET);
-            var yardQuantity = new Quantity(1.0, LengthUnit.YARD);
+            var yardsLength = new GenericQuantity<LengthUnit>(1.0, LengthUnit.YARD);
+            var feetLength = new GenericQuantity<LengthUnit>(3.0, LengthUnit.FEET);
+            var inchesLength = new GenericQuantity<LengthUnit>(36.0, LengthUnit.INCH);
+            var cmLength = new GenericQuantity<LengthUnit>(91.44, LengthUnit.CENTIMETER);
 
-            // Act - Convert yard to feet, then add
-            var yardInFeet = yardQuantity.ConvertTo(LengthUnit.FEET);
-            var totalInFeet = feetQuantity.Add(yardInFeet);
-
-            // Assert
-            Assert.AreEqual(6.0, totalInFeet.Value, Tolerance, "3 ft + 1 yd should equal 6 ft");
+            // Act & Assert
+            Assert.IsTrue(
+                _measurementService.AreQuantitiesEqual(yardsLength, feetLength),
+                "1 yd should equal 3 ft"
+            );
+            Assert.IsTrue(
+                _measurementService.AreQuantitiesEqual(yardsLength, inchesLength),
+                "1 yd should equal 36 in"
+            );
+            Assert.IsTrue(
+                _measurementService.AreQuantitiesEqual(yardsLength, cmLength),
+                "1 yd should equal 91.44 cm"
+            );
         }
 
         /// <summary>
-        /// Tests comparison workflow across different units.
+        /// Tests cross-unit comparison across weight units.
         /// </summary>
         [TestMethod]
-        public void CompareAcrossUnits_Workflow_ReturnsCorrectResult()
+        public void CompareAcrossUnits_Weight_ReturnsCorrectResult()
         {
-            // Arrange - Create quantities that should all be equal to 1 yard
-            var yardsQuantity = new Quantity(1.0, LengthUnit.YARD); // 1 yard
-            var feetQuantity = new Quantity(3.0, LengthUnit.FEET); // 3 feet = 1 yard
-            var inchesQuantity = new Quantity(36.0, LengthUnit.INCH); // 36 inches = 1 yard
-            var cmQuantity = new Quantity(91.44, LengthUnit.CENTIMETER); // 91.44 cm = 1 yard
+            // Arrange
+            var kgWeight = new GenericQuantity<WeightUnit>(1.0, WeightUnit.KILOGRAM);
+            var gWeight = new GenericQuantity<WeightUnit>(1000.0, WeightUnit.GRAM);
+            var lbWeight = new GenericQuantity<WeightUnit>(2.20462262185, WeightUnit.POUND);
 
-            // Act & Assert - Compare each quantity directly with yardsQuantity using AreQuantitiesEqual
-            bool feetEqualsYards = _measurementService.AreQuantitiesEqual(
-                feetQuantity,
-                yardsQuantity
+            // Act & Assert
+            Assert.IsTrue(
+                _measurementService.AreQuantitiesEqual(kgWeight, gWeight),
+                "1 kg should equal 1000 g"
             );
-            bool inchesEqualsYards = _measurementService.AreQuantitiesEqual(
-                inchesQuantity,
-                yardsQuantity
+            Assert.IsTrue(
+                _measurementService.AreQuantitiesEqual(kgWeight, lbWeight),
+                "1 kg should approximately equal 2.20462 lb"
             );
-            bool cmEqualsYards = _measurementService.AreQuantitiesEqual(cmQuantity, yardsQuantity);
-
-            // Assert
-            Assert.IsTrue(feetEqualsYards, "3 ft should equal 1 yd");
-            Assert.IsTrue(inchesEqualsYards, "36 in should equal 1 yd");
-            Assert.IsTrue(cmEqualsYards, "91.44 cm should equal 1 yd");
-
-            // Also test using the Quantity.Equals method directly
-            Assert.IsTrue(feetQuantity.Equals(yardsQuantity), "3 ft should equal 1 yd (direct)");
-            Assert.IsTrue(inchesQuantity.Equals(yardsQuantity), "36 in should equal 1 yd (direct)");
-            Assert.IsTrue(cmQuantity.Equals(yardsQuantity), "91.44 cm should equal 1 yd (direct)");
         }
 
         /// <summary>
@@ -123,33 +156,33 @@ namespace QuantityMeasurementApp.Tests.IntegrationTests
         [TestMethod]
         public void CrossUnitAddition_DifferentTargets_ReturnsCorrectResults()
         {
-            // Arrange
-            var feetQuantity = new Quantity(1.0, LengthUnit.FEET);
-            var inchesQuantity = new Quantity(12.0, LengthUnit.INCH);
+            // Arrange - Length
+            var feetLength = new GenericQuantity<LengthUnit>(1.0, LengthUnit.FEET);
+            var inchesLength = new GenericQuantity<LengthUnit>(12.0, LengthUnit.INCH);
 
-            // Act - Add with different target units
+            // Act - Length with different target units
             var sumInFeet = _measurementService.AddQuantitiesWithTarget(
-                feetQuantity,
-                inchesQuantity,
+                feetLength,
+                inchesLength,
                 LengthUnit.FEET
             );
             var sumInInches = _measurementService.AddQuantitiesWithTarget(
-                feetQuantity,
-                inchesQuantity,
+                feetLength,
+                inchesLength,
                 LengthUnit.INCH
             );
             var sumInYards = _measurementService.AddQuantitiesWithTarget(
-                feetQuantity,
-                inchesQuantity,
+                feetLength,
+                inchesLength,
                 LengthUnit.YARD
             );
             var sumInCm = _measurementService.AddQuantitiesWithTarget(
-                feetQuantity,
-                inchesQuantity,
+                feetLength,
+                inchesLength,
                 LengthUnit.CENTIMETER
             );
 
-            // Assert
+            // Assert - Length
             Assert.AreEqual(2.0, sumInFeet.Value, Tolerance, "Sum in feet should be 2 ft");
             Assert.AreEqual(24.0, sumInInches.Value, Tolerance, "Sum in inches should be 24 in");
             Assert.AreEqual(
@@ -159,6 +192,37 @@ namespace QuantityMeasurementApp.Tests.IntegrationTests
                 "Sum in yards should be 2/3 yd"
             );
             Assert.AreEqual(60.96, sumInCm.Value, Tolerance, "Sum in cm should be 60.96 cm");
+
+            // Arrange - Weight
+            var kgWeight = new GenericQuantity<WeightUnit>(1.0, WeightUnit.KILOGRAM);
+            var gWeight = new GenericQuantity<WeightUnit>(500.0, WeightUnit.GRAM);
+
+            // Act - Weight with different target units
+            var sumInKg = _measurementService.AddQuantitiesWithTarget(
+                kgWeight,
+                gWeight,
+                WeightUnit.KILOGRAM
+            );
+            var sumInG = _measurementService.AddQuantitiesWithTarget(
+                kgWeight,
+                gWeight,
+                WeightUnit.GRAM
+            );
+            var sumInLb = _measurementService.AddQuantitiesWithTarget(
+                kgWeight,
+                gWeight,
+                WeightUnit.POUND
+            );
+
+            // Assert - Weight
+            Assert.AreEqual(1.5, sumInKg.Value, Tolerance, "Sum in kg should be 1.5 kg");
+            Assert.AreEqual(1500.0, sumInG.Value, Tolerance, "Sum in grams should be 1500 g");
+            Assert.AreEqual(
+                1.5 * 2.20462262185,
+                sumInLb.Value,
+                PoundTolerance,
+                "Sum in pounds should be correct"
+            );
         }
 
         /// <summary>
@@ -167,23 +231,67 @@ namespace QuantityMeasurementApp.Tests.IntegrationTests
         [TestMethod]
         public void RoundTripConversion_PreservesOriginalValue()
         {
-            // Arrange
-            double originalValue = 5.0;
-            var originalQuantity = new Quantity(originalValue, LengthUnit.FEET);
+            // Arrange - Length
+            double originalLengthValue = 5.0;
+            var originalLength = new GenericQuantity<LengthUnit>(
+                originalLengthValue,
+                LengthUnit.FEET
+            );
 
-            // Act - Feet -> Inches -> Centimeters -> Yards -> Feet
-            var inInches = originalQuantity.ConvertTo(LengthUnit.INCH);
+            // Act - Length: Feet -> Inches -> Centimeters -> Yards -> Feet
+            var inInches = originalLength.ConvertTo(LengthUnit.INCH);
             var inCentimeters = inInches.ConvertTo(LengthUnit.CENTIMETER);
             var inYards = inCentimeters.ConvertTo(LengthUnit.YARD);
             var backToFeet = inYards.ConvertTo(LengthUnit.FEET);
 
-            // Assert
+            // Assert - Length
             Assert.AreEqual(
-                originalValue,
+                originalLengthValue,
                 backToFeet.Value,
                 Tolerance,
-                "Round-trip conversion should return original value"
+                "Round-trip length conversion should return original value"
             );
+
+            // Arrange - Weight
+            double originalWeightValue = 5.0;
+            var originalWeight = new GenericQuantity<WeightUnit>(
+                originalWeightValue,
+                WeightUnit.KILOGRAM
+            );
+
+            // Act - Weight: Kg -> G -> Lb -> Kg
+            var inGrams = originalWeight.ConvertTo(WeightUnit.GRAM);
+            var inPounds = inGrams.ConvertTo(WeightUnit.POUND);
+            var backToKg = inPounds.ConvertTo(WeightUnit.KILOGRAM);
+
+            // Assert - Weight
+            Assert.AreEqual(
+                originalWeightValue,
+                backToKg.Value,
+                PoundTolerance,
+                "Round-trip weight conversion should return original value"
+            );
+        }
+
+        /// <summary>
+        /// Tests that different measurement categories are independent.
+        /// </summary>
+        [TestMethod]
+        public void DifferentCategories_AreIndependent()
+        {
+            // Arrange
+            var length = new GenericQuantity<LengthUnit>(1.0, LengthUnit.FEET);
+            var weight = new GenericQuantity<WeightUnit>(1.0, WeightUnit.KILOGRAM);
+
+            // Assert - Different types
+            Assert.AreNotEqual(
+                length.GetType(),
+                weight.GetType(),
+                "Length and Weight should be different types"
+            );
+
+            // Assert - Cannot be compared (compiler prevents this, but we test runtime)
+            Assert.IsFalse(length.Equals(weight), "Length and weight should not be equal");
         }
     }
 }

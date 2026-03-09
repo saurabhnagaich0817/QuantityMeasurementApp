@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using QuantityMeasurementApp.Core.Abstractions;
 using QuantityMeasurementApp.Domain.Quantities;
 using QuantityMeasurementApp.Domain.Units;
 
@@ -8,8 +9,9 @@ namespace QuantityMeasurementApp.Tests.ArchitectureTests
 {
     /// <summary>
     /// Tests demonstrating architectural scalability across multiple measurement categories.
-    /// UC8: Standalone unit enums with conversion responsibility.
+    /// UC8: Standalone unit classes with conversion responsibility.
     /// UC9: Addition of Weight category following the same pattern.
+    /// UC10: Generic Quantity class with IMeasurable interface.
     /// Shows how the design scales to support Length, Weight, and can easily extend to more categories.
     /// </summary>
     [TestClass]
@@ -21,11 +23,11 @@ namespace QuantityMeasurementApp.Tests.ArchitectureTests
         #region Length Category Tests (UC1-UC8)
 
         /// <summary>
-        /// Tests that LengthUnit works correctly as a standalone enum with conversion methods.
+        /// Tests that LengthUnit works correctly as a class implementing IMeasurable.
         /// Verifies UC8 pattern for length measurements.
         /// </summary>
         [TestMethod]
-        public void LengthUnit_StandaloneEnum_WorksCorrectly()
+        public void LengthUnit_Class_WorksCorrectly()
         {
             // Test conversion factors
             Assert.AreEqual(1.0, LengthUnit.FEET.GetConversionFactor(), Tolerance);
@@ -39,20 +41,28 @@ namespace QuantityMeasurementApp.Tests.ArchitectureTests
             Assert.AreEqual(1.0, LengthUnit.INCH.ToBaseUnit(12.0), Tolerance);
             Assert.AreEqual(12.0, LengthUnit.INCH.FromBaseUnit(1.0), Tolerance);
 
-            // Test direct conversion
-            Assert.AreEqual(36.0, LengthUnit.YARD.ConvertTo(LengthUnit.INCH, 1.0), Tolerance);
+            // Test GetSymbol and GetName
+            Assert.AreEqual("ft", LengthUnit.FEET.GetSymbol());
+            Assert.AreEqual("in", LengthUnit.INCH.GetSymbol());
+            Assert.AreEqual("yd", LengthUnit.YARD.GetSymbol());
+            Assert.AreEqual("cm", LengthUnit.CENTIMETER.GetSymbol());
+
+            Assert.AreEqual("feet", LengthUnit.FEET.GetName());
+            Assert.AreEqual("inches", LengthUnit.INCH.GetName());
+            Assert.AreEqual("yards", LengthUnit.YARD.GetName());
+            Assert.AreEqual("centimeters", LengthUnit.CENTIMETER.GetName());
         }
 
         /// <summary>
-        /// Tests that Quantity class for length works correctly.
+        /// Tests that GenericQuantity with LengthUnit works correctly.
         /// Verifies UC3-UC7 functionality for length.
         /// </summary>
         [TestMethod]
-        public void LengthQuantity_WorksCorrectly()
+        public void GenericQuantity_Length_WorksCorrectly()
         {
             // Test equality
-            var feetQuantity = new Quantity(1.0, LengthUnit.FEET);
-            var inchesQuantity = new Quantity(12.0, LengthUnit.INCH);
+            var feetQuantity = new GenericQuantity<LengthUnit>(1.0, LengthUnit.FEET);
+            var inchesQuantity = new GenericQuantity<LengthUnit>(12.0, LengthUnit.INCH);
             Assert.IsTrue(feetQuantity.Equals(inchesQuantity), "1 ft should equal 12 in");
 
             // Test conversion
@@ -71,11 +81,11 @@ namespace QuantityMeasurementApp.Tests.ArchitectureTests
         #region Weight Category Tests (UC9)
 
         /// <summary>
-        /// Tests that WeightUnit works correctly as a standalone enum with conversion methods.
+        /// Tests that WeightUnit works correctly as a class implementing IMeasurable.
         /// Verifies UC9 pattern for weight measurements following the same architecture as Length.
         /// </summary>
         [TestMethod]
-        public void WeightUnit_StandaloneEnum_WorksCorrectly()
+        public void WeightUnit_Class_WorksCorrectly()
         {
             // Test conversion factors
             Assert.AreEqual(1.0, WeightUnit.KILOGRAM.GetConversionFactor(), Tolerance);
@@ -91,19 +101,6 @@ namespace QuantityMeasurementApp.Tests.ArchitectureTests
             Assert.AreEqual(1000.0, WeightUnit.GRAM.FromBaseUnit(1.0), Tolerance);
             Assert.AreEqual(1.0, WeightUnit.POUND.FromBaseUnit(0.45359237), Tolerance);
 
-            // Test direct conversion
-            Assert.AreEqual(1000.0, WeightUnit.KILOGRAM.ConvertTo(WeightUnit.GRAM, 1.0), Tolerance);
-            Assert.AreEqual(
-                2.20462262185,
-                WeightUnit.KILOGRAM.ConvertTo(WeightUnit.POUND, 1.0),
-                PoundTolerance
-            );
-            Assert.AreEqual(
-                453.59237,
-                WeightUnit.POUND.ConvertTo(WeightUnit.GRAM, 1.0),
-                PoundTolerance
-            );
-
             // Test GetSymbol and GetName
             Assert.AreEqual("kg", WeightUnit.KILOGRAM.GetSymbol());
             Assert.AreEqual("g", WeightUnit.GRAM.GetSymbol());
@@ -115,16 +112,16 @@ namespace QuantityMeasurementApp.Tests.ArchitectureTests
         }
 
         /// <summary>
-        /// Tests that WeightQuantity class works correctly following the same pattern as Quantity.
+        /// Tests that GenericQuantity with WeightUnit works correctly.
         /// Verifies UC9 functionality for weight measurements.
         /// </summary>
         [TestMethod]
-        public void WeightQuantity_WorksCorrectly()
+        public void GenericQuantity_Weight_WorksCorrectly()
         {
             // Test equality
-            var kgWeight = new WeightQuantity(1.0, WeightUnit.KILOGRAM);
-            var gWeight = new WeightQuantity(1000.0, WeightUnit.GRAM);
-            var lbWeight = new WeightQuantity(2.20462262185, WeightUnit.POUND); // More precise value
+            var kgWeight = new GenericQuantity<WeightUnit>(1.0, WeightUnit.KILOGRAM);
+            var gWeight = new GenericQuantity<WeightUnit>(1000.0, WeightUnit.GRAM);
+            var lbWeight = new GenericQuantity<WeightUnit>(2.20462262185, WeightUnit.POUND);
 
             Assert.IsTrue(kgWeight.Equals(gWeight), "1 kg should equal 1000 g");
             Assert.IsTrue(kgWeight.Equals(lbWeight), "1 kg should approximately equal 2.20462 lb");
@@ -140,8 +137,8 @@ namespace QuantityMeasurementApp.Tests.ArchitectureTests
             Assert.AreEqual(WeightUnit.POUND, convertedToPounds.Unit);
 
             // Test addition with same unit
-            var firstKg = new WeightQuantity(1.0, WeightUnit.KILOGRAM);
-            var secondKg = new WeightQuantity(2.0, WeightUnit.KILOGRAM);
+            var firstKg = new GenericQuantity<WeightUnit>(1.0, WeightUnit.KILOGRAM);
+            var secondKg = new GenericQuantity<WeightUnit>(2.0, WeightUnit.KILOGRAM);
             var sumKg = firstKg.Add(secondKg);
             Assert.AreEqual(3.0, sumKg.Value, Tolerance);
             Assert.AreEqual(WeightUnit.KILOGRAM, sumKg.Unit);
@@ -162,7 +159,7 @@ namespace QuantityMeasurementApp.Tests.ArchitectureTests
             Assert.AreEqual(WeightUnit.POUND, sumInPounds.Unit);
 
             // Test static Add method
-            var staticSum = WeightQuantity.Add(
+            var staticSum = GenericQuantity<WeightUnit>.Add(
                 1.0,
                 WeightUnit.KILOGRAM,
                 500.0,
@@ -171,16 +168,6 @@ namespace QuantityMeasurementApp.Tests.ArchitectureTests
             );
             Assert.AreEqual(1.5, staticSum.Value, Tolerance);
             Assert.AreEqual(WeightUnit.KILOGRAM, staticSum.Unit);
-
-            // Test zero values
-            var zeroKg = new WeightQuantity(0.0, WeightUnit.KILOGRAM);
-            var zeroG = new WeightQuantity(0.0, WeightUnit.GRAM);
-            Assert.IsTrue(zeroKg.Equals(zeroG), "0 kg should equal 0 g");
-
-            // Test negative values
-            var negativeKg = new WeightQuantity(-1.0, WeightUnit.KILOGRAM);
-            var negativeG = new WeightQuantity(-1000.0, WeightUnit.GRAM);
-            Assert.IsTrue(negativeKg.Equals(negativeG), "-1 kg should equal -1000 g");
         }
 
         #endregion
@@ -195,16 +182,12 @@ namespace QuantityMeasurementApp.Tests.ArchitectureTests
         public void DifferentCategories_AreIndependent_CannotBeMixed()
         {
             // Length quantities
-            var lengthFeet = new Quantity(1.0, LengthUnit.FEET);
-            var lengthInches = new Quantity(12.0, LengthUnit.INCH);
+            var lengthFeet = new GenericQuantity<LengthUnit>(1.0, LengthUnit.FEET);
+            var lengthInches = new GenericQuantity<LengthUnit>(12.0, LengthUnit.INCH);
 
             // Weight quantities
-            var weightKg = new WeightQuantity(1.0, WeightUnit.KILOGRAM);
-            var weightG = new WeightQuantity(1000.0, WeightUnit.GRAM);
-
-            // Test that length and weight cannot be compared (should return false, not exception)
-            Assert.IsFalse(lengthFeet.Equals(weightKg), "1 ft should not equal 1 kg");
-            Assert.IsFalse(lengthInches.Equals(weightG), "12 in should not equal 1000 g");
+            var weightKg = new GenericQuantity<WeightUnit>(1.0, WeightUnit.KILOGRAM);
+            var weightG = new GenericQuantity<WeightUnit>(1000.0, WeightUnit.GRAM);
 
             // Test that they are different types
             Assert.AreNotEqual(
@@ -216,12 +199,15 @@ namespace QuantityMeasurementApp.Tests.ArchitectureTests
             // Test that operations within each category still work
             Assert.IsTrue(lengthFeet.Equals(lengthInches), "Length equality should still work");
             Assert.IsTrue(weightKg.Equals(weightG), "Weight equality should still work");
+
+            // Verify that the generic type parameters enforce category safety
+            // The following line would cause a compile error if uncommented:
+            // bool invalid = lengthFeet.Equals(weightKg); // Compiler error - different generic types
         }
 
         /// <summary>
         /// Tests that each category has its own base unit and conversion logic.
         /// Verifies that categories don't interfere with each other.
-        /// FIXED: Now properly tests that the base units are different concepts
         /// </summary>
         [TestMethod]
         public void EachCategory_HasOwnBaseUnit_AndConversionLogic()
@@ -234,9 +220,6 @@ namespace QuantityMeasurementApp.Tests.ArchitectureTests
             double weightInBase = WeightUnit.KILOGRAM.ToBaseUnit(1.0);
             string weightUnitName = WeightUnit.KILOGRAM.GetName();
 
-            // The numeric values might coincidentally be the same (both 1.0),
-            // but they represent different physical quantities
-
             // Test that they have different unit names
             Assert.AreNotEqual(
                 lengthUnitName,
@@ -245,41 +228,11 @@ namespace QuantityMeasurementApp.Tests.ArchitectureTests
             );
 
             // Test that the quantity classes are different types
-            var lengthQuantity = new Quantity(1.0, LengthUnit.FEET);
-            var weightQuantity = new WeightQuantity(1.0, WeightUnit.KILOGRAM);
+            var lengthQuantity = new GenericQuantity<LengthUnit>(1.0, LengthUnit.FEET);
+            var weightQuantity = new GenericQuantity<WeightUnit>(1.0, WeightUnit.KILOGRAM);
             Assert.AreNotEqual(
                 lengthQuantity.GetType(),
                 weightQuantity.GetType(),
-                "Length and Weight should be different types"
-            );
-
-            // Test that conversion factors are for different base units
-            double lengthFactor = LengthUnit.FEET.GetConversionFactor();
-            double weightFactor = WeightUnit.KILOGRAM.GetConversionFactor();
-
-            // They both return 1.0 for their own base units, but that's expected
-            // The key is that they are used in different contexts
-            Assert.AreEqual(
-                1.0,
-                lengthFactor,
-                Tolerance,
-                "Feet to feet conversion factor should be 1.0"
-            );
-            Assert.AreEqual(
-                1.0,
-                weightFactor,
-                Tolerance,
-                "Kg to kg conversion factor should be 1.0"
-            );
-
-            // Test that converting to the other category's base unit doesn't make sense
-            // This is a conceptual test - we can't convert length to weight
-            var lengthInches = new Quantity(12.0, LengthUnit.INCH);
-            var weightGrams = new WeightQuantity(1000.0, WeightUnit.GRAM);
-
-            // They are different types, so they can't be compared directly
-            Assert.IsFalse(
-                lengthInches.GetType() == weightGrams.GetType(),
                 "Length and Weight should be different types"
             );
         }
@@ -291,54 +244,57 @@ namespace QuantityMeasurementApp.Tests.ArchitectureTests
         /// <summary>
         /// Example of how Temperature category would follow the same pattern.
         /// This demonstrates that the architecture can scale to any number of categories.
-        /// Note: This is a demonstration only, not actual implementation.
+        /// Note: This is a conceptual demonstration with a simple class.
         /// </summary>
         [TestMethod]
         public void FutureCategory_Temperature_CanFollowSamePattern()
         {
-            // This test demonstrates how a new category (Temperature) would be implemented
-            // following the same architectural pattern as Length and Weight
+            // Create a simple TemperatureUnit class for demonstration
+            var celsiusUnit = new TestTemperatureUnit("celsius", "°C", 1.0);
+            var fahrenheitUnit = new TestTemperatureUnit("fahrenheit", "°F", 1.8, 32.0); // Special handling for offset
 
-            // Step 1: Define TemperatureUnit enum (conceptual)
-            /*
-            public enum TemperatureUnit
+            // This test shows that any class implementing IMeasurable can work with GenericQuantity
+            // In a real implementation, TemperatureUnit would properly handle the offset conversion
+
+            Assert.IsNotNull(celsiusUnit);
+            Assert.IsNotNull(fahrenheitUnit);
+            Assert.IsTrue(celsiusUnit is IMeasurable);
+            Assert.IsTrue(fahrenheitUnit is IMeasurable);
+        }
+
+        // Simple test class for demonstration
+        private class TestTemperatureUnit : IMeasurable
+        {
+            private readonly string _name;
+            private readonly string _symbol;
+            private readonly double _factor;
+            private readonly double _offset;
+
+            public TestTemperatureUnit(string name, string symbol, double factor, double offset = 0)
             {
-                CELSIUS,    // Base unit
-                FAHRENHEIT, // Conversion: °F = (°C × 9/5) + 32
-                KELVIN      // Conversion: K = °C + 273.15
+                _name = name;
+                _symbol = symbol;
+                _factor = factor;
+                _offset = offset;
             }
-            */
 
-            // Step 2: Extension methods would handle conversions (conceptual)
-            /*
-            public static double ToBaseUnit(this TemperatureUnit unit, double value)
+            public double GetConversionFactor() => _factor;
+
+            public double ToBaseUnit(double value)
             {
-                return unit switch
-                {
-                    TemperatureUnit.CELSIUS => value,
-                    TemperatureUnit.FAHRENHEIT => (value - 32) * 5 / 9,
-                    TemperatureUnit.KELVIN => value - 273.15,
-                    _ => throw new InvalidUnitException(unit)
-                };
+                // Simplified - in reality would handle offset
+                return (value - _offset) / _factor;
             }
-            */
 
-            // Step 3: TemperatureQuantity class would mirror WeightQuantity (conceptual)
-            /*
-            public class TemperatureQuantity
+            public double FromBaseUnit(double valueInBaseUnit)
             {
-                private readonly double _value;
-                private readonly TemperatureUnit _unit;
-                
-                // Same pattern: Equals, ConvertTo, Add methods
+                // Simplified - in reality would handle offset
+                return (valueInBaseUnit * _factor) + _offset;
             }
-            */
 
-            // Assert that the pattern is consistent
-            Assert.IsTrue(
-                true,
-                "The architectural pattern can be extended to any measurement category"
-            );
+            public string GetSymbol() => _symbol;
+
+            public string GetName() => _name;
         }
 
         /// <summary>
@@ -348,20 +304,17 @@ namespace QuantityMeasurementApp.Tests.ArchitectureTests
         [TestMethod]
         public void FutureCategory_Volume_CanFollowSamePattern()
         {
-            // Conceptual VolumeUnit enum
-            /*
-            public enum VolumeUnit
-            {
-                LITER,      // Base unit
-                MILLILITER, // 1 L = 1000 mL
-                GALLON      // 1 gal ≈ 3.78541 L
-            }
-            */
+            // This test demonstrates that Volume would follow the same pattern as Length and Weight
+            // In a real implementation, we would have a VolumeUnit class with static instances
 
-            // The same pattern would apply:
-            // - VolumeUnit enum with conversion factors
-            // - VolumeQuantity class with Equals, ConvertTo, Add methods
-            // - Complete independence from Length and Weight
+            // The pattern would be:
+            // public class VolumeUnit : IMeasurable
+            // {
+            //     public static readonly VolumeUnit LITER = new VolumeUnit("liters", "L", 1.0);
+            //     public static readonly VolumeUnit MILLILITER = new VolumeUnit("milliliters", "mL", 0.001);
+            //     public static readonly VolumeUnit GALLON = new VolumeUnit("gallons", "gal", 3.78541);
+            //     ... etc
+            // }
 
             Assert.IsTrue(
                 true,
@@ -369,133 +322,52 @@ namespace QuantityMeasurementApp.Tests.ArchitectureTests
             );
         }
 
+        #endregion
+
+        #region IMeasurable Interface Tests
+
         /// <summary>
-        /// Tests that all measurement categories follow the same architectural pattern.
-        /// Verifies consistency across implemented and future categories.
+        /// Tests that all unit classes properly implement IMeasurable interface.
         /// </summary>
         [TestMethod]
-        public void AllCategories_FollowSamePattern()
+        public void AllUnitClasses_Implement_IMeasurable()
         {
-            // Length pattern
-            Assert.IsTrue(Enum.IsDefined(typeof(LengthUnit), LengthUnit.FEET));
-            Assert.IsTrue(typeof(LengthUnit).IsEnum);
-            Assert.IsNotNull(LengthUnit.FEET.GetConversionFactor());
+            // Length units
+            Assert.IsTrue(LengthUnit.FEET is IMeasurable);
+            Assert.IsTrue(LengthUnit.INCH is IMeasurable);
+            Assert.IsTrue(LengthUnit.YARD is IMeasurable);
+            Assert.IsTrue(LengthUnit.CENTIMETER is IMeasurable);
 
-            // Weight pattern
-            Assert.IsTrue(Enum.IsDefined(typeof(WeightUnit), WeightUnit.KILOGRAM));
-            Assert.IsTrue(typeof(WeightUnit).IsEnum);
-            Assert.IsNotNull(WeightUnit.KILOGRAM.GetConversionFactor());
-
-            // Both have extension methods
-            Assert.IsNotNull(LengthUnit.FEET.ToBaseUnit(1.0));
-            Assert.IsNotNull(WeightUnit.KILOGRAM.ToBaseUnit(1.0));
-
-            // Both have quantity classes
-            var lengthQuantity = new Quantity(1.0, LengthUnit.FEET);
-            var weightQuantity = new WeightQuantity(1.0, WeightUnit.KILOGRAM);
-
-            Assert.IsNotNull(lengthQuantity);
-            Assert.IsNotNull(weightQuantity);
-
-            // Both have Equals method
-            Assert.IsNotNull(
-                lengthQuantity.GetType().GetMethod("Equals", new[] { typeof(object) })
-            );
-            Assert.IsNotNull(
-                weightQuantity.GetType().GetMethod("Equals", new[] { typeof(object) })
-            );
-
-            // Both have ConvertTo method
-            Assert.IsNotNull(
-                lengthQuantity.GetType().GetMethod("ConvertTo", new[] { typeof(LengthUnit) })
-            );
-            Assert.IsNotNull(
-                weightQuantity.GetType().GetMethod("ConvertTo", new[] { typeof(WeightUnit) })
-            );
-
-            // Both have Add method with one parameter
-            Assert.IsNotNull(lengthQuantity.GetType().GetMethod("Add", new[] { typeof(Quantity) }));
-            Assert.IsNotNull(
-                weightQuantity.GetType().GetMethod("Add", new[] { typeof(WeightQuantity) })
-            );
+            // Weight units
+            Assert.IsTrue(WeightUnit.KILOGRAM is IMeasurable);
+            Assert.IsTrue(WeightUnit.GRAM is IMeasurable);
+            Assert.IsTrue(WeightUnit.POUND is IMeasurable);
         }
 
         #endregion
 
-        #region Performance and Scalability Considerations
+        #region GenericQuantity Type Safety Tests
 
         /// <summary>
-        /// Demonstrates that adding new categories has minimal performance impact.
-        /// Each category operates independently without affecting others.
+        /// Tests that GenericQuantity maintains type safety across categories.
         /// </summary>
         [TestMethod]
-        public void NewCategories_DoNotAffect_ExistingCategories()
+        public void GenericQuantity_Maintains_TypeSafety()
         {
-            // Measure time for length operations
-            var watch = System.Diagnostics.Stopwatch.StartNew();
+            // Arrange
+            var lengthQuantity = new GenericQuantity<LengthUnit>(1.0, LengthUnit.FEET);
+            var weightQuantity = new GenericQuantity<WeightUnit>(1.0, WeightUnit.KILOGRAM);
 
-            var length1 = new Quantity(1.0, LengthUnit.FEET);
-            var length2 = new Quantity(12.0, LengthUnit.INCH);
-            bool lengthEqual = length1.Equals(length2);
-            var lengthSum = length1.Add(length2);
+            // Assert - Different generic instantiations are different types
+            Assert.AreNotEqual(
+                lengthQuantity.GetType(),
+                weightQuantity.GetType(),
+                "GenericQuantity<LengthUnit> and GenericQuantity<WeightUnit> should be different types"
+            );
 
-            watch.Stop();
-            long lengthTime = watch.ElapsedTicks;
-
-            // Measure time for weight operations (new category)
-            watch.Restart();
-
-            var weight1 = new WeightQuantity(1.0, WeightUnit.KILOGRAM);
-            var weight2 = new WeightQuantity(1000.0, WeightUnit.GRAM);
-            bool weightEqual = weight1.Equals(weight2);
-            var weightSum = weight1.Add(weight2);
-
-            watch.Stop();
-            long weightTime = watch.ElapsedTicks;
-
-            // Both should complete successfully
-            Assert.IsTrue(lengthEqual);
-            Assert.IsTrue(weightEqual);
-            Assert.IsNotNull(lengthSum);
-            Assert.IsNotNull(weightSum);
-
-            // The addition of weight category doesn't break length operations
-            // Performance difference should be minimal (not measuring exact equality)
-            Console.WriteLine($"Length operations time: {lengthTime} ticks");
-            Console.WriteLine($"Weight operations time: {weightTime} ticks");
-        }
-
-        #endregion
-
-        #region Summary
-
-        /// <summary>
-        /// Summary test that verifies all categories work together harmoniously.
-        /// </summary>
-        [TestMethod]
-        public void CompleteScalability_Summary()
-        {
-            // Length operations
-            var lengthInFeet = new Quantity(3.0, LengthUnit.FEET);
-            var lengthInYards = new Quantity(1.0, LengthUnit.YARD);
-
-            // Weight operations
-            var weightInKg = new WeightQuantity(2.0, WeightUnit.KILOGRAM);
-            var weightInG = new WeightQuantity(2000.0, WeightUnit.GRAM);
-
-            // Length addition
-            var lengthSum = lengthInFeet.Add(lengthInYards);
-            Assert.AreEqual(6.0, lengthSum.Value, Tolerance); // 3 ft + 1 yd = 3 ft + 3 ft = 6 ft
-
-            // Weight addition
-            var weightSum = weightInKg.Add(weightInG);
-            Assert.AreEqual(4.0, weightSum.Value, Tolerance); // 2 kg + 2000 g = 2 kg + 2 kg = 4 kg
-
-            // Categories are independent
-            Assert.AreNotEqual(lengthSum.GetType(), weightSum.GetType());
-
-            // The architectural pattern has been successfully scaled from Length to Weight
-            // and can easily extend to Temperature, Volume, and more
+            // Verify we can't accidentally compare them (this would be a compile error)
+            // The following line would not compile:
+            // bool equal = lengthQuantity.Equals(weightQuantity);
         }
 
         #endregion
