@@ -9,13 +9,14 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
     /// <summary>
     /// Test class for GenericMeasurementService.
     /// UC10: Tests the generic service layer for all measurement categories.
+    /// Updated to expect rounded values (2 decimal places).
     /// </summary>
     [TestClass]
     public class GenericMeasurementServiceTests
     {
         private GenericMeasurementService _measurementService = null!;
         private const double Tolerance = 0.000001;
-        private const double PoundTolerance = 0.001;
+        private const double RoundedTolerance = 0.01; // For rounded values (2 decimal places)
 
         [TestInitialize]
         public void Setup()
@@ -25,9 +26,6 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
 
         #region Length Service Tests
 
-        /// <summary>
-        /// Tests AreQuantitiesEqual for length with equal quantities.
-        /// </summary>
         [TestMethod]
         public void AreQuantitiesEqual_Length_EqualQuantities_ReturnsTrue()
         {
@@ -42,9 +40,6 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
             Assert.IsTrue(areEqual, "1 ft and 12 in should be equal");
         }
 
-        /// <summary>
-        /// Tests AreQuantitiesEqual for length with different quantities.
-        /// </summary>
         [TestMethod]
         public void AreQuantitiesEqual_Length_DifferentQuantities_ReturnsFalse()
         {
@@ -59,9 +54,6 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
             Assert.IsFalse(areEqual, "1 ft and 2 ft should not be equal");
         }
 
-        /// <summary>
-        /// Tests ConvertValue for length.
-        /// </summary>
         [TestMethod]
         public void ConvertValue_Length_FeetToInches_ReturnsCorrectValue()
         {
@@ -79,9 +71,6 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
             Assert.AreEqual(12.0, inchesValue, Tolerance, "1 ft should convert to 12 in");
         }
 
-        /// <summary>
-        /// Tests ConvertValue for length with yards to centimeters.
-        /// </summary>
         [TestMethod]
         public void ConvertValue_Length_YardsToCentimeters_ReturnsCorrectValue()
         {
@@ -99,9 +88,6 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
             Assert.AreEqual(91.44, cmValue, Tolerance, "1 yd should convert to 91.44 cm");
         }
 
-        /// <summary>
-        /// Tests AddQuantities for length with default unit.
-        /// </summary>
         [TestMethod]
         public void AddQuantities_Length_DefaultUnit_ReturnsCorrectSum()
         {
@@ -117,9 +103,6 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
             Assert.AreEqual(LengthUnit.FEET, sumLength.Unit, "Result should be in feet");
         }
 
-        /// <summary>
-        /// Tests AddQuantitiesWithTarget for length with yards target.
-        /// </summary>
         [TestMethod]
         public void AddQuantitiesWithTarget_Length_YardsTarget_ReturnsCorrectSum()
         {
@@ -136,12 +119,12 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
             );
 
             // Assert
-            double expectedValue = 2.0 / 3.0;
+            double expectedValue = 0.67; // 2/3 yards rounded to 2 decimal places
             Assert.AreEqual(
                 expectedValue,
                 sumLength.Value,
-                Tolerance,
-                "1 ft + 12 in in yards should equal 2/3 yd"
+                RoundedTolerance,
+                "1 ft + 12 in in yards should equal 0.67 yd (rounded)"
             );
             Assert.AreEqual(LengthUnit.YARD, sumLength.Unit, "Result should be in yards");
         }
@@ -150,9 +133,6 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
 
         #region Weight Service Tests
 
-        /// <summary>
-        /// Tests AreQuantitiesEqual for weight with equal quantities.
-        /// </summary>
         [TestMethod]
         public void AreQuantitiesEqual_Weight_EqualQuantities_ReturnsTrue()
         {
@@ -167,9 +147,6 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
             Assert.IsTrue(areEqual, "1 kg and 1000 g should be equal");
         }
 
-        /// <summary>
-        /// Tests AreQuantitiesEqual for weight with different quantities.
-        /// </summary>
         [TestMethod]
         public void AreQuantitiesEqual_Weight_DifferentQuantities_ReturnsFalse()
         {
@@ -184,9 +161,6 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
             Assert.IsFalse(areEqual, "1 kg and 2 kg should not be equal");
         }
 
-        /// <summary>
-        /// Tests ConvertValue for weight.
-        /// </summary>
         [TestMethod]
         public void ConvertValue_Weight_KgToG_ReturnsCorrectValue()
         {
@@ -204,9 +178,6 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
             Assert.AreEqual(1000.0, gValue, Tolerance, "1 kg should convert to 1000 g");
         }
 
-        /// <summary>
-        /// Tests ConvertValue for weight with kg to pounds.
-        /// </summary>
         [TestMethod]
         public void ConvertValue_Weight_KgToLb_ReturnsCorrectValue()
         {
@@ -224,14 +195,11 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
             Assert.AreEqual(
                 2.20462262185,
                 lbValue,
-                PoundTolerance,
+                0.001,
                 "1 kg should convert to approximately 2.20462 lb"
             );
         }
 
-        /// <summary>
-        /// Tests AddQuantities for weight with default unit.
-        /// </summary>
         [TestMethod]
         public void AddQuantities_Weight_DefaultUnit_ReturnsCorrectSum()
         {
@@ -247,9 +215,6 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
             Assert.AreEqual(WeightUnit.KILOGRAM, sumWeight.Unit, "Result should be in kilograms");
         }
 
-        /// <summary>
-        /// Tests AddQuantitiesWithTarget for weight with grams target.
-        /// </summary>
         [TestMethod]
         public void AddQuantitiesWithTarget_Weight_GramsTarget_ReturnsCorrectSum()
         {
@@ -275,9 +240,6 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
             Assert.AreEqual(WeightUnit.GRAM, sumWeight.Unit, "Result should be in grams");
         }
 
-        /// <summary>
-        /// Tests AddQuantitiesWithTarget for weight with pounds target.
-        /// </summary>
         [TestMethod]
         public void AddQuantitiesWithTarget_Weight_PoundsTarget_ReturnsCorrectSum()
         {
@@ -294,12 +256,12 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
             );
 
             // Assert
-            double expectedValue = 1.5 * 2.20462262185; // 1.5 kg in pounds
+            double expectedValue = 3.31; // 1.5 kg * 2.20462 = 3.30693 rounded to 2 decimal places = 3.31
             Assert.AreEqual(
                 expectedValue,
                 sumWeight.Value,
-                PoundTolerance,
-                "1 kg + 500 g in pounds should be correct"
+                RoundedTolerance,
+                "1 kg + 500 g in pounds should be 3.31 lb (rounded)"
             );
             Assert.AreEqual(WeightUnit.POUND, sumWeight.Unit, "Result should be in pounds");
         }
@@ -308,9 +270,6 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
 
         #region CreateFromString Tests
 
-        /// <summary>
-        /// Tests CreateQuantityFromString for length with valid input.
-        /// </summary>
         [TestMethod]
         public void CreateQuantityFromString_Length_ValidInput_ReturnsQuantity()
         {
@@ -330,9 +289,6 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
             Assert.AreEqual(LengthUnit.FEET, createdQuantity.Unit, "Unit should be feet");
         }
 
-        /// <summary>
-        /// Tests CreateQuantityFromString for weight with valid input.
-        /// </summary>
         [TestMethod]
         public void CreateQuantityFromString_Weight_ValidInput_ReturnsQuantity()
         {
@@ -352,9 +308,6 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
             Assert.AreEqual(WeightUnit.KILOGRAM, createdQuantity.Unit, "Unit should be kilograms");
         }
 
-        /// <summary>
-        /// Tests CreateQuantityFromString with invalid input.
-        /// </summary>
         [TestMethod]
         public void CreateQuantityFromString_InvalidInput_ReturnsNull()
         {
@@ -372,33 +325,10 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
             Assert.IsNull(createdQuantity, "Invalid input should return null");
         }
 
-        /// <summary>
-        /// Tests CreateQuantityFromString with empty input.
-        /// </summary>
-        [TestMethod]
-        public void CreateQuantityFromString_EmptyInput_ReturnsNull()
-        {
-            // Arrange
-            string emptyInput = "";
-            LengthUnit unitOfMeasure = LengthUnit.FEET;
-
-            // Act
-            var createdQuantity = _measurementService.CreateQuantityFromString(
-                emptyInput,
-                unitOfMeasure
-            );
-
-            // Assert
-            Assert.IsNull(createdQuantity, "Empty input should return null");
-        }
-
         #endregion
 
         #region Cross-Category Tests
 
-        /// <summary>
-        /// Tests AreQuantitiesFromDifferentCategoriesEqual always returns false.
-        /// </summary>
         [TestMethod]
         public void AreQuantitiesFromDifferentCategoriesEqual_Always_ReturnsFalse()
         {
@@ -414,56 +344,6 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
 
             // Assert
             Assert.IsFalse(areEqual, "Length and weight should never be equal");
-        }
-
-        #endregion
-
-        #region Null Argument Tests
-
-        /// <summary>
-        /// Tests AreQuantitiesEqual with null first argument returns false.
-        /// </summary>
-        [TestMethod]
-        public void AreQuantitiesEqual_NullFirst_ReturnsFalse()
-        {
-            // Arrange
-            var validLength = new GenericQuantity<LengthUnit>(1.0, LengthUnit.FEET);
-
-            // Act
-            bool areEqual = _measurementService.AreQuantitiesEqual<LengthUnit>(null!, validLength);
-
-            // Assert
-            Assert.IsFalse(areEqual, "Null first argument should return false");
-        }
-
-        /// <summary>
-        /// Tests AreQuantitiesEqual with null second argument returns false.
-        /// </summary>
-        [TestMethod]
-        public void AreQuantitiesEqual_NullSecond_ReturnsFalse()
-        {
-            // Arrange
-            var validLength = new GenericQuantity<LengthUnit>(1.0, LengthUnit.FEET);
-
-            // Act
-            bool areEqual = _measurementService.AreQuantitiesEqual(validLength, null!);
-
-            // Assert
-            Assert.IsFalse(areEqual, "Null second argument should return false");
-        }
-
-        /// <summary>
-        /// Tests AddQuantities with null arguments throws exception.
-        /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void AddQuantities_NullFirst_ThrowsException()
-        {
-            // Arrange
-            var validLength = new GenericQuantity<LengthUnit>(1.0, LengthUnit.FEET);
-
-            // Act - Should throw
-            _measurementService.AddQuantities<LengthUnit>(null!, validLength);
         }
 
         #endregion

@@ -8,17 +8,15 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
     /// <summary>
     /// Test class for GenericQuantity subtraction operations.
     /// UC12: Tests subtraction functionality for all measurement categories.
+    /// Updated to use rounded tolerance for explicit target unit tests.
     /// </summary>
     [TestClass]
     public class GenericQuantitySubtractionTests
     {
         private const double Tolerance = 0.000001;
-
+        private const double RoundedTolerance = 0.01; // For rounded values (2 decimal places)
         #region Length Subtraction Tests
 
-        /// <summary>
-        /// Tests subtraction of two lengths in same unit (feet).
-        /// </summary>
         [TestMethod]
         public void Subtract_Length_SameUnit_Feet_ReturnsCorrectDifference()
         {
@@ -34,9 +32,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(LengthUnit.FEET, difference.Unit, "Result should be in feet");
         }
 
-        /// <summary>
-        /// Tests subtraction of two lengths in different units (feet - inches) with result in first unit.
-        /// </summary>
         [TestMethod]
         public void Subtract_Length_CrossUnit_ResultInFirstUnit_ReturnsCorrectDifference()
         {
@@ -52,9 +47,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(LengthUnit.FEET, difference.Unit, "Result should be in feet");
         }
 
-        /// <summary>
-        /// Tests subtraction of two lengths in different units (feet - inches) with result in second unit.
-        /// </summary>
         [TestMethod]
         public void Subtract_Length_CrossUnit_ResultInSecondUnit_ReturnsCorrectDifference()
         {
@@ -75,9 +67,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(LengthUnit.INCH, difference.Unit, "Result should be in inches");
         }
 
-        /// <summary>
-        /// Tests subtraction with explicit target unit (yards).
-        /// </summary>
         [TestMethod]
         public void Subtract_Length_ExplicitTarget_Yards_ReturnsCorrectDifference()
         {
@@ -89,19 +78,16 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             var difference = feetLength.Subtract(inchesLength, LengthUnit.YARD);
 
             // Assert
-            double expectedValue = 9.5 / 3.0; // 9.5 feet in yards
+            double expectedValue = 3.17; // 9.5 feet in yards = 3.1667 rounded to 2 decimal places
             Assert.AreEqual(
                 expectedValue,
                 difference.Value,
-                Tolerance,
-                "10 ft - 6 in in yards should equal 3.1667 yd"
+                RoundedTolerance,
+                "10 ft - 6 in in yards should equal 3.17 yd (rounded)"
             );
             Assert.AreEqual(LengthUnit.YARD, difference.Unit, "Result should be in yards");
         }
 
-        /// <summary>
-        /// Tests subtraction resulting in negative value.
-        /// </summary>
         [TestMethod]
         public void Subtract_Length_NegativeResult_ReturnsCorrectDifference()
         {
@@ -116,9 +102,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(-5.0, difference.Value, Tolerance, "5 ft - 10 ft should equal -5 ft");
         }
 
-        /// <summary>
-        /// Tests subtraction resulting in zero.
-        /// </summary>
         [TestMethod]
         public void Subtract_Length_ZeroResult_ReturnsZero()
         {
@@ -133,9 +116,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(0.0, difference.Value, Tolerance, "10 ft - 120 in should equal 0 ft");
         }
 
-        /// <summary>
-        /// Tests that subtraction is not commutative.
-        /// </summary>
         [TestMethod]
         public void Subtract_Length_NotCommutative_ReturnsDifferentResults()
         {
@@ -161,9 +141,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
 
         #region Weight Subtraction Tests
 
-        /// <summary>
-        /// Tests subtraction of two weights in same unit (kilograms).
-        /// </summary>
         [TestMethod]
         public void Subtract_Weight_SameUnit_Kilograms_ReturnsCorrectDifference()
         {
@@ -179,9 +156,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(WeightUnit.KILOGRAM, difference.Unit, "Result should be in kilograms");
         }
 
-        /// <summary>
-        /// Tests subtraction of two weights in different units (kg - g) with result in first unit.
-        /// </summary>
         [TestMethod]
         public void Subtract_Weight_CrossUnit_ResultInFirstUnit_ReturnsCorrectDifference()
         {
@@ -197,9 +171,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(WeightUnit.KILOGRAM, difference.Unit, "Result should be in kilograms");
         }
 
-        /// <summary>
-        /// Tests subtraction with explicit target unit (grams).
-        /// </summary>
         [TestMethod]
         public void Subtract_Weight_ExplicitTarget_Grams_ReturnsCorrectDifference()
         {
@@ -224,9 +195,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
 
         #region Volume Subtraction Tests
 
-        /// <summary>
-        /// Tests subtraction of two volumes in same unit (litres).
-        /// </summary>
         [TestMethod]
         public void Subtract_Volume_SameUnit_Litres_ReturnsCorrectDifference()
         {
@@ -242,9 +210,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(VolumeUnit.LITRE, difference.Unit, "Result should be in litres");
         }
 
-        /// <summary>
-        /// Tests subtraction of two volumes in different units (L - mL) with result in first unit.
-        /// </summary>
         [TestMethod]
         public void Subtract_Volume_CrossUnit_ResultInFirstUnit_ReturnsCorrectDifference()
         {
@@ -260,9 +225,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(VolumeUnit.LITRE, difference.Unit, "Result should be in litres");
         }
 
-        /// <summary>
-        /// Tests subtraction with explicit target unit (millilitres).
-        /// </summary>
         [TestMethod]
         public void Subtract_Volume_ExplicitTarget_Millilitres_ReturnsCorrectDifference()
         {
@@ -291,9 +253,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
 
         #region Edge Cases
 
-        /// <summary>
-        /// Tests subtraction with zero.
-        /// </summary>
         [TestMethod]
         public void Subtract_WithZero_ReturnsOriginalValue()
         {
@@ -308,9 +267,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(5.0, result.Value, Tolerance, "5 ft - 0 in should equal 5 ft");
         }
 
-        /// <summary>
-        /// Tests subtraction with negative values.
-        /// </summary>
         [TestMethod]
         public void Subtract_WithNegativeValues_ReturnsCorrectDifference()
         {
@@ -325,9 +281,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(7.0, result.Value, Tolerance, "5 ft - (-2 ft) should equal 7 ft");
         }
 
-        /// <summary>
-        /// Tests that subtracting null throws exception.
-        /// </summary>
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Subtract_NullOperand_ThrowsException()

@@ -7,6 +7,7 @@ namespace QuantityMeasurementApp.Domain.Quantities
     /// Generic quantity class that works with any measurement unit implementing IMeasurable.
     /// UC10: Single class replaces both Quantity and WeightQuantity, eliminating code duplication.
     /// UC12: Added Subtraction and Division operations.
+    /// UC13: Centralized arithmetic logic to enforce DRY principle.
     /// </summary>
     /// <typeparam name="T">The unit type (must implement IMeasurable).</typeparam>
     public class GenericQuantity<T>
@@ -66,53 +67,143 @@ namespace QuantityMeasurementApp.Domain.Quantities
             return ConvertTo(targetUnit).Value;
         }
 
-        #region Addition Operations
+        #region Private Validation and Arithmetic Helpers (UC13)
+
+        /// <summary>
+        /// Enum representing arithmetic operations for centralized dispatch.
+        /// UC13: Uses lambda expressions for clean operation definitions.
+        /// </summary>
+        private enum ArithmeticOperation
+        {
+            ADD,
+            SUBTRACT,
+            DIVIDE,
+        }
+
+        /// <summary>
+        /// Validates arithmetic operands for null, and finiteness.
+        /// Note: Category compatibility is enforced by the generic type parameter T.
+        /// UC13: Centralized validation for all arithmetic operations.
+        /// </summary>
+        /// <param name="other">The other quantity.</param>
+        /// <param name="targetUnit">The target unit (may be null for division).</param>
+        /// <param name="isTargetUnitRequired">Whether target unit validation is required.</param>
+        /// <exception cref="ArgumentNullException">Thrown when other is null or targetUnit required but null.</exception>
+        /// <exception cref="InvalidValueException">Thrown when values are invalid.</exception>
+        private void ValidateArithmeticOperands(
+            GenericQuantity<T> other,
+            T? targetUnit,
+            bool isTargetUnitRequired
+        )
+        {
+            // Validate other quantity
+            if (other == null)
+                throw new ArgumentNullException(nameof(other), "Other quantity cannot be null");
+
+            // Validate target unit if required
+            if (isTargetUnitRequired && targetUnit == null)
+                throw new ArgumentNullException(nameof(targetUnit), "Target unit cannot be null");
+
+            // Note: We don't need to validate that targetUnit is a valid unit because
+            // the type parameter T ensures it's the correct type.
+
+            // Validate values are finite
+            if (!IsFinite(_value) || !IsFinite(other._value))
+                throw new InvalidValueException("Both quantities must have finite values");
+        }
+
+        /// <summary>
+        /// Performs arithmetic operation in base unit and returns result in base unit.
+        /// UC13: Centralized arithmetic execution using lambda dispatch.
+        /// </summary>
+        /// <param name="other">The other quantity.</param>
+        /// <param name="operation">The arithmetic operation to perform.</param>
+        /// <returns>The result in base unit.</returns>
+        /// <exception cref="DivideByZeroException">Thrown when dividing by zero.</exception>
+        private double PerformBaseArithmetic(
+            GenericQuantity<T> other,
+            ArithmeticOperation operation
+        )
+        {
+            // Convert both to base unit
+            double thisInBase = _unit.ToBaseUnit(_value);
+            double otherInBase = other._unit.ToBaseUnit(other._value);
+
+            // Perform operation using lambda dispatch
+            return operation switch
+            {
+                ArithmeticOperation.ADD => thisInBase + otherInBase,
+                ArithmeticOperation.SUBTRACT => thisInBase - otherInBase,
+                ArithmeticOperation.DIVIDE when Math.Abs(otherInBase) < 0.000000001 =>
+                    throw new DivideByZeroException("Cannot divide by zero quantity"),
+                ArithmeticOperation.DIVIDE => thisInBase / otherInBase,
+                _ => throw new InvalidOperationException($"Unknown operation: {operation}"),
+            };
+        }
+
+        /// <summary>
+        /// Rounds a value to two decimal places.
+        /// UC13: Consistent rounding for add/subtract results.
+        /// </summary>
+        /// <param name="value">The value to round.</param>
+        /// <returns>The rounded value.</returns>
+        private static double RoundToTwoDecimals(double value)
+        {
+            return Math.Round(value, 2, MidpointRounding.AwayFromZero);
+        }
+
+        /// <summary>
+        /// Checks if a value is finite.
+        /// </summary>
+        /// <param name="value">The value to check.</param>
+        /// <returns>True if value is finite.</returns>
+        private static bool IsFinite(double value)
+        {
+            return !double.IsNaN(value) && !double.IsInfinity(value);
+        }
+
+        #endregion
+
+        #region Addition Operations (UC6, UC7) - Refactored for UC13
 
         /// <summary>
         /// Adds another quantity to this quantity.
         /// UC6: Addition with result in this quantity's unit.
+        /// UC13: Delegates to centralized arithmetic helpers.
         /// </summary>
         /// <param name="other">The other quantity to add.</param>
         /// <returns>A new GenericQuantity representing the sum.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when other is null.</exception>
         public GenericQuantity<T> Add(GenericQuantity<T> other)
         {
-            if (other == null)
-                throw new ArgumentNullException(nameof(other));
-
             return Add(other, _unit);
         }
 
         /// <summary>
         /// Adds another quantity to this quantity with result in specified unit.
         /// UC7: Addition with explicit target unit.
+        /// UC13: Delegates to centralized arithmetic helpers.
         /// </summary>
         /// <param name="other">The other quantity to add.</param>
         /// <param name="targetUnit">The unit for the result.</param>
         /// <returns>A new GenericQuantity representing the sum in the target unit.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when other is null.</exception>
         public GenericQuantity<T> Add(GenericQuantity<T> other, T targetUnit)
         {
-            if (other == null)
-                throw new ArgumentNullException(nameof(other));
-            if (targetUnit == null)
-                throw new ArgumentNullException(nameof(targetUnit));
+            // Validate operands
+            ValidateArithmeticOperands(other, targetUnit, true);
 
-            double thisInBase = _unit.ToBaseUnit(_value);
-            double otherInBase = other._unit.ToBaseUnit(other._value);
-            double sumInBase = thisInBase + otherInBase;
-            double sumInTarget = targetUnit.FromBaseUnit(sumInBase);
+            // Perform addition in base unit
+            double resultInBase = PerformBaseArithmetic(other, ArithmeticOperation.ADD);
 
-            return new GenericQuantity<T>(sumInTarget, targetUnit);
+            // Convert result to target unit and round
+            double resultInTarget = targetUnit.FromBaseUnit(resultInBase);
+            double roundedResult = RoundToTwoDecimals(resultInTarget);
+
+            return new GenericQuantity<T>(roundedResult, targetUnit);
         }
 
         /// <summary>
         /// Static method to add two quantities.
         /// </summary>
-        /// <param name="first">First quantity.</param>
-        /// <param name="second">Second quantity.</param>
-        /// <param name="targetUnit">Target unit for result.</param>
-        /// <returns>The sum in target unit.</returns>
         public static GenericQuantity<T> Add(
             GenericQuantity<T> first,
             GenericQuantity<T> second,
@@ -123,19 +214,12 @@ namespace QuantityMeasurementApp.Domain.Quantities
                 throw new ArgumentNullException(nameof(first));
             if (second == null)
                 throw new ArgumentNullException(nameof(second));
-
             return first.Add(second, targetUnit);
         }
 
         /// <summary>
         /// Static method to add two values with units.
         /// </summary>
-        /// <param name="firstValue">First value.</param>
-        /// <param name="firstUnit">Unit of first value.</param>
-        /// <param name="secondValue">Second value.</param>
-        /// <param name="secondUnit">Unit of second value.</param>
-        /// <param name="targetUnit">Target unit for result.</param>
-        /// <returns>The sum in target unit.</returns>
         public static GenericQuantity<T> Add(
             double firstValue,
             T firstUnit,
@@ -151,55 +235,46 @@ namespace QuantityMeasurementApp.Domain.Quantities
 
         #endregion
 
-        #region Subtraction Operations (UC12)
+        #region Subtraction Operations (UC12) - Refactored for UC13
 
         /// <summary>
         /// Subtracts another quantity from this quantity.
         /// UC12: Subtraction with result in this quantity's unit.
+        /// UC13: Delegates to centralized arithmetic helpers.
         /// </summary>
         /// <param name="other">The other quantity to subtract.</param>
         /// <returns>A new GenericQuantity representing the difference.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when other is null.</exception>
-        /// <exception cref="ArgumentException">Thrown when categories don't match.</exception>
         public GenericQuantity<T> Subtract(GenericQuantity<T> other)
         {
-            if (other == null)
-                throw new ArgumentNullException(nameof(other));
-
             return Subtract(other, _unit);
         }
 
         /// <summary>
         /// Subtracts another quantity from this quantity with result in specified unit.
         /// UC12: Subtraction with explicit target unit.
+        /// UC13: Delegates to centralized arithmetic helpers.
         /// </summary>
         /// <param name="other">The other quantity to subtract.</param>
         /// <param name="targetUnit">The unit for the result.</param>
         /// <returns>A new GenericQuantity representing the difference in the target unit.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when other or targetUnit is null.</exception>
-        /// <exception cref="ArgumentException">Thrown when categories don't match.</exception>
         public GenericQuantity<T> Subtract(GenericQuantity<T> other, T targetUnit)
         {
-            if (other == null)
-                throw new ArgumentNullException(nameof(other));
-            if (targetUnit == null)
-                throw new ArgumentNullException(nameof(targetUnit));
+            // Validate operands
+            ValidateArithmeticOperands(other, targetUnit, true);
 
-            double thisInBase = _unit.ToBaseUnit(_value);
-            double otherInBase = other._unit.ToBaseUnit(other._value);
-            double differenceInBase = thisInBase - otherInBase;
-            double differenceInTarget = targetUnit.FromBaseUnit(differenceInBase);
+            // Perform subtraction in base unit
+            double resultInBase = PerformBaseArithmetic(other, ArithmeticOperation.SUBTRACT);
 
-            return new GenericQuantity<T>(differenceInTarget, targetUnit);
+            // Convert result to target unit and round
+            double resultInTarget = targetUnit.FromBaseUnit(resultInBase);
+            double roundedResult = RoundToTwoDecimals(resultInTarget);
+
+            return new GenericQuantity<T>(roundedResult, targetUnit);
         }
 
         /// <summary>
         /// Static method to subtract two quantities.
         /// </summary>
-        /// <param name="first">First quantity (minuend).</param>
-        /// <param name="second">Second quantity (subtrahend).</param>
-        /// <param name="targetUnit">Target unit for result.</param>
-        /// <returns>The difference in target unit.</returns>
         public static GenericQuantity<T> Subtract(
             GenericQuantity<T> first,
             GenericQuantity<T> second,
@@ -210,19 +285,12 @@ namespace QuantityMeasurementApp.Domain.Quantities
                 throw new ArgumentNullException(nameof(first));
             if (second == null)
                 throw new ArgumentNullException(nameof(second));
-
             return first.Subtract(second, targetUnit);
         }
 
         /// <summary>
         /// Static method to subtract two values with units.
         /// </summary>
-        /// <param name="firstValue">First value (minuend).</param>
-        /// <param name="firstUnit">Unit of first value.</param>
-        /// <param name="secondValue">Second value (subtrahend).</param>
-        /// <param name="secondUnit">Unit of second value.</param>
-        /// <param name="targetUnit">Target unit for result.</param>
-        /// <returns>The difference in target unit.</returns>
         public static GenericQuantity<T> Subtract(
             double firstValue,
             T firstUnit,
@@ -238,55 +306,42 @@ namespace QuantityMeasurementApp.Domain.Quantities
 
         #endregion
 
-        #region Division Operations (UC12)
+        #region Division Operations (UC12) - Refactored for UC13
 
         /// <summary>
         /// Divides this quantity by another quantity.
         /// UC12: Division returning a dimensionless scalar ratio.
+        /// UC13: Delegates to centralized arithmetic helpers.
         /// </summary>
         /// <param name="other">The other quantity (divisor).</param>
         /// <returns>The ratio as a double (dimensionless).</returns>
-        /// <exception cref="ArgumentNullException">Thrown when other is null.</exception>
-        /// <exception cref="ArgumentException">Thrown when categories don't match.</exception>
-        /// <exception cref="DivideByZeroException">Thrown when divisor is zero.</exception>
         public double Divide(GenericQuantity<T> other)
         {
-            if (other == null)
-                throw new ArgumentNullException(nameof(other));
+            // Validate operands (no target unit needed for division)
+            ValidateArithmeticOperands(other, null, false);
 
-            double thisInBase = _unit.ToBaseUnit(_value);
-            double otherInBase = other._unit.ToBaseUnit(other._value);
+            // Perform division in base unit
+            double resultInBase = PerformBaseArithmetic(other, ArithmeticOperation.DIVIDE);
 
-            if (Math.Abs(otherInBase) < 0.000000001)
-                throw new DivideByZeroException("Cannot divide by zero quantity");
-
-            return thisInBase / otherInBase;
+            // Return raw result (no rounding, no unit conversion)
+            return resultInBase;
         }
 
         /// <summary>
         /// Static method to divide two quantities.
         /// </summary>
-        /// <param name="first">First quantity (dividend).</param>
-        /// <param name="second">Second quantity (divisor).</param>
-        /// <returns>The ratio as a double (dimensionless).</returns>
         public static double Divide(GenericQuantity<T> first, GenericQuantity<T> second)
         {
             if (first == null)
                 throw new ArgumentNullException(nameof(first));
             if (second == null)
                 throw new ArgumentNullException(nameof(second));
-
             return first.Divide(second);
         }
 
         /// <summary>
         /// Static method to divide two values with units.
         /// </summary>
-        /// <param name="firstValue">First value (dividend).</param>
-        /// <param name="firstUnit">Unit of first value.</param>
-        /// <param name="secondValue">Second value (divisor).</param>
-        /// <param name="secondUnit">Unit of second value.</param>
-        /// <returns>The ratio as a double (dimensionless).</returns>
         public static double Divide(
             double firstValue,
             T firstUnit,

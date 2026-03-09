@@ -8,20 +8,17 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
     /// <summary>
     /// Test class for GenericQuantity arithmetic operations.
     /// UC10: Tests addition functionality for all measurement categories.
-    /// Verifies addition with default and explicit target units.
+    /// Updated to use rounded tolerance for explicit target unit tests.
     /// </summary>
     [TestClass]
     public class GenericQuantityArithmeticTests
     {
         private const double Tolerance = 0.000001;
+        private const double RoundedTolerance = 0.01; // For rounded values (2 decimal places)
         private const double PoundTolerance = 0.001;
 
         #region Length Addition Tests
 
-        /// <summary>
-        /// Tests addition of two length quantities in same unit (feet).
-        /// Verifies UC6 functionality preserved.
-        /// </summary>
         [TestMethod]
         public void Add_Length_SameUnit_Feet_ReturnsCorrectSum()
         {
@@ -37,9 +34,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(LengthUnit.FEET, sumLength.Unit, "Result should be in feet");
         }
 
-        /// <summary>
-        /// Tests addition of two length quantities in same unit (inches).
-        /// </summary>
         [TestMethod]
         public void Add_Length_SameUnit_Inches_ReturnsCorrectSum()
         {
@@ -55,9 +49,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(LengthUnit.INCH, sumLength.Unit, "Result should be in inches");
         }
 
-        /// <summary>
-        /// Tests addition of length quantities in different units with result in first unit.
-        /// </summary>
         [TestMethod]
         public void Add_Length_CrossUnit_ResultInFirstUnit_ReturnsCorrectSum()
         {
@@ -73,9 +64,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(LengthUnit.FEET, sumLength.Unit, "Result should be in feet");
         }
 
-        /// <summary>
-        /// Tests addition of length quantities in different units with result in second unit.
-        /// </summary>
         [TestMethod]
         public void Add_Length_CrossUnit_ResultInSecondUnit_ReturnsCorrectSum()
         {
@@ -96,10 +84,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(LengthUnit.INCH, sumLength.Unit, "Result should be in inches");
         }
 
-        /// <summary>
-        /// Tests addition of length quantities with explicit target unit (yards).
-        /// Verifies UC7 functionality preserved.
-        /// </summary>
         [TestMethod]
         public void Add_Length_ExplicitTarget_Yards_ReturnsCorrectSum()
         {
@@ -111,19 +95,16 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             var sumInYards = feetLength.Add(inchesLength, LengthUnit.YARD);
 
             // Assert
-            double expectedValue = 2.0 / 3.0; // 2 feet = 2/3 yards
+            double expectedValue = 0.67; // 2 feet = 2/3 yards rounded to 2 decimal places
             Assert.AreEqual(
                 expectedValue,
                 sumInYards.Value,
-                Tolerance,
-                "1 ft + 12 in in yards should equal 2/3 yd"
+                RoundedTolerance,
+                "1 ft + 12 in in yards should equal 0.67 yd (rounded)"
             );
             Assert.AreEqual(LengthUnit.YARD, sumInYards.Unit, "Result should be in yards");
         }
 
-        /// <summary>
-        /// Tests addition of length quantities with explicit target unit (centimeters).
-        /// </summary>
         [TestMethod]
         public void Add_Length_ExplicitTarget_Centimeters_ReturnsCorrectSum()
         {
@@ -135,7 +116,7 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             var sumInCm = feetLength.Add(inchesLength, LengthUnit.CENTIMETER);
 
             // Assert
-            double expectedValue = 2.0 * 30.48; // 2 feet in cm
+            double expectedValue = 60.96; // 2 feet in cm
             Assert.AreEqual(
                 expectedValue,
                 sumInCm.Value,
@@ -149,10 +130,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
 
         #region Weight Addition Tests
 
-        /// <summary>
-        /// Tests addition of two weight quantities in same unit (kilograms).
-        /// Verifies UC9 functionality preserved.
-        /// </summary>
         [TestMethod]
         public void Add_Weight_SameUnit_Kilograms_ReturnsCorrectSum()
         {
@@ -168,9 +145,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(WeightUnit.KILOGRAM, sumWeight.Unit, "Result should be in kilograms");
         }
 
-        /// <summary>
-        /// Tests addition of weight quantities in different units with result in first unit.
-        /// </summary>
         [TestMethod]
         public void Add_Weight_CrossUnit_ResultInFirstUnit_ReturnsCorrectSum()
         {
@@ -186,9 +160,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(WeightUnit.KILOGRAM, sumWeight.Unit, "Result should be in kilograms");
         }
 
-        /// <summary>
-        /// Tests addition of weight quantities in different units with result in second unit.
-        /// </summary>
         [TestMethod]
         public void Add_Weight_CrossUnit_ResultInSecondUnit_ReturnsCorrectSum()
         {
@@ -209,9 +180,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(WeightUnit.GRAM, sumWeight.Unit, "Result should be in grams");
         }
 
-        /// <summary>
-        /// Tests addition of weight quantities with explicit target unit (pounds).
-        /// </summary>
         [TestMethod]
         public void Add_Weight_ExplicitTarget_Pounds_ReturnsCorrectSum()
         {
@@ -223,12 +191,12 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             var sumInPounds = kgWeight.Add(gWeight, WeightUnit.POUND);
 
             // Assert
-            double expectedValue = 1.5 * 2.20462262185; // 1.5 kg in pounds
+            double expectedValue = 3.31; // 1.5 kg in pounds = 3.30693 rounded to 2 decimal places
             Assert.AreEqual(
                 expectedValue,
                 sumInPounds.Value,
-                PoundTolerance,
-                "1 kg + 500 g in pounds should be correct"
+                RoundedTolerance,
+                "1 kg + 500 g in pounds should be 3.31 lb (rounded)"
             );
             Assert.AreEqual(WeightUnit.POUND, sumInPounds.Unit, "Result should be in pounds");
         }
@@ -237,9 +205,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
 
         #region Static Add Method Tests
 
-        /// <summary>
-        /// Tests static Add method for length.
-        /// </summary>
         [TestMethod]
         public void Add_Static_Length_ReturnsCorrectSum()
         {
@@ -257,9 +222,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(LengthUnit.FEET, sumLength.Unit, "Result should be in feet");
         }
 
-        /// <summary>
-        /// Tests static Add method for weight.
-        /// </summary>
         [TestMethod]
         public void Add_Static_Weight_ReturnsCorrectSum()
         {
@@ -281,9 +243,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
 
         #region Commutativity Tests
 
-        /// <summary>
-        /// Tests that addition is commutative for length.
-        /// </summary>
         [TestMethod]
         public void Add_Length_IsCommutative_ReturnsTrue()
         {
@@ -300,14 +259,11 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(
                 firstSum.Value,
                 secondSum.Value,
-                Tolerance,
+                RoundedTolerance,
                 "a + b should equal b + a when using same target unit"
             );
         }
 
-        /// <summary>
-        /// Tests that addition is commutative for weight.
-        /// </summary>
         [TestMethod]
         public void Add_Weight_IsCommutative_ReturnsTrue()
         {
@@ -324,7 +280,7 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(
                 firstSum.Value,
                 secondSum.Value,
-                PoundTolerance,
+                RoundedTolerance,
                 "a + b should equal b + a when using same target unit"
             );
         }
@@ -333,9 +289,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
 
         #region Zero and Negative Value Tests
 
-        /// <summary>
-        /// Tests addition with zero.
-        /// </summary>
         [TestMethod]
         public void Add_WithZero_ReturnsOriginalValue()
         {
@@ -360,9 +313,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(5.0, sumWeight.Value, Tolerance, "5 kg + 0 g should equal 5 kg");
         }
 
-        /// <summary>
-        /// Tests addition with negative values.
-        /// </summary>
         [TestMethod]
         public void Add_WithNegativeValues_ReturnsCorrectSum()
         {
@@ -391,9 +341,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
 
         #region Null Argument Tests
 
-        /// <summary>
-        /// Tests that adding null throws exception.
-        /// </summary>
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Add_NullOperand_ThrowsException()

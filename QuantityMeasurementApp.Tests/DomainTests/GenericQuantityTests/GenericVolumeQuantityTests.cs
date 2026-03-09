@@ -9,18 +9,17 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
     /// <summary>
     /// Test class for GenericQuantity with VolumeUnit.
     /// UC11: Tests volume measurements equality, conversion, and addition.
+    /// Updated to use rounded tolerance for explicit target unit tests.
     /// </summary>
     [TestClass]
     public class GenericVolumeQuantityTests
     {
         private const double Tolerance = 0.000001;
+        private const double RoundedTolerance = 0.01; // For rounded values (2 decimal places)
         private const double GallonTolerance = 0.001;
 
         #region Equality Tests
 
-        /// <summary>
-        /// Tests that two volumes in litres with same value are equal.
-        /// </summary>
         [TestMethod]
         public void Equals_Volume_LitreSameValue_ReturnsTrue()
         {
@@ -35,9 +34,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.IsTrue(areEqual, "1 L should equal 1 L");
         }
 
-        /// <summary>
-        /// Tests that two volumes in litres with different values are not equal.
-        /// </summary>
         [TestMethod]
         public void Equals_Volume_LitreDifferentValue_ReturnsFalse()
         {
@@ -52,9 +48,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.IsFalse(areEqual, "1 L should not equal 2 L");
         }
 
-        /// <summary>
-        /// Tests cross-unit equality: 1 L = 1000 mL.
-        /// </summary>
         [TestMethod]
         public void Equals_Volume_LitreToMillilitreEquivalent_ReturnsTrue()
         {
@@ -69,9 +62,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.IsTrue(areEqual, "1 L should equal 1000 mL");
         }
 
-        /// <summary>
-        /// Tests cross-unit equality: 1 L ≈ 0.264172 gal.
-        /// </summary>
         [TestMethod]
         public void Equals_Volume_LitreToGallonEquivalent_ReturnsTrue()
         {
@@ -86,9 +76,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.IsTrue(areEqual, "1 L should approximately equal 0.264172 gal");
         }
 
-        /// <summary>
-        /// Tests cross-unit equality: 3.78541 L = 1 gal.
-        /// </summary>
         [TestMethod]
         public void Equals_Volume_GallonToLitreEquivalent_ReturnsTrue()
         {
@@ -103,9 +90,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.IsTrue(areEqual, "1 gal should approximately equal 3.78541 L");
         }
 
-        /// <summary>
-        /// Tests reflexive property.
-        /// </summary>
         [TestMethod]
         public void Equals_Volume_Reflexive_ReturnsTrue()
         {
@@ -119,9 +103,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.IsTrue(isEqualToItself, "Object should equal itself");
         }
 
-        /// <summary>
-        /// Tests symmetric property.
-        /// </summary>
         [TestMethod]
         public void Equals_Volume_Symmetric_ReturnsTrue()
         {
@@ -137,9 +118,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.IsTrue(litreEqualsMl && mlEqualsLitre, "Equality should be symmetric");
         }
 
-        /// <summary>
-        /// Tests null comparison.
-        /// </summary>
         [TestMethod]
         public void Equals_Volume_NullComparison_ReturnsFalse()
         {
@@ -153,9 +131,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.IsFalse(isEqualToNull, "Object should not equal null");
         }
 
-        /// <summary>
-        /// Tests that volume and length are not equal (different categories).
-        /// </summary>
         [TestMethod]
         public void Equals_VolumeVsLength_ReturnsFalse()
         {
@@ -170,9 +145,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.IsFalse(areEqual, "Volume and length should not be equal");
         }
 
-        /// <summary>
-        /// Tests that volume and weight are not equal (different categories).
-        /// </summary>
         [TestMethod]
         public void Equals_VolumeVsWeight_ReturnsFalse()
         {
@@ -191,9 +163,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
 
         #region Conversion Tests
 
-        /// <summary>
-        /// Tests ConvertTo for litres to millilitres.
-        /// </summary>
         [TestMethod]
         public void ConvertTo_Volume_LitresToMillilitres_ReturnsCorrectQuantity()
         {
@@ -208,9 +177,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(VolumeUnit.MILLILITRE, mlVolume.Unit, "Unit should be millilitres");
         }
 
-        /// <summary>
-        /// Tests ConvertTo for millilitres to litres.
-        /// </summary>
         [TestMethod]
         public void ConvertTo_Volume_MillilitresToLitres_ReturnsCorrectQuantity()
         {
@@ -225,9 +191,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(VolumeUnit.LITRE, litreVolume.Unit, "Unit should be litres");
         }
 
-        /// <summary>
-        /// Tests ConvertTo for litres to gallons.
-        /// </summary>
         [TestMethod]
         public void ConvertTo_Volume_LitresToGallons_ReturnsCorrectQuantity()
         {
@@ -247,9 +210,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(VolumeUnit.GALLON, gallonVolume.Unit, "Unit should be gallons");
         }
 
-        /// <summary>
-        /// Tests ConvertTo for gallons to litres.
-        /// </summary>
         [TestMethod]
         public void ConvertTo_Volume_GallonsToLitres_ReturnsCorrectQuantity()
         {
@@ -269,9 +229,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(VolumeUnit.LITRE, litreVolume.Unit, "Unit should be litres");
         }
 
-        /// <summary>
-        /// Tests ConvertTo for millilitres to gallons.
-        /// </summary>
         [TestMethod]
         public void ConvertTo_Volume_MillilitresToGallons_ReturnsCorrectQuantity()
         {
@@ -292,9 +249,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(VolumeUnit.GALLON, gallonVolume.Unit, "Unit should be gallons");
         }
 
-        /// <summary>
-        /// Tests round-trip conversion.
-        /// </summary>
         [TestMethod]
         public void ConvertTo_Volume_RoundTrip_ReturnsOriginalValue()
         {
@@ -319,9 +273,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
 
         #region Addition Tests
 
-        /// <summary>
-        /// Tests addition of two volumes in same unit (litres).
-        /// </summary>
         [TestMethod]
         public void Add_Volume_SameUnit_Litres_ReturnsCorrectSum()
         {
@@ -337,9 +288,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(VolumeUnit.LITRE, sumVolume.Unit, "Result should be in litres");
         }
 
-        /// <summary>
-        /// Tests addition of two volumes in same unit (millilitres).
-        /// </summary>
         [TestMethod]
         public void Add_Volume_SameUnit_Millilitres_ReturnsCorrectSum()
         {
@@ -364,9 +312,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             );
         }
 
-        /// <summary>
-        /// Tests addition of volumes in different units (L + mL) with result in first unit.
-        /// </summary>
         [TestMethod]
         public void Add_Volume_CrossUnit_ResultInFirstUnit_ReturnsCorrectSum()
         {
@@ -382,9 +327,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(VolumeUnit.LITRE, sumVolume.Unit, "Result should be in litres");
         }
 
-        /// <summary>
-        /// Tests addition of volumes in different units (L + mL) with result in second unit.
-        /// </summary>
         [TestMethod]
         public void Add_Volume_CrossUnit_ResultInSecondUnit_ReturnsCorrectSum()
         {
@@ -409,33 +351,27 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             );
         }
 
-        /// <summary>
-        /// Tests addition with explicit target unit (gallons).
-        /// </summary>
         [TestMethod]
         public void Add_Volume_ExplicitTarget_Gallons_ReturnsCorrectSum()
         {
             // Arrange
-            var litreVolume = new GenericQuantity<VolumeUnit>(3.78541, VolumeUnit.LITRE);
-            var mlVolume = new GenericQuantity<VolumeUnit>(1000.0, VolumeUnit.MILLILITRE);
+            var litreVolume = new GenericQuantity<VolumeUnit>(3.78541, VolumeUnit.LITRE); // 1 gallon
+            var mlVolume = new GenericQuantity<VolumeUnit>(1000.0, VolumeUnit.MILLILITRE); // 1 litre
 
             // Act
             var sumInGallons = litreVolume.Add(mlVolume, VolumeUnit.GALLON);
 
             // Assert
-            double expectedValue = 1.264172; // 1 gal + 0.264172 gal = 1.264172 gal
+            double expectedValue = 1.26; // 1 gal + 0.264 gal = 1.264 gal rounded to 2 decimal places
             Assert.AreEqual(
                 expectedValue,
                 sumInGallons.Value,
-                GallonTolerance,
-                "1 gal + 1000 mL in gallons should be correct"
+                RoundedTolerance,
+                "1 gal + 1000 mL in gallons should be 1.26 gal (rounded)"
             );
             Assert.AreEqual(VolumeUnit.GALLON, sumInGallons.Unit, "Result should be in gallons");
         }
 
-        /// <summary>
-        /// Tests static Add method.
-        /// </summary>
         [TestMethod]
         public void Add_Volume_Static_ReturnsCorrectSum()
         {
@@ -453,9 +389,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(VolumeUnit.LITRE, sumVolume.Unit, "Result should be in litres");
         }
 
-        /// <summary>
-        /// Tests addition with zero.
-        /// </summary>
         [TestMethod]
         public void Add_Volume_WithZero_ReturnsOriginalValue()
         {
@@ -470,9 +403,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(5.0, sumVolume.Value, Tolerance, "5 L + 0 mL should equal 5 L");
         }
 
-        /// <summary>
-        /// Tests addition with negative values.
-        /// </summary>
         [TestMethod]
         public void Add_Volume_WithNegativeValues_ReturnsCorrectSum()
         {
@@ -487,9 +417,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(3.0, sumVolume.Value, Tolerance, "5 L + (-2000 mL) should equal 3 L");
         }
 
-        /// <summary>
-        /// Tests commutativity property.
-        /// </summary>
         [TestMethod]
         public void Add_Volume_IsCommutative_ReturnsTrue()
         {
@@ -506,7 +433,7 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(
                 firstSum.Value,
                 secondSum.Value,
-                GallonTolerance,
+                RoundedTolerance,
                 "a + b should equal b + a when using same target unit"
             );
         }
@@ -515,9 +442,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
 
         #region Zero and Edge Cases
 
-        /// <summary>
-        /// Tests equality with zero values across units.
-        /// </summary>
         [TestMethod]
         public void Equals_Volume_ZeroValue_AllUnitsEqual()
         {
@@ -532,9 +456,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.IsTrue(zeroMl.Equals(zeroGal), "0 mL should equal 0 gal");
         }
 
-        /// <summary>
-        /// Tests that invalid value throws exception.
-        /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidValueException))]
         public void Constructor_Volume_NaNValue_ThrowsException()
@@ -543,9 +464,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             var invalidVolume = new GenericQuantity<VolumeUnit>(double.NaN, VolumeUnit.LITRE);
         }
 
-        /// <summary>
-        /// Tests that infinite value throws exception.
-        /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidValueException))]
         public void Constructor_Volume_InfinityValue_ThrowsException()
@@ -561,9 +479,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
 
         #region GetHashCode Tests
 
-        /// <summary>
-        /// Tests that GetHashCode returns same value for equal objects.
-        /// </summary>
         [TestMethod]
         public void GetHashCode_Volume_EqualObjects_ReturnsSameHashCode()
         {
@@ -579,9 +494,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
             Assert.AreEqual(litreHash, mlHash, "Equal volumes should have equal hash codes");
         }
 
-        /// <summary>
-        /// Tests that GetHashCode returns different values for different objects.
-        /// </summary>
         [TestMethod]
         public void GetHashCode_Volume_DifferentObjects_ReturnsDifferentHashCode()
         {
@@ -601,9 +513,6 @@ namespace QuantityMeasurementApp.Tests.DomainTests.GenericQuantityTests
 
         #region ToString Tests
 
-        /// <summary>
-        /// Tests ToString returns correct format for each unit.
-        /// </summary>
         [TestMethod]
         public void ToString_Volume_ReturnsCorrectFormat()
         {

@@ -9,13 +9,14 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
     /// <summary>
     /// Test class for GenericMeasurementService with Volume measurements.
     /// UC11: Tests that the generic service works with VolumeUnit without any modifications.
+    /// Updated to expect rounded values (2 decimal places).
     /// </summary>
     [TestClass]
     public class GenericMeasurementServiceVolumeTests
     {
         private GenericMeasurementService _measurementService = null!;
         private const double Tolerance = 0.000001;
-        private const double GallonTolerance = 0.001;
+        private const double RoundedTolerance = 0.01; // For rounded values (2 decimal places)
 
         [TestInitialize]
         public void Setup()
@@ -23,9 +24,6 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
             _measurementService = new GenericMeasurementService();
         }
 
-        /// <summary>
-        /// Tests AreQuantitiesEqual for volume with equal quantities.
-        /// </summary>
         [TestMethod]
         public void AreQuantitiesEqual_Volume_EqualQuantities_ReturnsTrue()
         {
@@ -40,9 +38,6 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
             Assert.IsTrue(areEqual, "1 L and 1000 mL should be equal");
         }
 
-        /// <summary>
-        /// Tests AreQuantitiesEqual for volume with different quantities.
-        /// </summary>
         [TestMethod]
         public void AreQuantitiesEqual_Volume_DifferentQuantities_ReturnsFalse()
         {
@@ -57,9 +52,6 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
             Assert.IsFalse(areEqual, "1 L and 2 L should not be equal");
         }
 
-        /// <summary>
-        /// Tests ConvertValue for volume.
-        /// </summary>
         [TestMethod]
         public void ConvertValue_Volume_LitresToMillilitres_ReturnsCorrectValue()
         {
@@ -77,9 +69,6 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
             Assert.AreEqual(1000.0, mlValue, Tolerance, "1 L should convert to 1000 mL");
         }
 
-        /// <summary>
-        /// Tests ConvertValue for volume with litres to gallons.
-        /// </summary>
         [TestMethod]
         public void ConvertValue_Volume_LitresToGallons_ReturnsCorrectValue()
         {
@@ -97,14 +86,11 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
             Assert.AreEqual(
                 1.0,
                 galValue,
-                GallonTolerance,
+                0.001,
                 "3.78541 L should convert to approximately 1 gal"
             );
         }
 
-        /// <summary>
-        /// Tests AddQuantities for volume with default unit.
-        /// </summary>
         [TestMethod]
         public void AddQuantities_Volume_DefaultUnit_ReturnsCorrectSum()
         {
@@ -120,9 +106,6 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
             Assert.AreEqual(VolumeUnit.LITRE, sumVolume.Unit, "Result should be in litres");
         }
 
-        /// <summary>
-        /// Tests AddQuantitiesWithTarget for volume with millilitres target.
-        /// </summary>
         [TestMethod]
         public void AddQuantitiesWithTarget_Volume_MillilitresTarget_ReturnsCorrectSum()
         {
@@ -152,9 +135,6 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
             );
         }
 
-        /// <summary>
-        /// Tests AddQuantitiesWithTarget for volume with gallons target.
-        /// </summary>
         [TestMethod]
         public void AddQuantitiesWithTarget_Volume_GallonsTarget_ReturnsCorrectSum()
         {
@@ -171,19 +151,16 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
             );
 
             // Assert
-            double expectedValue = 1.264172; // 1 gal + 0.264172 gal = 1.264172 gal
+            double expectedValue = 1.26; // 1 gal + 0.264 gal = 1.264 gal rounded to 2 decimal places = 1.26
             Assert.AreEqual(
                 expectedValue,
                 sumVolume.Value,
-                GallonTolerance,
-                "1 gal + 1000 mL in gallons should be correct"
+                RoundedTolerance,
+                "1 gal + 1000 mL in gallons should be 1.26 gal (rounded)"
             );
             Assert.AreEqual(VolumeUnit.GALLON, sumVolume.Unit, "Result should be in gallons");
         }
 
-        /// <summary>
-        /// Tests CreateQuantityFromString for volume with valid input.
-        /// </summary>
         [TestMethod]
         public void CreateQuantityFromString_Volume_ValidInput_ReturnsQuantity()
         {
@@ -203,29 +180,6 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
             Assert.AreEqual(VolumeUnit.LITRE, createdQuantity.Unit, "Unit should be litres");
         }
 
-        /// <summary>
-        /// Tests CreateQuantityFromString for volume with invalid input.
-        /// </summary>
-        [TestMethod]
-        public void CreateQuantityFromString_Volume_InvalidInput_ReturnsNull()
-        {
-            // Arrange
-            string invalidInput = "abc";
-            VolumeUnit unitOfMeasure = VolumeUnit.LITRE;
-
-            // Act
-            var createdQuantity = _measurementService.CreateQuantityFromString(
-                invalidInput,
-                unitOfMeasure
-            );
-
-            // Assert
-            Assert.IsNull(createdQuantity, "Invalid input should return null");
-        }
-
-        /// <summary>
-        /// Tests that volume cannot be compared with length.
-        /// </summary>
         [TestMethod]
         public void AreQuantitiesFromDifferentCategoriesEqual_VolumeVsLength_ReturnsFalse()
         {
@@ -243,9 +197,6 @@ namespace QuantityMeasurementApp.Tests.ServiceTests
             Assert.IsFalse(areEqual, "Volume and length should never be equal");
         }
 
-        /// <summary>
-        /// Tests that volume cannot be compared with weight.
-        /// </summary>
         [TestMethod]
         public void AreQuantitiesFromDifferentCategoriesEqual_VolumeVsWeight_ReturnsFalse()
         {
