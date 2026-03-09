@@ -125,12 +125,12 @@ namespace QuantityMeasurementApp.UI.Menus
                 }
                 else
                 {
-                    ConsoleHelper.DisplayError(" Invalid numeric values!");
+                    ConsoleHelper.DisplayError("❌ Invalid numeric values!");
                 }
             }
             catch (Exception ex)
             {
-                ConsoleHelper.DisplayError($" Error: {ex.Message}");
+                ConsoleHelper.DisplayError($"❌ Error: {ex.Message}");
             }
 
             ConsoleHelper.WaitForKeyPress();
@@ -187,12 +187,12 @@ namespace QuantityMeasurementApp.UI.Menus
                 }
                 else
                 {
-                    ConsoleHelper.DisplayError("Invalid numeric values!");
+                    ConsoleHelper.DisplayError("❌ Invalid numeric values!");
                 }
             }
             catch (Exception ex)
             {
-                ConsoleHelper.DisplayError($"Error: {ex.Message}");
+                ConsoleHelper.DisplayError($"❌ Error: {ex.Message}");
             }
 
             ConsoleHelper.WaitForKeyPress();
@@ -259,12 +259,12 @@ namespace QuantityMeasurementApp.UI.Menus
                 }
                 else
                 {
-                    ConsoleHelper.DisplayError("Invalid numeric values!");
+                    ConsoleHelper.DisplayError("❌ Invalid numeric values!");
                 }
             }
             catch (Exception ex)
             {
-                ConsoleHelper.DisplayError($"Error: {ex.Message}");
+                ConsoleHelper.DisplayError($"❌ Error: {ex.Message}");
             }
 
             ConsoleHelper.WaitForKeyPress();

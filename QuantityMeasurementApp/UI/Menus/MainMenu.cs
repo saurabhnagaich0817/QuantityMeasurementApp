@@ -5,7 +5,7 @@ namespace QuantityMeasurementApp.UI.Menus
 {
     /// <summary>
     /// Main menu of the application.
-    /// Provides access to all features.
+    /// Provides access to all features including new weight measurements.
     /// </summary>
     public class MainMenu
     {
@@ -13,6 +13,7 @@ namespace QuantityMeasurementApp.UI.Menus
         private readonly ConversionMenu _conversionMenu;
         private readonly ComparisonMenu _comparisonMenu;
         private readonly ArithmeticMenu _arithmeticMenu;
+        private readonly WeightMenu _weightMenu;
 
         /// <summary>
         /// Initializes a new instance of the MainMenu class.
@@ -23,6 +24,7 @@ namespace QuantityMeasurementApp.UI.Menus
             _conversionMenu = new ConversionMenu(_measurementService);
             _comparisonMenu = new ComparisonMenu(_measurementService);
             _arithmeticMenu = new ArithmeticMenu(_measurementService);
+            _weightMenu = new WeightMenu();
         }
 
         /// <summary>
@@ -37,7 +39,7 @@ namespace QuantityMeasurementApp.UI.Menus
                 DisplayOptions();
                 string? userChoice = ConsoleHelper.GetInput("Enter your choice");
 
-                if (userChoice == "5")
+                if (userChoice == "6")
                     break;
 
                 ProcessUserChoice(userChoice);
@@ -51,16 +53,18 @@ namespace QuantityMeasurementApp.UI.Menus
 
         private void DisplayOptions()
         {
-            ConsoleHelper.DisplayMenu(
-                new[]
-                {
-                    "1. Convert Units",
-                    "2. Compare Measurements",
-                    "3. Add Measurements",
-                    "4. Legacy Mode",
-                    "5. Exit",
-                }
-            );
+            Console.WriteLine("╔════════════════════════════════════════════════════════╗");
+            Console.WriteLine("║                       MAIN MENU                        ║");
+            Console.WriteLine("╠════════════════════════════════════════════════════════╣");
+            Console.WriteLine("║                                                        ║");
+            Console.WriteLine("║    1.  Length Measurements (ft, in, yd, cm)            ║");
+            Console.WriteLine("║    2.  Weight Measurements (kg, g, lb)                 ║");
+            Console.WriteLine("║    3.  Compare Measurements                            ║");
+            Console.WriteLine("║    4.  Add Measurements                                ║");
+            Console.WriteLine("║    5.  Legacy Mode (Original Classes)                  ║");
+            Console.WriteLine("║    6.  Exit                                            ║");
+            Console.WriteLine("║                                                        ║");
+            Console.WriteLine("╚════════════════════════════════════════════════════════╝");
         }
 
         private void ProcessUserChoice(string? userChoice)
@@ -71,12 +75,15 @@ namespace QuantityMeasurementApp.UI.Menus
                     _conversionMenu.Display();
                     break;
                 case "2":
-                    _comparisonMenu.Display();
+                    _weightMenu.Display();
                     break;
                 case "3":
-                    _arithmeticMenu.Display();
+                    _comparisonMenu.Display();
                     break;
                 case "4":
+                    _arithmeticMenu.Display();
+                    break;
+                case "5":
                     DisplayLegacyMenu();
                     break;
                 default:
