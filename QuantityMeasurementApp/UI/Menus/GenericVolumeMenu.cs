@@ -68,13 +68,10 @@ namespace QuantityMeasurementApp.UI.Menus
             string[] menuOptions = new[]
             {
                 "1.  Convert Volume Units",
-                "    (e.g., 1 L = 1000 mL = 0.264 gal)",
                 "",
                 "2.  Compare Volumes",
-                "    (e.g., 1 L = 1000 mL = 0.264 gal)",
                 "",
                 "3.  Add Volumes",
-                "    (e.g., 1 L + 500 mL = 1.5 L)",
                 "",
                 "4.  Commutativity Demo",
                 "    (Shows that a + b = b + a)",
@@ -212,13 +209,10 @@ namespace QuantityMeasurementApp.UI.Menus
                 string[] additionOptions = new[]
                 {
                     "1.  Result in FIRST unit",
-                    "    (e.g., 1 L + 500 mL = 1.5 L)",
                     "",
                     "2.  Result in SECOND unit",
-                    "    (e.g., 1 L + 500 mL = 1500 mL)",
                     "",
                     "3.  Results in BOTH units",
-                    "    (Compare both results)",
                     "",
                     "4.  Back to Volume Menu",
                 };

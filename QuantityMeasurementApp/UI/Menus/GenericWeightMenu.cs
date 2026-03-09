@@ -64,13 +64,10 @@ namespace QuantityMeasurementApp.UI.Menus
             Console.WriteLine("╠════════════════════════════════════════════════════════╣");
             Console.WriteLine("║                                                        ║");
             Console.WriteLine("║    1.  Convert Weight Units                            ║");
-            Console.WriteLine("║        (e.g., 1 kg = 1000 g)                           ║");
             Console.WriteLine("║                                                        ║");
             Console.WriteLine("║    2.  Compare Weights                                 ║");
-            Console.WriteLine("║        (e.g., 1 kg = 1000 g = 2.20462 lb)              ║");
             Console.WriteLine("║                                                        ║");
             Console.WriteLine("║    3.  Add Weights                                     ║");
-            Console.WriteLine("║        (e.g., 1 kg + 500 g = 1.5 kg)                   ║");
             Console.WriteLine("║                                                        ║");
             Console.WriteLine("║    4.  Back to Main Menu                               ║");
             Console.WriteLine("║                                                        ║");
@@ -232,13 +229,10 @@ namespace QuantityMeasurementApp.UI.Menus
                 Console.WriteLine("╠════════════════════════════════════════════════════════╣");
                 Console.WriteLine("║                                                        ║");
                 Console.WriteLine("║    1.  Result in FIRST unit                            ║");
-                Console.WriteLine("║        (e.g., 1 kg + 500 g = 1.5 kg)                   ║");
                 Console.WriteLine("║                                                        ║");
                 Console.WriteLine("║    2.  Result in SECOND unit                           ║");
-                Console.WriteLine("║        (e.g., 1 kg + 500 g = 1500 g)                   ║");
                 Console.WriteLine("║                                                        ║");
                 Console.WriteLine("║    3.  Results in BOTH units                           ║");
-                Console.WriteLine("║        (Compare both results)                          ║");
                 Console.WriteLine("║                                                        ║");
                 Console.WriteLine("║    4.  Back to Weight Menu                             ║");
                 Console.WriteLine("║                                                        ║");

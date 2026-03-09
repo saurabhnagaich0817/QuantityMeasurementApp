@@ -290,5 +290,61 @@ namespace QuantityMeasurementApp.UI.Helpers
             Console.WriteLine(message);
             Console.ResetColor();
         }
+
+        /// <summary>
+        /// Displays a subtraction result.
+        /// </summary>
+        /// <param name="firstQuantity">First quantity string.</param>
+        /// <param name="secondQuantity">Second quantity string.</param>
+        /// <param name="resultValue">The result value.</param>
+        /// <param name="resultSymbol">The result symbol.</param>
+        public static void DisplaySubtractionResult(
+            string firstQuantity,
+            string secondQuantity,
+            double resultValue,
+            string resultSymbol
+        )
+        {
+            int width = 60;
+            string border = new string('═', width - 2);
+
+            Console.WriteLine($"\n╔{border}╗");
+            Console.WriteLine($"║{CenterText("SUBTRACTION RESULT", width - 2)}║");
+            Console.WriteLine($"╠{border}╣");
+            Console.WriteLine(
+                $"║  {firstQuantity, -10} - {secondQuantity, -10}{new string(' ', 25)}║"
+            );
+            Console.WriteLine($"╠{border}╣");
+            Console.WriteLine(
+                $"║  = {resultValue, 12:F6} {resultSymbol, -3}{new string(' ', 34)}║"
+            );
+            Console.WriteLine($"╚{border}╝");
+        }
+
+        /// <summary>
+        /// Displays a division result.
+        /// </summary>
+        /// <param name="firstQuantity">First quantity string.</param>
+        /// <param name="secondQuantity">Second quantity string.</param>
+        /// <param name="ratio">The division ratio.</param>
+        public static void DisplayDivisionResult(
+            string firstQuantity,
+            string secondQuantity,
+            double ratio
+        )
+        {
+            int width = 60;
+            string border = new string('═', width - 2);
+
+            Console.WriteLine($"\n╔{border}╗");
+            Console.WriteLine($"║{CenterText("DIVISION RESULT", width - 2)}║");
+            Console.WriteLine($"╠{border}╣");
+            Console.WriteLine(
+                $"║  {firstQuantity, -10} ÷ {secondQuantity, -10}{new string(' ', 25)}║"
+            );
+            Console.WriteLine($"╠{border}╣");
+            Console.WriteLine($"║  Ratio = {ratio, 12:F6}{new string(' ', 31)}║");
+            Console.WriteLine($"╚{border}╝");
+        }
     }
 }
