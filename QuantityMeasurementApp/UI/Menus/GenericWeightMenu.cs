@@ -60,19 +60,19 @@ namespace QuantityMeasurementApp.UI.Menus
             ConsoleHelper.DisplayAttributedHeader("WEIGHT MEASUREMENTS", "kg, g, lb");
 
             Console.WriteLine("╔════════════════════════════════════════════════════════╗");
-            Console.WriteLine("║                    WEIGHT OPTIONS                     ║");
+            Console.WriteLine("║                      WEIGHT OPTIONS                    ║");
             Console.WriteLine("╠════════════════════════════════════════════════════════╣");
             Console.WriteLine("║                                                        ║");
-            Console.WriteLine("║    1.  Convert Weight Units                           ║");
-            Console.WriteLine("║        (e.g., 1 kg = 1000 g)                          ║");
+            Console.WriteLine("║    1.  Convert Weight Units                            ║");
+            Console.WriteLine("║        (e.g., 1 kg = 1000 g)                           ║");
             Console.WriteLine("║                                                        ║");
-            Console.WriteLine("║    2.  Compare Weights                                ║");
-            Console.WriteLine("║        (e.g., 1 kg = 1000 g = 2.20462 lb)            ║");
+            Console.WriteLine("║    2.  Compare Weights                                 ║");
+            Console.WriteLine("║        (e.g., 1 kg = 1000 g = 2.20462 lb)              ║");
             Console.WriteLine("║                                                        ║");
-            Console.WriteLine("║    3.  Add Weights                                    ║");
-            Console.WriteLine("║        (e.g., 1 kg + 500 g = 1.5 kg)                  ║");
+            Console.WriteLine("║    3.  Add Weights                                     ║");
+            Console.WriteLine("║        (e.g., 1 kg + 500 g = 1.5 kg)                   ║");
             Console.WriteLine("║                                                        ║");
-            Console.WriteLine("║    4.  Back to Main Menu                              ║");
+            Console.WriteLine("║    4.  Back to Main Menu                               ║");
             Console.WriteLine("║                                                        ║");
             Console.WriteLine("╚════════════════════════════════════════════════════════╝");
         }
@@ -103,7 +103,7 @@ namespace QuantityMeasurementApp.UI.Menus
                     );
 
                     Console.WriteLine("\n╔════════════════════════════════════════╗");
-                    Console.WriteLine("║         CONVERSION RESULT             ║");
+                    Console.WriteLine("║          CONVERSION RESULT             ║");
                     Console.WriteLine("╠════════════════════════════════════════╣");
                     Console.WriteLine(
                         $"║  {inputValue, 8:F3} {sourceUnit.GetSymbol(), -3} = {convertedValue, 10:F6} {targetUnit.GetSymbol(), -3} ║"
@@ -183,7 +183,7 @@ namespace QuantityMeasurementApp.UI.Menus
                     );
 
                     Console.WriteLine("\n╔════════════════════════════════════════╗");
-                    Console.WriteLine("║         COMPARISON RESULT             ║");
+                    Console.WriteLine("║         COMPARISON RESULT              ║");
                     Console.WriteLine("╠════════════════════════════════════════╣");
                     Console.WriteLine($"║  {firstQuantity, -8} vs {secondQuantity, -8}      ║");
                     Console.WriteLine("╠════════════════════════════════════════╣");
@@ -228,19 +228,19 @@ namespace QuantityMeasurementApp.UI.Menus
                 ConsoleHelper.DisplayAttributedHeader("WEIGHT ADDITION", "1 kg + 500 g = 1.5 kg");
 
                 Console.WriteLine("╔════════════════════════════════════════════════════════╗");
-                Console.WriteLine("║                 ADDITION OPTIONS                      ║");
+                Console.WriteLine("║                    ADDITION OPTIONS                    ║");
                 Console.WriteLine("╠════════════════════════════════════════════════════════╣");
                 Console.WriteLine("║                                                        ║");
-                Console.WriteLine("║    1.  Result in FIRST unit                           ║");
-                Console.WriteLine("║        (e.g., 1 kg + 500 g = 1.5 kg)                  ║");
+                Console.WriteLine("║    1.  Result in FIRST unit                            ║");
+                Console.WriteLine("║        (e.g., 1 kg + 500 g = 1.5 kg)                   ║");
                 Console.WriteLine("║                                                        ║");
-                Console.WriteLine("║    2.  Result in SECOND unit                          ║");
-                Console.WriteLine("║        (e.g., 1 kg + 500 g = 1500 g)                  ║");
+                Console.WriteLine("║    2.  Result in SECOND unit                           ║");
+                Console.WriteLine("║        (e.g., 1 kg + 500 g = 1500 g)                   ║");
                 Console.WriteLine("║                                                        ║");
-                Console.WriteLine("║    3.  Results in BOTH units                          ║");
-                Console.WriteLine("║        (Compare both results)                         ║");
+                Console.WriteLine("║    3.  Results in BOTH units                           ║");
+                Console.WriteLine("║        (Compare both results)                          ║");
                 Console.WriteLine("║                                                        ║");
-                Console.WriteLine("║    4.  Back to Weight Menu                            ║");
+                Console.WriteLine("║    4.  Back to Weight Menu                             ║");
                 Console.WriteLine("║                                                        ║");
                 Console.WriteLine("╚════════════════════════════════════════════════════════╝");
 

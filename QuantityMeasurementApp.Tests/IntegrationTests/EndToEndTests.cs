@@ -293,5 +293,123 @@ namespace QuantityMeasurementApp.Tests.IntegrationTests
             // Assert - Cannot be compared (compiler prevents this, but we test runtime)
             Assert.IsFalse(length.Equals(weight), "Length and weight should not be equal");
         }
+
+        /// <summary>
+        /// Tests a complete volume workflow: create, convert, add, compare.
+        /// </summary>
+        [TestMethod]
+        public void CompleteWorkflow_Volume_AllOperations_WorkCorrectly()
+        {
+            // Step 1: Create quantities from string inputs
+            var firstVolume = _measurementService.CreateQuantityFromString("2", VolumeUnit.LITRE);
+            var secondVolume = _measurementService.CreateQuantityFromString(
+                "1000",
+                VolumeUnit.MILLILITRE
+            );
+
+            Assert.IsNotNull(firstVolume, "First volume should not be null");
+            Assert.IsNotNull(secondVolume, "Second volume should not be null");
+
+            // Step 2: Convert first volume to millilitres
+            var firstVolumeInMl = firstVolume!.ConvertTo(VolumeUnit.MILLILITRE);
+            Assert.AreEqual(2000.0, firstVolumeInMl.Value, Tolerance, "2 L should equal 2000 mL");
+
+            // Step 3: Add both volumes and get result in litres
+            var sumInLitres = _measurementService.AddQuantitiesWithTarget(
+                firstVolume,
+                secondVolume!,
+                VolumeUnit.LITRE
+            );
+
+            // 2 L + 1000 mL = 2 L + 1 L = 3 L
+            Assert.AreEqual(3.0, sumInLitres.Value, Tolerance, "2 L + 1000 mL should equal 3 L");
+
+            // Step 4: Compare with expected volume
+            var expectedVolume = new GenericQuantity<VolumeUnit>(3.0, VolumeUnit.LITRE);
+            bool areEqual = _measurementService.AreQuantitiesEqual(sumInLitres, expectedVolume);
+
+            Assert.IsTrue(areEqual, "Sum should equal expected volume");
+        }
+
+        /// <summary>
+        /// Tests cross-unit comparison across volume units.
+        /// </summary>
+        [TestMethod]
+        public void CompareAcrossUnits_Volume_ReturnsCorrectResult()
+        {
+            // Arrange
+            var litreVolume = new GenericQuantity<VolumeUnit>(1.0, VolumeUnit.LITRE);
+            var mlVolume = new GenericQuantity<VolumeUnit>(1000.0, VolumeUnit.MILLILITRE);
+            var galVolume = new GenericQuantity<VolumeUnit>(0.264172, VolumeUnit.GALLON);
+
+            // Act & Assert
+            Assert.IsTrue(
+                _measurementService.AreQuantitiesEqual(litreVolume, mlVolume),
+                "1 L should equal 1000 mL"
+            );
+            Assert.IsTrue(
+                _measurementService.AreQuantitiesEqual(litreVolume, galVolume),
+                "1 L should approximately equal 0.264172 gal"
+            );
+        }
+
+        /// <summary>
+        /// Tests cross-unit addition with different target units for volume.
+        /// </summary>
+        [TestMethod]
+        public void CrossUnitAddition_Volume_DifferentTargets_ReturnsCorrectResults()
+        {
+            // Arrange
+            var litreVolume = new GenericQuantity<VolumeUnit>(1.0, VolumeUnit.LITRE);
+            var mlVolume = new GenericQuantity<VolumeUnit>(500.0, VolumeUnit.MILLILITRE);
+
+            // Act - Volume with different target units
+            var sumInLitres = _measurementService.AddQuantitiesWithTarget(
+                litreVolume,
+                mlVolume,
+                VolumeUnit.LITRE
+            );
+            var sumInMl = _measurementService.AddQuantitiesWithTarget(
+                litreVolume,
+                mlVolume,
+                VolumeUnit.MILLILITRE
+            );
+            var sumInGal = _measurementService.AddQuantitiesWithTarget(
+                litreVolume,
+                mlVolume,
+                VolumeUnit.GALLON
+            );
+
+            // Assert
+            Assert.AreEqual(1.5, sumInLitres.Value, Tolerance, "Sum in litres should be 1.5 L");
+            Assert.AreEqual(1500.0, sumInMl.Value, Tolerance, "Sum in mL should be 1500 mL");
+
+            double expectedGal = 1.5 * 0.264172; // 1.5 L in gallons
+            Assert.AreEqual(expectedGal, sumInGal.Value, 0.001, "Sum in gallons should be correct");
+        }
+
+        /// <summary>
+        /// Tests round-trip conversion through multiple volume units.
+        /// </summary>
+        [TestMethod]
+        public void RoundTripConversion_Volume_PreservesOriginalValue()
+        {
+            // Arrange
+            double originalValue = 5.0;
+            var originalVolume = new GenericQuantity<VolumeUnit>(originalValue, VolumeUnit.LITRE);
+
+            // Act - Litres -> Millilitres -> Gallons -> Litres
+            var inMl = originalVolume.ConvertTo(VolumeUnit.MILLILITRE);
+            var inGal = inMl.ConvertTo(VolumeUnit.GALLON);
+            var backToLitres = inGal.ConvertTo(VolumeUnit.LITRE);
+
+            // Assert
+            Assert.AreEqual(
+                originalValue,
+                backToLitres.Value,
+                0.01,
+                "Round-trip volume conversion should return original value"
+            );
+        }
     }
 }

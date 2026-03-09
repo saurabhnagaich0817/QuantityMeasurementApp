@@ -1,18 +1,20 @@
 using QuantityMeasurementApp.Services;
 using QuantityMeasurementApp.UI.Helpers;
+using QuantityMeasurementApp.UI.Menus;
 
 namespace QuantityMeasurementApp.UI.Menus
 {
     /// <summary>
     /// Main menu of the application.
     /// Provides access to all features using generic implementations.
-    /// UC10: Simplified with only generic menus.
+    /// UC11: Added Volume measurements to the menu.
     /// </summary>
     public class MainMenu
     {
         private readonly GenericMeasurementService _measurementService;
         private readonly GenericLengthMenu _lengthMenu;
         private readonly GenericWeightMenu _weightMenu;
+        private readonly GenericVolumeMenu _volumeMenu;
 
         /// <summary>
         /// Initializes a new instance of the MainMenu class.
@@ -22,6 +24,7 @@ namespace QuantityMeasurementApp.UI.Menus
             _measurementService = new GenericMeasurementService();
             _lengthMenu = new GenericLengthMenu(_measurementService);
             _weightMenu = new GenericWeightMenu(_measurementService);
+            _volumeMenu = new GenericVolumeMenu(_measurementService);
         }
 
         /// <summary>
@@ -36,7 +39,7 @@ namespace QuantityMeasurementApp.UI.Menus
                 DisplayOptions();
                 string? userChoice = ConsoleHelper.GetInput("Enter your choice");
 
-                if (userChoice == "3")
+                if (userChoice == "4")
                     break;
 
                 ProcessUserChoice(userChoice);
@@ -51,12 +54,13 @@ namespace QuantityMeasurementApp.UI.Menus
         private void DisplayOptions()
         {
             Console.WriteLine("╔════════════════════════════════════════════════════════╗");
-            Console.WriteLine("║                    MAIN MENU                          ║");
+            Console.WriteLine("║                         MAIN MENU                      ║");
             Console.WriteLine("╠════════════════════════════════════════════════════════╣");
             Console.WriteLine("║                                                        ║");
-            Console.WriteLine("║    1.  Length Measurements (ft, in, yd, cm)           ║");
-            Console.WriteLine("║    2.  Weight Measurements (kg, g, lb)                ║");
-            Console.WriteLine("║    3.  Exit                                           ║");
+            Console.WriteLine("║    1.  Length Measurements (ft, in, yd, cm)            ║");
+            Console.WriteLine("║    2.  Weight Measurements (kg, g, lb)                 ║");
+            Console.WriteLine("║    3.  Volume Measurements (L, mL, gal)                ║");
+            Console.WriteLine("║    4.  Exit                                            ║");
             Console.WriteLine("║                                                        ║");
             Console.WriteLine("╚════════════════════════════════════════════════════════╝");
         }
@@ -70,6 +74,9 @@ namespace QuantityMeasurementApp.UI.Menus
                     break;
                 case "2":
                     _weightMenu.Display();
+                    break;
+                case "3":
+                    _volumeMenu.Display();
                     break;
                 default:
                     ConsoleHelper.DisplayError("Invalid choice!");
