@@ -75,3 +75,4 @@ TestResults/
 # =========================
 *.tmp
 *.temp
+QuantityMeasurement.Api/
