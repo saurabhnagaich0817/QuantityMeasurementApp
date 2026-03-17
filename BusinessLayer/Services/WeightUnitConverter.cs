@@ -3,10 +3,6 @@ using ModelLayer.Enums;
 
 namespace BusinessLayer.Services
 {
-    /// <summary>
-    /// Helper methods for weight unit conversions.
-    /// Base unit used internally is kilogram.
-    /// </summary>
     public class WeightUnitConverter: IMeasurable<WeightUnit>
     {
         private static readonly double[] BaseFactors =

@@ -1,15 +1,16 @@
 using ModelLayer.Models;
+using System.Collections.Generic;
 
 namespace RepoLayer.Interfaces
 {
-    /// <summary>
-    /// Defines operations for storing quantities.
-    /// </summary>
     public interface IQuantityRepository
     {
-        /// <summary>
-        /// Saves a quantity instance.
-        /// </summary>
         Quantity<T> Save<T>(Quantity<T> quantity) where T : struct, Enum;
+        
+        // UC16 Database Methods
+        QuantityMeasurementEntity SaveToDatabase(QuantityMeasurementEntity entity);
+        List<QuantityMeasurementEntity> GetAllFromDatabase();
+        int GetTotalCount();
+        List<QuantityMeasurementEntity> GetByOperationType(string operationType);
     }
 }

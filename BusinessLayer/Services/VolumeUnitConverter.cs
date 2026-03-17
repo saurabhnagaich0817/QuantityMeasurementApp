@@ -3,7 +3,6 @@ using ModelLayer.Enums;
 
 namespace BusinessLayer.Services
 {
-
     public class VolumeUnitConverter: IMeasurable<VolumeUnit>
     {
         private static readonly double[] ConversionFactors =

@@ -1,12 +1,8 @@
-using System;
 using ModelLayer.Models;
 using ModelLayer.DTOs;
 
 namespace BusinessLayer.Interfaces
 {
-    /// <summary>
-    /// Defines operations for working with Quantity objects.
-    /// </summary>
     public interface IQuantityMeasurementService
     {
         ComparisonResultDto Compare<U>(Quantity<U> firstQuantity, Quantity<U> secondQuantity)

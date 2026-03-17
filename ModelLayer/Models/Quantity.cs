@@ -6,7 +6,6 @@ namespace ModelLayer.Models
     public sealed class Quantity<TUnit> where TUnit : struct, Enum
     {
         private const double PrecisionLimit = 1e-6;
-
         private readonly IUnitConverter<TUnit> _converter;
 
         public double Value { get; }
@@ -18,7 +17,6 @@ namespace ModelLayer.Models
                 throw new ArgumentException("Numeric value is not valid.");
 
             _converter = converter ?? throw new ArgumentNullException(nameof(converter));
-
             Value = amount;
             Unit = unitType;
         }
@@ -47,16 +45,12 @@ namespace ModelLayer.Models
             {
                 case OperationType.Add:
                     return baseA + baseB;
-
                 case OperationType.Subtract:
                     return baseA - baseB;
-
                 case OperationType.Divide:
                     if (Math.Abs(baseB) < PrecisionLimit)
                         throw new ArithmeticException("Cannot divide by zero.");
-
                     return baseA / baseB;
-
                 default:
                     throw new InvalidOperationException();
             }
@@ -66,27 +60,22 @@ namespace ModelLayer.Models
         {
             double baseVal = ConvertCurrentToBase();
             double newValue = _converter.ConvertFromBase(destinationUnit, baseVal);
-
             return new Quantity<TUnit>(newValue, destinationUnit, _converter);
         }
 
         public Quantity<TUnit> Add(Quantity<TUnit> other, TUnit? resultUnit = null)
         {
             double baseResult = ExecuteBaseOperation(other, OperationType.Add);
-
             TUnit target = resultUnit ?? Unit;
             double converted = _converter.ConvertFromBase(target, baseResult);
-
             return new Quantity<TUnit>(converted, target, _converter);
         }
 
         public Quantity<TUnit> Subtract(Quantity<TUnit> other, TUnit? resultUnit = null)
         {
             double baseResult = ExecuteBaseOperation(other, OperationType.Subtract);
-
             TUnit target = resultUnit ?? Unit;
             double converted = _converter.ConvertFromBase(target, baseResult);
-
             return new Quantity<TUnit>(converted, target, _converter);
         }
 
@@ -99,7 +88,6 @@ namespace ModelLayer.Models
         {
             if (obj is not Quantity<TUnit> other)
                 return false;
-
             return Math.Abs(ConvertCurrentToBase() - other.ConvertCurrentToBase()) < PrecisionLimit;
         }
 
