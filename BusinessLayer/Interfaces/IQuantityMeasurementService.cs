@@ -1,29 +1,22 @@
-using ModelLayer.Models;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;  // IMPORTANT: Add this line
 using ModelLayer.DTOs;
+using ModelLayer.Enums;
 
 namespace BusinessLayer.Interfaces
 {
     public interface IQuantityMeasurementService
     {
-        ComparisonResultDto Compare<U>(Quantity<U> firstQuantity, Quantity<U> secondQuantity)
-            where U : struct, Enum;
-
-        QuantityResultDto DemonstrateConversion<U>(double numericValue, U sourceType, U targetType)
-            where U : struct, Enum;
-
-        QuantityResultDto DemonstrateConversion<U>(Quantity<U> originalQuantity, U desiredUnit)
-            where U : struct, Enum;
-
-        QuantityResultDto DemonstrateAddition<U>(Quantity<U> leftOperand, Quantity<U> rightOperand)
-            where U : struct, Enum;
-
-        QuantityResultDto DemonstrateAddition<U>(Quantity<U> leftOperand, Quantity<U> rightOperand, U resultUnit)
-            where U : struct, Enum;
-
-        QuantityResultDto Subtract<U>(Quantity<U> firstValue, Quantity<U> secondValue, U resultUnit)
-            where U : struct, Enum;
-
-        DivisionResultDto Divide<T>(double firstValue, T firstUnit, double secondValue, T secondUnit)
-            where T : struct, Enum;
+        Task<QuantityMeasurementDTO> CompareQuantities(QuantityInputDTO first, QuantityInputDTO second);
+        Task<QuantityMeasurementDTO> ConvertQuantity(QuantityInputDTO source, QuantityInputDTO target);
+        Task<QuantityMeasurementDTO> AddQuantities(QuantityInputDTO first, QuantityInputDTO second, string? resultUnit = null);
+        Task<QuantityMeasurementDTO> SubtractQuantities(QuantityInputDTO first, QuantityInputDTO second, string? resultUnit = null);
+        Task<QuantityMeasurementDTO> DivideQuantities(QuantityInputDTO first, QuantityInputDTO second);
+        
+        Task<List<QuantityMeasurementDTO>> GetOperationHistory(OperationType operation);
+        Task<List<QuantityMeasurementDTO>> GetMeasurementTypeHistory(string measurementType);
+        Task<int> GetOperationCount(OperationType operation);
+        Task<List<QuantityMeasurementDTO>> GetErrorHistory();
     }
 }

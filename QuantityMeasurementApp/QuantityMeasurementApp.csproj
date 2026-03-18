@@ -1,27 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <ItemGroup>
     <ProjectReference Include="..\BusinessLayer\BusinessLayer.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />  <!-- Changed to 5.2.0 -->
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
   </ItemGroup>
-
+  
+  <!-- ✅ Yeh part add karo - appsettings.json copy karne ke liye -->
   <ItemGroup>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-
+  
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-
 </Project>

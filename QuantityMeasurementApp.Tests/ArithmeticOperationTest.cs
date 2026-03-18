@@ -108,15 +108,7 @@ namespace QuantityMeasurementApp.Tests
             var numerator = new Quantity<VolumeUnit>(10.0, VolumeUnit.Litre, new VolumeUnitConverter());
             var zeroDenominator = new Quantity<VolumeUnit>(0.0, VolumeUnit.Litre, new VolumeUnitConverter());
 
-            try
-            {
-                numerator.Divide(zeroDenominator);
-                Assert.Fail("Expected ArithmeticException was not thrown.");
-            }
-            catch (ArithmeticException)
-            {
-                Assert.IsTrue(true);
-            }
+            Assert.ThrowsException<ArithmeticException>(() => numerator.Divide(zeroDenominator));
         }
 
         [TestMethod]

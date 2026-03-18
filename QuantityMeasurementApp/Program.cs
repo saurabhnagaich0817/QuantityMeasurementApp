@@ -4,6 +4,13 @@ using QuantityMeasurementApp.Menu;
 using BusinessLayer.Services;
 using BusinessLayer.Interfaces;
 using RepoLayer.Interfaces;
+#nullable enable
+using QuantityMeasurementApp.Factories;
+using QuantityMeasurementApp.Interfaces;
+using QuantityMeasurementApp.Menu;
+using BusinessLayer.Services;
+using BusinessLayer.Interfaces;
+using RepoLayer.Interfaces;
 using RepoLayer.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,8 +20,8 @@ namespace QuantityMeasurementApp
 {
     internal class Program
     {
-        private static IServiceProvider _serviceProvider;
-        private static IConfiguration _configuration;
+        private static IServiceProvider? _serviceProvider;
+        private static IConfiguration? _configuration;
 
         private static void Main(string[] args)
         {
@@ -24,9 +31,8 @@ namespace QuantityMeasurementApp
                 SetupDependencyInjection();
                 
                 ShowRepositoryInfo();
-                TestDatabaseConnection();
                 
-                var menu = _serviceProvider.GetRequiredService<IQuantityMeasurementAppMenu>();
+                var menu = _serviceProvider!.GetRequiredService<IQuantityMeasurementAppMenu>();
                 menu.Run();
             }
             catch (Exception ex)
@@ -56,21 +62,38 @@ namespace QuantityMeasurementApp
         private static void SetupDependencyInjection()
         {
             var services = new ServiceCollection();
-            services.AddSingleton(_configuration);
+            services.AddSingleton(_configuration!);
             
-            bool useDatabase = bool.Parse(_configuration["AppSettings:UseDatabase"] ?? "false");
+            // Register converters
+            services.AddSingleton<LengthUnitConverter>();
+            services.AddSingleton<WeightUnitConverter>();
+            services.AddSingleton<VolumeUnitConverter>();
+            services.AddSingleton<TemperatureUnitConverter>();
+            
+            // Register repository
+            bool useDatabase = bool.Parse(_configuration!["AppSettings:UseDatabase"] ?? "false");
             
             if (useDatabase)
             {
-                string connectionString = _configuration.GetConnectionString("DefaultConnection");
-                services.AddSingleton<IQuantityRepository>(new QuantityDatabaseRepository(connectionString));
+                string? connectionString = _configuration!.GetConnectionString("DefaultConnection");
+                if (!string.IsNullOrEmpty(connectionString))
+                {
+                    services.AddSingleton<IQuantityRepository>(new QuantityDatabaseRepository(connectionString));
+                }
+                else
+                {
+                    services.AddSingleton<IQuantityRepository, QuantityRepository>();
+                }
             }
             else
             {
                 services.AddSingleton<IQuantityRepository, QuantityRepository>();
             }
             
+            // Register service with all dependencies
             services.AddSingleton<IQuantityMeasurementService, QuantityMeasurementService>();
+            
+            // Register menu
             services.AddSingleton<IMenuFactory, MenuFactory>();
             services.AddSingleton<IQuantityMeasurementAppMenu, QuantityMeasurementAppMenu>();
             
@@ -79,53 +102,15 @@ namespace QuantityMeasurementApp
 
         private static void ShowRepositoryInfo()
         {
-            var repo = _serviceProvider.GetRequiredService<IQuantityRepository>();
+            var repo = _serviceProvider!.GetRequiredService<IQuantityRepository>();
             
             if (repo is QuantityDatabaseRepository)
             {
-                Console.WriteLine(" Using ADVANCED DATABASE repository (UC16)");
+                Console.WriteLine(" Using DATABASE repository");
             }
             else
             {
                 Console.WriteLine(" Using CACHE repository");
-            }
-        }
-
-        private static void TestDatabaseConnection()
-        {
-            var repo = _serviceProvider.GetRequiredService<IQuantityRepository>();
-            
-            if (repo is QuantityDatabaseRepository dbRepo)
-            {
-                try
-                {
-                    int count = dbRepo.GetTotalCount();
-                    Console.WriteLine($"Database connected. Total records: {count}");
-                    
-                    // Show quick stats
-                    if (count > 0)
-                    {
-                        var latest = dbRepo.GetAllFromDatabase();
-                        if (latest.Count > 0)
-                        {
-                            Console.WriteLine($"Latest: {latest[0].OperationType} at {latest[0].CreatedAt:HH:mm}");
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($" Database warning: {ex.Message}");
-                    
-                    // Fall back to cache
-                    var services = new ServiceCollection();
-                    services.AddSingleton(_configuration);
-                    services.AddSingleton<IQuantityRepository, QuantityRepository>();
-                    services.AddSingleton<IQuantityMeasurementService, QuantityMeasurementService>();
-                    services.AddSingleton<IMenuFactory, MenuFactory>();
-                    services.AddSingleton<IQuantityMeasurementAppMenu, QuantityMeasurementAppMenu>();
-                    
-                    _serviceProvider = services.BuildServiceProvider();
-                }
             }
         }
     }

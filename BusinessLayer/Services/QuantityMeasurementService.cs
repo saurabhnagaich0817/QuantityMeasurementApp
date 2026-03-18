@@ -1,10 +1,14 @@
+#nullable enable
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using ModelLayer.Models;
 using ModelLayer.Enums;
 using ModelLayer.Interfaces;
 using ModelLayer.DTOs;
+using ModelLayer.Exceptions;
 using RepoLayer.Interfaces;
-using RepoLayer.Repositories;
 using BusinessLayer.Interfaces;
 
 namespace BusinessLayer.Services
@@ -12,275 +16,333 @@ namespace BusinessLayer.Services
     public class QuantityMeasurementService : IQuantityMeasurementService
     {
         private readonly IQuantityRepository _repository;
-        
-        public QuantityMeasurementService(IQuantityRepository repository)
+        private readonly LengthUnitConverter _lengthConverter;
+        private readonly WeightUnitConverter _weightConverter;
+        private readonly VolumeUnitConverter _volumeConverter;
+        private readonly TemperatureUnitConverter _temperatureConverter;
+
+        public QuantityMeasurementService(
+            IQuantityRepository repository,
+            LengthUnitConverter lengthConverter,
+            WeightUnitConverter weightConverter,
+            VolumeUnitConverter volumeConverter,
+            TemperatureUnitConverter temperatureConverter)
         {
             _repository = repository;
-        }
-        
-        public QuantityMeasurementService() : this(new QuantityRepository())
-        {
+            _lengthConverter = lengthConverter;
+            _weightConverter = weightConverter;
+            _volumeConverter = volumeConverter;
+            _temperatureConverter = temperatureConverter;
         }
 
-        private IUnitConverter<T> ResolveConverter<T>() where T : struct, Enum
+        private IUnitConverter<T> GetConverter<T>() where T : struct, Enum
         {
             if (typeof(T) == typeof(LengthUnit))
-                return (IUnitConverter<T>)(object)new LengthUnitConverter();
-
+                return (IUnitConverter<T>)_lengthConverter;
             if (typeof(T) == typeof(WeightUnit))
-                return (IUnitConverter<T>)(object)new WeightUnitConverter();
-
+                return (IUnitConverter<T>)_weightConverter;
             if (typeof(T) == typeof(VolumeUnit))
-                return (IUnitConverter<T>)(object)new VolumeUnitConverter();
-
+                return (IUnitConverter<T>)_volumeConverter;
             if (typeof(T) == typeof(TemperatureUnit))
-                return (IUnitConverter<T>)(object)new TemperatureUnitConverter();
-
-            throw new NotSupportedException($"Unsupported unit type {typeof(T).Name}");
+                return (IUnitConverter<T>)_temperatureConverter;
+            
+            throw new NotSupportedException($"Unsupported type {typeof(T).Name}");
         }
 
-        private QuantityResultDto MapQuantityToDto<T>(Quantity<T> quantity) where T : struct, Enum
+        private object ParseUnit(string unitName, string measurementType)
         {
-            return new QuantityResultDto
+            return measurementType.ToLower() switch
             {
-                Value = quantity.Value,
-                UnitSymbol = quantity.ToString().Split(' ')[1]
+                "length" => Enum.Parse<LengthUnit>(unitName, true),
+                "weight" => Enum.Parse<WeightUnit>(unitName, true),
+                "volume" => Enum.Parse<VolumeUnit>(unitName, true),
+                "temperature" => Enum.Parse<TemperatureUnit>(unitName, true),
+                _ => throw new QuantityMeasurementException($"Invalid measurement type: {measurementType}")
             };
         }
 
-        public ComparisonResultDto Compare<U>(Quantity<U> firstQuantity, Quantity<U> secondQuantity) where U : struct, Enum
+        private dynamic CreateQuantity(QuantityInputDTO dto)
         {
-            if (firstQuantity == null || secondQuantity == null)
-                return new ComparisonResultDto { AreEqual = false };
-
-            bool areEqual = firstQuantity.Equals(secondQuantity);
+            var unit = ParseUnit(dto.Unit, dto.MeasurementType);
             
-            try
+            return dto.MeasurementType.ToLower() switch
             {
-                var entity = new QuantityMeasurementEntity
-                {
-                    OperationType = "Compare",
-                    MeasurementType = typeof(U).Name,
-                    FromValue = firstQuantity.Value,
-                    FromUnit = firstQuantity.Unit.ToString(),
-                    ToValue = secondQuantity.Value,
-                    ToUnit = secondQuantity.Unit.ToString(),
-                    Result = areEqual ? 1 : 0,
-                    ResultUnit = "Boolean",
-                    CreatedAt = DateTime.Now,
-                    SessionId = Guid.NewGuid()
-                };
-                
-                _repository.SaveToDatabase(entity);
-                Console.WriteLine(" Operation saved to database");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Database warning: {ex.Message}");
-            }
-
-            return new ComparisonResultDto
-            {
-                AreEqual = areEqual
+                "length" => new Quantity<LengthUnit>(dto.Value, (LengthUnit)unit, _lengthConverter),
+                "weight" => new Quantity<WeightUnit>(dto.Value, (WeightUnit)unit, _weightConverter),
+                "volume" => new Quantity<VolumeUnit>(dto.Value, (VolumeUnit)unit, _volumeConverter),
+                "temperature" => new Quantity<TemperatureUnit>(dto.Value, (TemperatureUnit)unit, _temperatureConverter),
+                _ => throw new QuantityMeasurementException($"Invalid measurement type: {dto.MeasurementType}")
             };
         }
 
-        public QuantityResultDto DemonstrateConversion<U>(double numericValue, U sourceType, U targetType) where U : struct, Enum
+        private async Task<QuantityMeasurementDTO> SaveOperation(
+            OperationType operation,
+            QuantityInputDTO first,
+            QuantityInputDTO second,
+            dynamic? result,
+            string? errorMessage = null)
         {
-            var converter = ResolveConverter<U>();
-
-            Quantity<U> tempQuantity = new Quantity<U>(numericValue, sourceType, converter);
-            Quantity<U> converted = tempQuantity.ConvertTo(targetType);
-
             try
             {
                 var entity = new QuantityMeasurementEntity
                 {
-                    OperationType = "Convert",
-                    MeasurementType = typeof(U).Name,
-                    FromValue = numericValue,
-                    FromUnit = sourceType.ToString(),
-                    ToValue = converted.Value,
-                    ToUnit = targetType.ToString(),
-                    Result = converted.Value,
-                    ResultUnit = targetType.ToString(),
+                    OperationType = operation.ToString(),
+                    MeasurementType = first.MeasurementType,
+                    FromValue = first.Value,
+                    FromUnit = first.Unit,
+                    ToValue = second.Value,
+                    ToUnit = second.Unit,
+                    Result = (errorMessage == null && result != null) ? Convert.ToDouble(result.Value) : 0,
+                    ResultUnit = (errorMessage == null && result != null && result.Unit != null) ? result.Unit.ToString() : "",
                     CreatedAt = DateTime.Now,
                     SessionId = Guid.NewGuid()
                 };
+
+                var saved = _repository.SaveToDatabase(entity);
+                var dto = QuantityMeasurementDTO.FromEntity(saved);
                 
-                _repository.SaveToDatabase(entity);
+                if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    dto.IsError = true;
+                    dto.ErrorMessage = errorMessage;
+                }
+                
+                return await Task.FromResult(dto);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Database warning: {ex.Message}");
+                return new QuantityMeasurementDTO
+                {
+                    Operation = operation,
+                    MeasurementType = first.MeasurementType,
+                    FromValue = first.Value,
+                    FromUnit = first.Unit,
+                    ToValue = second.Value,
+                    ToUnit = second.Unit,
+                    IsError = true,
+                    ErrorMessage = errorMessage ?? ex.Message,
+                    CreatedAt = DateTime.Now
+                };
             }
-
-            return MapQuantityToDto(converted);
         }
 
-        public QuantityResultDto DemonstrateConversion<U>(Quantity<U> originalQuantity, U desiredUnit) where U : struct, Enum
+        public async Task<QuantityMeasurementDTO> CompareQuantities(QuantityInputDTO first, QuantityInputDTO second)
         {
-            Quantity<U> resultQuantity = originalQuantity.ConvertTo(desiredUnit);
-            return MapQuantityToDto(resultQuantity);
-        }
-
-        public QuantityResultDto DemonstrateAddition<U>(Quantity<U> leftOperand, Quantity<U> rightOperand) where U : struct, Enum
-        {
-            Quantity<U> sum = leftOperand.Add(rightOperand);
-            
             try
             {
-                var entity = new QuantityMeasurementEntity
-                {
-                    OperationType = "Add",
-                    MeasurementType = typeof(U).Name,
-                    FromValue = leftOperand.Value,
-                    FromUnit = leftOperand.Unit.ToString(),
-                    ToValue = rightOperand.Value,
-                    ToUnit = rightOperand.Unit.ToString(),
-                    Result = sum.Value,
-                    ResultUnit = sum.Unit.ToString(),
-                    CreatedAt = DateTime.Now,
-                    SessionId = Guid.NewGuid()
-                };
+                if (first.MeasurementType != second.MeasurementType)
+                    throw new QuantityMeasurementException($"Cannot compare different measurement types: {first.MeasurementType} and {second.MeasurementType}");
+
+                dynamic q1 = CreateQuantity(first);
+                dynamic q2 = CreateQuantity(second);
                 
-                _repository.SaveToDatabase(entity);
+                bool areEqual = q1.Equals(q2);
+                
+                var result = new { Value = areEqual ? 1.0 : 0.0, Unit = "Boolean" };
+                
+                return await SaveOperation(OperationType.Compare, first, second, result);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Database warning: {ex.Message}");
+                var dummyResult = new { Value = 0.0, Unit = "" };
+                return await SaveOperation(OperationType.Compare, first, second, dummyResult, ex.Message);
             }
-            
-            return MapQuantityToDto(sum);
         }
 
-        public QuantityResultDto DemonstrateAddition<U>(Quantity<U> leftOperand, Quantity<U> rightOperand, U resultUnit) where U : struct, Enum
+        public async Task<QuantityMeasurementDTO> ConvertQuantity(QuantityInputDTO source, QuantityInputDTO target)
         {
-            Quantity<U> result = leftOperand.Add(rightOperand, resultUnit);
-            return MapQuantityToDto(result);
-        }
-
-        public QuantityResultDto Subtract<U>(Quantity<U> firstValue, Quantity<U> secondValue, U resultUnit) where U : struct, Enum
-        {
-            Quantity<U> difference = firstValue.Subtract(secondValue, resultUnit);
-            
             try
             {
-                var entity = new QuantityMeasurementEntity
-                {
-                    OperationType = "Subtract",
-                    MeasurementType = typeof(U).Name,
-                    FromValue = firstValue.Value,
-                    FromUnit = firstValue.Unit.ToString(),
-                    ToValue = secondValue.Value,
-                    ToUnit = secondValue.Unit.ToString(),
-                    Result = difference.Value,
-                    ResultUnit = difference.Unit.ToString(),
-                    CreatedAt = DateTime.Now,
-                    SessionId = Guid.NewGuid()
-                };
+                if (source.MeasurementType != target.MeasurementType)
+                    throw new QuantityMeasurementException($"Cannot convert between different measurement types: {source.MeasurementType} and {target.MeasurementType}");
+
+                dynamic q1 = CreateQuantity(source);
+                var targetUnit = ParseUnit(target.Unit, target.MeasurementType);
                 
-                _repository.SaveToDatabase(entity);
+                dynamic converted = ConvertQuantityByType(q1, source.MeasurementType, targetUnit);
+                
+                return await SaveOperation(OperationType.Convert, source, target, converted);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Database warning: {ex.Message}");
+                var dummyResult = new { Value = 0.0, Unit = "" };
+                return await SaveOperation(OperationType.Convert, source, target, dummyResult, ex.Message);
             }
-            
-            return MapQuantityToDto(difference);
         }
 
-        public DivisionResultDto Divide<T>(double firstValue, T firstUnit, double secondValue, T secondUnit) where T : struct, Enum
+        private dynamic ConvertQuantityByType(dynamic quantity, string measurementType, object targetUnit)
         {
-            var converter = ResolveConverter<T>();
-
-            Quantity<T> dividend = new Quantity<T>(firstValue, firstUnit, converter);
-            Quantity<T> divisor = new Quantity<T>(secondValue, secondUnit, converter);
-
-            double outcome = dividend.Divide(divisor);
-            
-            try
+            return measurementType.ToLower() switch
             {
-                var entity = new QuantityMeasurementEntity
-                {
-                    OperationType = "Divide",
-                    MeasurementType = typeof(T).Name,
-                    FromValue = firstValue,
-                    FromUnit = firstUnit.ToString(),
-                    ToValue = secondValue,
-                    ToUnit = secondUnit.ToString(),
-                    Result = outcome,
-                    ResultUnit = "Ratio",
-                    CreatedAt = DateTime.Now,
-                    SessionId = Guid.NewGuid()
-                };
-                
-                _repository.SaveToDatabase(entity);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Database warning: {ex.Message}");
-            }
-
-            return new DivisionResultDto
-            {
-                Ratio = outcome
+                "length" => ((Quantity<LengthUnit>)quantity).ConvertTo((LengthUnit)targetUnit),
+                "weight" => ((Quantity<WeightUnit>)quantity).ConvertTo((WeightUnit)targetUnit),
+                "volume" => ((Quantity<VolumeUnit>)quantity).ConvertTo((VolumeUnit)targetUnit),
+                "temperature" => ((Quantity<TemperatureUnit>)quantity).ConvertTo((TemperatureUnit)targetUnit),
+                _ => throw new QuantityMeasurementException($"Unknown measurement type: {measurementType}")
             };
         }
-        
-        public void ShowDatabaseStatistics()
+
+        public async Task<QuantityMeasurementDTO> AddQuantities(QuantityInputDTO first, QuantityInputDTO second, string? resultUnit = null)
         {
-            if (_repository is QuantityDatabaseRepository dbRepo)
+            try
             {
-                try
+                if (first.MeasurementType != second.MeasurementType)
+                    throw new QuantityMeasurementException($"Cannot add different measurement types: {first.MeasurementType} and {second.MeasurementType}");
+
+                dynamic q1 = CreateQuantity(first);
+                dynamic q2 = CreateQuantity(second);
+                
+                dynamic sum;
+                if (!string.IsNullOrEmpty(resultUnit))
                 {
-                    string stats = dbRepo.GetStatistics();
-                    Console.WriteLine(stats);
+                    var targetUnit = ParseUnit(resultUnit, first.MeasurementType);
+                    sum = AddQuantitiesByType(q1, q2, first.MeasurementType, targetUnit);
                 }
-                catch (Exception ex)
+                else
                 {
-                    Console.WriteLine($"Error getting stats: {ex.Message}");
+                    sum = AddQuantitiesByType(q1, q2, first.MeasurementType, null);
                 }
+                
+                return await SaveOperation(OperationType.Add, first, second, sum);
+            }
+            catch (Exception ex)
+            {
+                var dummyResult = new { Value = 0.0, Unit = "" };
+                return await SaveOperation(OperationType.Add, first, second, dummyResult, ex.Message);
             }
         }
-        
-        public void ShowHistory(int page = 1, int pageSize = 10)
+
+        private dynamic AddQuantitiesByType(dynamic q1, dynamic q2, string measurementType, object? targetUnit)
         {
-            if (_repository is QuantityDatabaseRepository dbRepo)
+            return measurementType.ToLower() switch
             {
-                try
-                {
-                    var records = dbRepo.GetMeasurementsPaged(page, pageSize);
-                    
-                    Console.WriteLine("\nID  Operation  Type       From           To             Result   Date");
-                    // Console.WriteLine("----------------------------------------------------------------------");
-                    
-                    foreach (var item in records)
-                    {
-                        string line = item.Id.ToString().PadRight(3) + " " +
-                                     (item.OperationType ?? "").PadRight(9) + " " +
-                                     (item.MeasurementType ?? "").PadRight(8) + " " +
-                                     item.FromValue.ToString("F2").PadRight(6) + " " +
-                                     (item.FromUnit ?? "").PadRight(5) + " " +
-                                     item.ToValue.ToString("F2").PadRight(6) + " " +
-                                     (item.ToUnit ?? "").PadRight(5) + " " +
-                                     item.Result.ToString("F2").PadRight(5) + " " +
-                                     item.CreatedAt.ToString("yyyy-MM-dd HH:mm");
-                        
-                        Console.WriteLine(line);
-                    }
-                    
-                    Console.WriteLine($"\nPage {page}");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error loading history: {ex.Message}");
-                }
-            }
-            else
+                "length" => targetUnit != null 
+                    ? ((Quantity<LengthUnit>)q1).Add((Quantity<LengthUnit>)q2, (LengthUnit)targetUnit)
+                    : ((Quantity<LengthUnit>)q1).Add((Quantity<LengthUnit>)q2),
+                "weight" => targetUnit != null
+                    ? ((Quantity<WeightUnit>)q1).Add((Quantity<WeightUnit>)q2, (WeightUnit)targetUnit)
+                    : ((Quantity<WeightUnit>)q1).Add((Quantity<WeightUnit>)q2),
+                "volume" => targetUnit != null
+                    ? ((Quantity<VolumeUnit>)q1).Add((Quantity<VolumeUnit>)q2, (VolumeUnit)targetUnit)
+                    : ((Quantity<VolumeUnit>)q1).Add((Quantity<VolumeUnit>)q2),
+                "temperature" => targetUnit != null
+                    ? ((Quantity<TemperatureUnit>)q1).Add((Quantity<TemperatureUnit>)q2, (TemperatureUnit)targetUnit)
+                    : ((Quantity<TemperatureUnit>)q1).Add((Quantity<TemperatureUnit>)q2),
+                _ => throw new QuantityMeasurementException($"Unknown measurement type: {measurementType}")
+            };
+        }
+
+        public async Task<QuantityMeasurementDTO> SubtractQuantities(QuantityInputDTO first, QuantityInputDTO second, string? resultUnit = null)
+        {
+            try
             {
-                Console.WriteLine("History only available with database repository");
+                if (first.MeasurementType != second.MeasurementType)
+                    throw new QuantityMeasurementException($"Cannot subtract different measurement types: {first.MeasurementType} and {second.MeasurementType}");
+
+                dynamic q1 = CreateQuantity(first);
+                dynamic q2 = CreateQuantity(second);
+                
+                dynamic difference;
+                if (!string.IsNullOrEmpty(resultUnit))
+                {
+                    var targetUnit = ParseUnit(resultUnit, first.MeasurementType);
+                    difference = SubtractQuantitiesByType(q1, q2, first.MeasurementType, targetUnit);
+                }
+                else
+                {
+                    difference = SubtractQuantitiesByType(q1, q2, first.MeasurementType, null);
+                }
+                
+                return await SaveOperation(OperationType.Subtract, first, second, difference);
             }
+            catch (Exception ex)
+            {
+                var dummyResult = new { Value = 0.0, Unit = "" };
+                return await SaveOperation(OperationType.Subtract, first, second, dummyResult, ex.Message);
+            }
+        }
+
+        private dynamic SubtractQuantitiesByType(dynamic q1, dynamic q2, string measurementType, object? targetUnit)
+        {
+            return measurementType.ToLower() switch
+            {
+                "length" => targetUnit != null
+                    ? ((Quantity<LengthUnit>)q1).Subtract((Quantity<LengthUnit>)q2, (LengthUnit)targetUnit)
+                    : ((Quantity<LengthUnit>)q1).Subtract((Quantity<LengthUnit>)q2),
+                "weight" => targetUnit != null
+                    ? ((Quantity<WeightUnit>)q1).Subtract((Quantity<WeightUnit>)q2, (WeightUnit)targetUnit)
+                    : ((Quantity<WeightUnit>)q1).Subtract((Quantity<WeightUnit>)q2),
+                "volume" => targetUnit != null
+                    ? ((Quantity<VolumeUnit>)q1).Subtract((Quantity<VolumeUnit>)q2, (VolumeUnit)targetUnit)
+                    : ((Quantity<VolumeUnit>)q1).Subtract((Quantity<VolumeUnit>)q2),
+                "temperature" => targetUnit != null
+                    ? ((Quantity<TemperatureUnit>)q1).Subtract((Quantity<TemperatureUnit>)q2, (TemperatureUnit)targetUnit)
+                    : ((Quantity<TemperatureUnit>)q1).Subtract((Quantity<TemperatureUnit>)q2),
+                _ => throw new QuantityMeasurementException($"Unknown measurement type: {measurementType}")
+            };
+        }
+
+        public async Task<QuantityMeasurementDTO> DivideQuantities(QuantityInputDTO first, QuantityInputDTO second)
+        {
+            try
+            {
+                if (first.MeasurementType != second.MeasurementType)
+                    throw new QuantityMeasurementException($"Cannot divide different measurement types: {first.MeasurementType} and {second.MeasurementType}");
+
+                if (second.Value == 0)
+                    throw new QuantityMeasurementException("Cannot divide by zero");
+
+                dynamic q1 = CreateQuantity(first);
+                dynamic q2 = CreateQuantity(second);
+                
+                double ratio = DivideQuantitiesByType(q1, q2, first.MeasurementType);
+                
+                var result = new { Value = ratio, Unit = "Ratio" };
+                
+                return await SaveOperation(OperationType.Divide, first, second, result);
+            }
+            catch (Exception ex)
+            {
+                var dummyResult = new { Value = 0.0, Unit = "" };
+                return await SaveOperation(OperationType.Divide, first, second, dummyResult, ex.Message);
+            }
+        }
+
+        private double DivideQuantitiesByType(dynamic q1, dynamic q2, string measurementType)
+        {
+            return measurementType.ToLower() switch
+            {
+                "length" => ((Quantity<LengthUnit>)q1).Divide((Quantity<LengthUnit>)q2),
+                "weight" => ((Quantity<WeightUnit>)q1).Divide((Quantity<WeightUnit>)q2),
+                "volume" => ((Quantity<VolumeUnit>)q1).Divide((Quantity<VolumeUnit>)q2),
+                "temperature" => ((Quantity<TemperatureUnit>)q1).Divide((Quantity<TemperatureUnit>)q2),
+                _ => throw new QuantityMeasurementException($"Unknown measurement type: {measurementType}")
+            };
+        }
+
+        public async Task<List<QuantityMeasurementDTO>> GetOperationHistory(OperationType operation)
+        {
+            var entities = _repository.GetByOperationType(operation.ToString());
+            return await Task.FromResult(entities.Select(e => QuantityMeasurementDTO.FromEntity(e)).ToList());
+        }
+
+        public async Task<List<QuantityMeasurementDTO>> GetMeasurementTypeHistory(string measurementType)
+        {
+            var all = _repository.GetAllFromDatabase();
+            return await Task.FromResult(all
+                .Where(e => e.MeasurementType?.Equals(measurementType, StringComparison.OrdinalIgnoreCase) == true)
+                .Select(e => QuantityMeasurementDTO.FromEntity(e))
+                .ToList());
+        }
+
+        public async Task<int> GetOperationCount(OperationType operation)
+        {
+            return await Task.FromResult(_repository.GetByOperationType(operation.ToString()).Count);
+        }
+
+        public async Task<List<QuantityMeasurementDTO>> GetErrorHistory()
+        {
+            return await Task.FromResult(new List<QuantityMeasurementDTO>());
         }
     }
 }

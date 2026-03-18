@@ -1,5 +1,7 @@
+#nullable enable
 using System;
 using ModelLayer.Interfaces;
+using ModelLayer.Enums;
 
 namespace ModelLayer.Models
 {

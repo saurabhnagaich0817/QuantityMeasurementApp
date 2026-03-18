@@ -30,27 +30,29 @@ namespace RepoLayer.Repositories
                 {
                     conn.Open();
                     
-                    using (SqlCommand cmd = new SqlCommand("sp_InsertMeasurement", conn))
+                    // Using direct INSERT instead of stored procedure
+                    string query = @"
+                        INSERT INTO QuantityMeasurements 
+                        (OperationType, MeasurementType, FromValue, FromUnit, ToValue, ToUnit, Result, ResultUnit, CreatedAt)
+                        VALUES 
+                        (@OperationType, @MeasurementType, @FromValue, @FromUnit, @ToValue, @ToUnit, @Result, @ResultUnit, @CreatedAt);
+                        
+                        SELECT SCOPE_IDENTITY();";
+                    
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        
-                        cmd.Parameters.AddWithValue("@OperationTypeName", entity.OperationType ?? "");
-                        cmd.Parameters.AddWithValue("@MeasurementTypeName", entity.MeasurementType ?? "");
+                        cmd.Parameters.AddWithValue("@OperationType", entity.OperationType ?? "");
+                        cmd.Parameters.AddWithValue("@MeasurementType", entity.MeasurementType ?? "");
                         cmd.Parameters.AddWithValue("@FromValue", entity.FromValue);
-                        cmd.Parameters.AddWithValue("@FromUnitName", entity.FromUnit ?? "");
+                        cmd.Parameters.AddWithValue("@FromUnit", entity.FromUnit ?? "");
                         cmd.Parameters.AddWithValue("@ToValue", entity.ToValue);
-                        cmd.Parameters.AddWithValue("@ToUnitName", entity.ToUnit ?? "");
+                        cmd.Parameters.AddWithValue("@ToUnit", entity.ToUnit ?? "");
                         cmd.Parameters.AddWithValue("@Result", entity.Result);
-                        cmd.Parameters.AddWithValue("@ResultUnitName", entity.ResultUnit ?? "");
-                        cmd.Parameters.AddWithValue("@UserId", entity.UserId ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@ResultUnit", entity.ResultUnit ?? "");
+                        cmd.Parameters.AddWithValue("@CreatedAt", DateTime.Now);
                         
-                        using (SqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            if (reader.Read())
-                            {
-                                entity.Id = Convert.ToInt32(reader["Id"]);
-                            }
-                        }
+                        int newId = Convert.ToInt32(cmd.ExecuteScalar());
+                        entity.Id = newId;
                         
                         return entity;
                     }
@@ -75,7 +77,21 @@ namespace RepoLayer.Repositories
                 {
                     conn.Open();
                     
-                    string query = "SELECT * FROM vw_RecentMeasurements";
+                    // Simple query with correct column names
+                    string query = @"
+                        SELECT 
+                            Id,
+                            OperationType,
+                            MeasurementType,
+                            FromValue,
+                            FromUnit,
+                            ToValue,
+                            ToUnit,
+                            Result,
+                            ISNULL(ResultUnit, '') as ResultUnit,
+                            CreatedAt
+                        FROM QuantityMeasurements 
+                        ORDER BY CreatedAt DESC";
                     
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
@@ -119,21 +135,86 @@ namespace RepoLayer.Repositories
                 {
                     conn.Open();
                     
+                    // Simple query without joins
                     string query = @"
-                        SELECT qm.Id, ot.Name as OperationType, mt.Name as MeasurementType,
-                               qm.FromValue, qm.FromUnitName as FromUnit,
-                               qm.ToValue, qm.ToUnitName as ToUnit,
-                               qm.Result, qm.ResultUnitName as ResultUnit,
-                               qm.CreatedAt
-                        FROM QuantityMeasurements qm
-                        INNER JOIN OperationTypes ot ON qm.OperationTypeId = ot.Id
-                        INNER JOIN MeasurementTypes mt ON qm.MeasurementTypeId = mt.Id
-                        WHERE ot.Name = @OperationType
-                        ORDER BY qm.CreatedAt DESC";
+                        SELECT 
+                            Id,
+                            OperationType,
+                            MeasurementType,
+                            FromValue,
+                            FromUnit,
+                            ToValue,
+                            ToUnit,
+                            Result,
+                            ISNULL(ResultUnit, '') as ResultUnit,
+                            CreatedAt
+                        FROM QuantityMeasurements 
+                        WHERE OperationType = @OperationType
+                        ORDER BY CreatedAt DESC";
                     
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
                         cmd.Parameters.AddWithValue("@OperationType", operationType);
+                        
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                entities.Add(new QuantityMeasurementEntity
+                                {
+                                    Id = reader.GetInt32(0),
+                                    OperationType = reader.GetString(1),
+                                    MeasurementType = reader.GetString(2),
+                                    FromValue = Convert.ToDouble(reader.GetDecimal(3)),
+                                    FromUnit = reader.GetString(4),
+                                    ToValue = Convert.ToDouble(reader.GetDecimal(5)),
+                                    ToUnit = reader.GetString(6),
+                                    Result = Convert.ToDouble(reader.GetDecimal(7)),
+                                    ResultUnit = reader.GetString(8),
+                                    CreatedAt = reader.GetDateTime(9)
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                throw new DatabaseException($"Error reading database: {ex.Message}", ex);
+            }
+            
+            return entities;
+        }
+        
+        public List<QuantityMeasurementEntity> GetByMeasurementType(string measurementType)
+        {
+            List<QuantityMeasurementEntity> entities = new List<QuantityMeasurementEntity>();
+            
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(_connectionString))
+                {
+                    conn.Open();
+                    
+                    string query = @"
+                        SELECT 
+                            Id,
+                            OperationType,
+                            MeasurementType,
+                            FromValue,
+                            FromUnit,
+                            ToValue,
+                            ToUnit,
+                            Result,
+                            ISNULL(ResultUnit, '') as ResultUnit,
+                            CreatedAt
+                        FROM QuantityMeasurements 
+                        WHERE MeasurementType = @MeasurementType
+                        ORDER BY CreatedAt DESC";
+                    
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@MeasurementType", measurementType);
                         
                         using (SqlDataReader reader = cmd.ExecuteReader())
                         {
@@ -185,85 +266,6 @@ namespace RepoLayer.Repositories
             {
                 throw new DatabaseException($"Error getting count: {ex.Message}", ex);
             }
-        }
-        
-        public string GetStatistics()
-        {
-            try
-            {
-                using (SqlConnection conn = new SqlConnection(_connectionString))
-                {
-                    conn.Open();
-                    
-                    using (SqlCommand cmd = new SqlCommand("sp_GetStatistics", conn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        
-                        using (SqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            System.Text.StringBuilder stats = new System.Text.StringBuilder();
-                            
-                            stats.AppendLine("=== OPERATION STATISTICS ===");
-                            while (reader.Read())
-                            {
-                                stats.AppendLine($"{reader["OperationType"]}: {reader["Count"]} operations");
-                            }
-                            
-                            return stats.ToString();
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                return $"Error getting statistics: {ex.Message}";
-            }
-        }
-        
-        public List<QuantityMeasurementEntity> GetMeasurementsPaged(int pageNumber, int pageSize)
-        {
-            List<QuantityMeasurementEntity> entities = new List<QuantityMeasurementEntity>();
-            
-            try
-            {
-                using (SqlConnection conn = new SqlConnection(_connectionString))
-                {
-                    conn.Open();
-                    
-                    using (SqlCommand cmd = new SqlCommand("sp_GetMeasurements", conn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@PageNumber", pageNumber);
-                        cmd.Parameters.AddWithValue("@PageSize", pageSize);
-                        
-                        using (SqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                entities.Add(new QuantityMeasurementEntity
-                                {
-                                    Id = reader.GetInt32(0),
-                                    OperationType = reader.GetString(1),
-                                    MeasurementType = reader.GetString(2),
-                                    FromValue = Convert.ToDouble(reader.GetDecimal(3)),
-                                    FromUnit = reader.GetString(4),
-                                    ToValue = Convert.ToDouble(reader.GetDecimal(5)),
-                                    ToUnit = reader.GetString(6),
-                                    Result = Convert.ToDouble(reader.GetDecimal(7)),
-                                    ResultUnit = reader.GetString(8),
-                                    CreatedAt = reader.GetDateTime(9)
-                                });
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new DatabaseException($"Error in pagination: {ex.Message}", ex);
-            }
-            
-            return entities;
         }
     }
 }
