@@ -3,7 +3,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ModelLayer.Models
+namespace ModelLayer.Entities
 {
     [Table("QuantityMeasurements")]
     public class QuantityMeasurementEntity

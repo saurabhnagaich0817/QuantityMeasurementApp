@@ -1,7 +1,7 @@
-using Microsoft.EntityFrameworkCore;  // 👈 Add this
-using ModelLayer.Models;
+using Microsoft.EntityFrameworkCore;
+using ModelLayer.Entities;
 
-namespace RepoLayer.Data
+namespace RepoLayer.Context
 {
     public class AppDbContext : DbContext
     {

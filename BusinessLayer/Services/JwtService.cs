@@ -1,17 +1,13 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using ModelLayer.Models;
+using ModelLayer.Entities;
+using BusinessLayer.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
 namespace BusinessLayer.Services
 {
-    public interface IJwtService
-    {
-        string GenerateToken(User user);
-    }
-
     public class JwtService : IJwtService
     {
         private readonly IConfiguration _configuration;

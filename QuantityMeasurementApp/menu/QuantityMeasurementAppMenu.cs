@@ -1,6 +1,6 @@
 using System;
 using ModelLayer.Enums;
-using ModelLayer.Models;
+using ModelLayer.Entities;
 using ModelLayer.Interfaces;
 using ModelLayer.DTOs;
 using BusinessLayer.Services;

@@ -5,7 +5,7 @@ using ModelLayer.Entities;
 using RepoLayer.Context;
 using RepoLayer.Interfaces;
 
-namespace RepoLayer.Repositories
+namespace RepoLayer.Persistence
 {
     /// <summary>
     /// Provides an implementation of IQuantityRepository backed by a real database via EF Core.

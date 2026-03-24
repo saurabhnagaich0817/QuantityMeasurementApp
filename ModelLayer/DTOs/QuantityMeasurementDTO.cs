@@ -1,7 +1,7 @@
 #nullable enable
 using System;
 using ModelLayer.Enums;
-using ModelLayer.Models;
+using ModelLayer.Entities;
 
 namespace ModelLayer.DTOs
 {

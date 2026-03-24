@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using ModelLayer.Entities;
 using RepoLayer.Context;
 using RepoLayer.Interfaces;
-namespace RepoLayer.Repositories
+namespace RepoLayer.Persistence
 {
     public class QuantityRepository : IQuantityRepository
     {

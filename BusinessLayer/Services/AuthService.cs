@@ -1,16 +1,10 @@
 using BusinessLayer.Interfaces;
 using ModelLayer.DTOs.Auth;
-using ModelLayer.Models;
+using ModelLayer.Entities;
 using RepoLayer.Interfaces;
 
 namespace BusinessLayer.Services
 {
-    public interface IAuthService
-    {
-        Task<AuthResponseDto> RegisterAsync(RegisterRequestDto request);
-        Task<AuthResponseDto> LoginAsync(LoginRequestDto request);
-    }
-
     public class AuthService : IAuthService
     {
         private readonly IUserRepository _userRepository;

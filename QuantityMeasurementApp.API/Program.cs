@@ -2,11 +2,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using BusinessLayer.Interfaces;
-using BusinessLayer.Services;
-using RepoLayer.Data;
-using RepoLayer.Interfaces;
-using RepoLayer.Repositories;
+using BusinessLayer.Extensions;
+using QuantityMeasurementApp.API.Middleware;
+using RepoLayer.Context;
+using RepoLayer.Extensions;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -56,9 +55,8 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-//  2. Configure Entity Framework Core
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+//  2. Configure persistence and repositories
+builder.Services.AddPersistence(builder.Configuration);
 
 //  3. Configure JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "YourSecretKeyHereMustBeLongEnoughForSecurity123456789!";
@@ -86,20 +84,8 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-//  4. Register Repositories
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IQuantityRepository, QuantityRepository>();
-
-//  5. Register Services
-builder.Services.AddScoped<IJwtService, JwtService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IQuantityMeasurementService, QuantityMeasurementService>();
-
-// 6. Register Unit Converters
-builder.Services.AddScoped<LengthUnitConverter>();
-builder.Services.AddScoped<WeightUnitConverter>();
-builder.Services.AddScoped<VolumeUnitConverter>();
-builder.Services.AddScoped<TemperatureUnitConverter>();
+//  4. Register repository and business services
+builder.Services.AddBusinessServices();
 
 // 7. Add Memory Cache for history APIs
 builder.Services.AddMemoryCache();
@@ -128,6 +114,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseMiddleware<GlobalExceptionHandler>();
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 

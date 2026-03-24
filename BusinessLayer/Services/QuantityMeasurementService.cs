@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
-using ModelLayer.Models;
+using ModelLayer.Entities;
 using ModelLayer.Enums;
 using ModelLayer.Interfaces;
 using ModelLayer.DTOs;

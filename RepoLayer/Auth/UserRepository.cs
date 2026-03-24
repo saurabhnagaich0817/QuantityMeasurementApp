@@ -8,7 +8,7 @@ using ModelLayer.Entities;
 using RepoLayer.Context;
 using RepoLayer.Interfaces;
 
-namespace RepoLayer.Repositories
+namespace RepoLayer.Auth
 {
     public class UserRepository : IUserRepository
     {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using BusinessLayer.Interfaces;
 using BusinessLayer.Services;
 using QuantityMeasurementApp.Factories;

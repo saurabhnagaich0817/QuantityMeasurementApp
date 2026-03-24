@@ -3,7 +3,7 @@ using System;
 using ModelLayer.Interfaces;
 using ModelLayer.Enums;
 
-namespace ModelLayer.Models
+namespace ModelLayer.Entities
 {
     public sealed class Quantity<TUnit> where TUnit : struct, Enum
     {
