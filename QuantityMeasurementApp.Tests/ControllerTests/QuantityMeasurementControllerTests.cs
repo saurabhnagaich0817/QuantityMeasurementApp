@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -26,6 +28,16 @@ namespace QuantityMeasurementApp.Tests.ControllerTests
             _mockService = new Mock<IQuantityMeasurementService>();
             _mockLogger = new Mock<ILogger<QuantityMeasurementController>>();
             _controller = new QuantityMeasurementController(_mockService.Object, _mockLogger.Object);
+
+            // Add a default authenticated user context for controller methods that rely on claims
+            var claims = new[] { new Claim(ClaimTypes.NameIdentifier, "1") };
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    User = new ClaimsPrincipal(new ClaimsIdentity(claims, "TestAuth"))
+                }
+            };
         }
 
         [TestMethod]
@@ -53,7 +65,7 @@ namespace QuantityMeasurementApp.Tests.ControllerTests
                 CreatedAt = DateTime.Now
             };
 
-            _mockService!.Setup(s => s.CompareQuantities(request.First, request.Second))
+            _mockService!.Setup(s => s.CompareQuantities(request.First, request.Second, It.IsAny<int>()))
                 .ReturnsAsync(expectedResult);
 
             // Act
@@ -86,7 +98,7 @@ namespace QuantityMeasurementApp.Tests.ControllerTests
                 ErrorMessage = "Cannot compare different measurement types"
             };
 
-            _mockService!.Setup(s => s.CompareQuantities(request.First, request.Second))
+            _mockService!.Setup(s => s.CompareQuantities(request.First, request.Second, It.IsAny<int>()))
                 .ReturnsAsync(errorResult);
 
             // Act
@@ -121,7 +133,7 @@ namespace QuantityMeasurementApp.Tests.ControllerTests
                 IsError = false
             };
 
-            _mockService!.Setup(s => s.ConvertQuantity(request.Source, request.Target))
+            _mockService!.Setup(s => s.ConvertQuantity(request.Source, request.Target, It.IsAny<int>()))
                 .ReturnsAsync(expectedResult);
 
             // Act
@@ -157,7 +169,7 @@ namespace QuantityMeasurementApp.Tests.ControllerTests
                 IsError = false
             };
 
-            _mockService!.Setup(s => s.AddQuantities(request.First, request.Second, request.ResultUnit))
+            _mockService!.Setup(s => s.AddQuantities(request.First, request.Second, request.ResultUnit, It.IsAny<int>()))
                 .ReturnsAsync(expectedResult);
 
             // Act

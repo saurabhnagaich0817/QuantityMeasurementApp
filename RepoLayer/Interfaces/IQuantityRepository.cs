@@ -1,18 +1,23 @@
-using System;  // IMPORTANT: Add this line
-using ModelLayer.Models;
+using System;  // 👈 Add this
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using ModelLayer.Models;
 
 namespace RepoLayer.Interfaces
 {
     public interface IQuantityRepository
     {
-        // Original method - with proper constraint
-        Quantity<T> Save<T>(Quantity<T> quantity) where T : struct, Enum;
-        
-        // UC16 Database Methods
+        // Sync methods (for backward compatibility)
         QuantityMeasurementEntity SaveToDatabase(QuantityMeasurementEntity entity);
         List<QuantityMeasurementEntity> GetAllFromDatabase();
         int GetTotalCount();
         List<QuantityMeasurementEntity> GetByOperationType(string operationType);
+
+        // Async methods (for EF Core)
+        Task<QuantityMeasurementEntity> SaveToDatabaseAsync(QuantityMeasurementEntity entity);
+        Task<List<QuantityMeasurementEntity>> GetAllFromDatabaseAsync();
+        Task<int> GetTotalCountAsync();
+        Task<List<QuantityMeasurementEntity>> GetByOperationTypeAsync(string operationType);
+        Task<List<QuantityMeasurementEntity>> GetByUserIdAsync(int userId);
     }
 }

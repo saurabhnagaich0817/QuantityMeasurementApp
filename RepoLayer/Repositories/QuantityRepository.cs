@@ -1,41 +1,84 @@
-using System;  // Add this line
-using RepoLayer.Interfaces;
-using ModelLayer.Models;
+using System;  
 using System.Collections.Generic;
-
+using System.Linq;  
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using ModelLayer.Models;
+using RepoLayer.Data;
+using RepoLayer.Interfaces;
 namespace RepoLayer.Repositories
 {
     public class QuantityRepository : IQuantityRepository
     {
-        private static List<QuantityMeasurementEntity> _memoryCache = new List<QuantityMeasurementEntity>();
-        
-        // Fix: Add proper constraint
-        public Quantity<T> Save<T>(Quantity<T> quantity) where T : struct, Enum
+        private readonly AppDbContext _context;
+
+        public QuantityRepository(AppDbContext context)
         {
-            return quantity;
+            _context = context;
         }
-        
-        public QuantityMeasurementEntity SaveToDatabase(QuantityMeasurementEntity entity)
+
+        // ===== Async Methods (EF Core) =====
+        public async Task<QuantityMeasurementEntity> SaveToDatabaseAsync(QuantityMeasurementEntity entity)
         {
-            entity.Id = _memoryCache.Count + 1;
-            entity.CreatedAt = DateTime.Now;
-            _memoryCache.Add(entity);
+            await _context.QuantityMeasurements.AddAsync(entity);
+            await _context.SaveChangesAsync();
             return entity;
         }
-        
+
+        public async Task<List<QuantityMeasurementEntity>> GetAllFromDatabaseAsync()
+        {
+            return await _context.QuantityMeasurements
+                .OrderByDescending(q => q.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<int> GetTotalCountAsync()
+        {
+            return await _context.QuantityMeasurements.CountAsync();
+        }
+
+        public async Task<List<QuantityMeasurementEntity>> GetByOperationTypeAsync(string operationType)
+        {
+            return await _context.QuantityMeasurements
+                .Where(q => q.OperationType == operationType)
+                .OrderByDescending(q => q.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<List<QuantityMeasurementEntity>> GetByUserIdAsync(int userId)
+        {
+            return await _context.QuantityMeasurements
+                .Where(q => q.UserId == userId)
+                .OrderByDescending(q => q.CreatedAt)
+                .ToListAsync();
+        }
+
+        // ===== Sync Methods (for backward compatibility) =====
+        public QuantityMeasurementEntity SaveToDatabase(QuantityMeasurementEntity entity)
+        {
+            _context.QuantityMeasurements.Add(entity);
+            _context.SaveChanges();
+            return entity;
+        }
+
         public List<QuantityMeasurementEntity> GetAllFromDatabase()
         {
-            return new List<QuantityMeasurementEntity>(_memoryCache);
+            return _context.QuantityMeasurements
+                .OrderByDescending(q => q.CreatedAt)
+                .ToList();
         }
-        
-        public List<QuantityMeasurementEntity> GetByOperationType(string operationType)
-        {
-            return _memoryCache.FindAll(e => e.OperationType == operationType);
-        }
-        
+
         public int GetTotalCount()
         {
-            return _memoryCache.Count;
+            return _context.QuantityMeasurements.Count();
+        }
+
+        public List<QuantityMeasurementEntity> GetByOperationType(string operationType)
+        {
+            return _context.QuantityMeasurements
+                .Where(q => q.OperationType == operationType)
+                .OrderByDescending(q => q.CreatedAt)
+                .ToList();
         }
     }
 }

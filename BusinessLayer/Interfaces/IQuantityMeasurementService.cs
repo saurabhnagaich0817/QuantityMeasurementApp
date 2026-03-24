@@ -1,6 +1,6 @@
-using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;  // IMPORTANT: Add this line
+using System.Threading.Tasks;
+using ModelLayer.DTOs.Quantity;  // 👈 Add this
 using ModelLayer.DTOs;
 using ModelLayer.Enums;
 
@@ -8,15 +8,25 @@ namespace BusinessLayer.Interfaces
 {
     public interface IQuantityMeasurementService
     {
-        Task<QuantityMeasurementDTO> CompareQuantities(QuantityInputDTO first, QuantityInputDTO second);
-        Task<QuantityMeasurementDTO> ConvertQuantity(QuantityInputDTO source, QuantityInputDTO target);
-        Task<QuantityMeasurementDTO> AddQuantities(QuantityInputDTO first, QuantityInputDTO second, string? resultUnit = null);
-        Task<QuantityMeasurementDTO> SubtractQuantities(QuantityInputDTO first, QuantityInputDTO second, string? resultUnit = null);
-        Task<QuantityMeasurementDTO> DivideQuantities(QuantityInputDTO first, QuantityInputDTO second);
-        
+        // Methods with userId parameter
+        Task<QuantityMeasurementDTO> CompareQuantities(QuantityInputDTO first, QuantityInputDTO second, int userId);
+        Task<QuantityMeasurementDTO> ConvertQuantity(QuantityInputDTO source, QuantityInputDTO target, int userId);
+        Task<QuantityMeasurementDTO> AddQuantities(QuantityInputDTO first, QuantityInputDTO second, string? resultUnit, int userId);
+        Task<QuantityMeasurementDTO> SubtractQuantities(QuantityInputDTO first, QuantityInputDTO second, string? resultUnit, int userId);
+        Task<QuantityMeasurementDTO> DivideQuantities(QuantityInputDTO first, QuantityInputDTO second, int userId);
+
+        // User-specific history methods
+        Task<List<QuantityMeasurementDTO>> GetUserOperationsAsync(int userId);
         Task<List<QuantityMeasurementDTO>> GetOperationHistory(OperationType operation);
         Task<List<QuantityMeasurementDTO>> GetMeasurementTypeHistory(string measurementType);
         Task<int> GetOperationCount(OperationType operation);
         Task<List<QuantityMeasurementDTO>> GetErrorHistory();
+        
+        // Default methods
+        Task<QuantityMeasurementDTO> CompareQuantities(QuantityInputDTO first, QuantityInputDTO second);
+        Task<QuantityMeasurementDTO> ConvertQuantity(QuantityInputDTO source, QuantityInputDTO target);
+        Task<QuantityMeasurementDTO> AddQuantities(QuantityInputDTO first, QuantityInputDTO second, string? resultUnit);
+        Task<QuantityMeasurementDTO> SubtractQuantities(QuantityInputDTO first, QuantityInputDTO second, string? resultUnit);
+        Task<QuantityMeasurementDTO> DivideQuantities(QuantityInputDTO first, QuantityInputDTO second);
     }
 }

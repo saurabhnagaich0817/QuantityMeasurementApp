@@ -1,64 +1,110 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using BusinessLayer.Interfaces;
 using BusinessLayer.Services;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;  
-using QuantityMeasurementApp.API.Middleware;
+using RepoLayer.Data;
 using RepoLayer.Interfaces;
 using RepoLayer.Repositories;
-using System;
-using System.Text.Json.Serialization;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to container
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-    });
-
-// Learn more about configuring Swagger/OpenAPI
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+//  1. Configure Swagger with JWT support
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "Quantity Measurement API",
+    c.SwaggerDoc("v1", new OpenApiInfo 
+    { 
+        Title = "Quantity Measurement API", 
         Version = "v1",
-        Description = "API for quantity measurement operations (Length, Weight, Volume, Temperature)",
-        Contact = new OpenApiContact
+        Description = "Quantity Measurement API with JWT Authentication"
+    });
+
+    // Include XML comments
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
+
+    // Add JWT Authentication to Swagger
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
         {
-            Name = "UC17 Implementation",
-            Email = "your-email@example.com"
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
         }
     });
 });
 
-// Register dependencies
+//  2. Configure Entity Framework Core
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+//  3. Configure JWT Authentication
+var jwtKey = builder.Configuration["Jwt:Key"] ?? "YourSecretKeyHereMustBeLongEnoughForSecurity123456789!";
+var key = Encoding.ASCII.GetBytes(jwtKey);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateIssuer = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidateAudience = true,
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero
+    };
+});
+
+//  4. Register Repositories
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IQuantityRepository, QuantityRepository>();
+
+//  5. Register Services
+builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IQuantityMeasurementService, QuantityMeasurementService>();
+
+// 6. Register Unit Converters
 builder.Services.AddScoped<LengthUnitConverter>();
 builder.Services.AddScoped<WeightUnitConverter>();
 builder.Services.AddScoped<VolumeUnitConverter>();
 builder.Services.AddScoped<TemperatureUnitConverter>();
 
-// Repository - choose based on configuration
-var useDatabase = builder.Configuration.GetValue<bool>("AppSettings:UseDatabase");
-if (useDatabase)
-{
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    builder.Services.AddSingleton<IQuantityRepository>(sp => 
-        new QuantityDatabaseRepository(connectionString!));
-}
-else
-{
-    builder.Services.AddSingleton<IQuantityRepository, QuantityRepository>();
-}
+// 7. Add Memory Cache for history APIs
+builder.Services.AddMemoryCache();
 
-builder.Services.AddScoped<IQuantityMeasurementService, QuantityMeasurementService>();
-
-// CORS
+// 7. Configure CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", builder =>
@@ -71,7 +117,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Configure pipeline
+//  8. Configure pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -84,29 +130,17 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
-app.UseAuthorization();
 
-// Global exception handling middleware
-app.UseMiddleware<GlobalExceptionHandler>();
+app.UseAuthentication();  // 👈 Important: Authentication before Authorization
+app.UseAuthorization();
 
 app.MapControllers();
 
-// Database check on startup
+//  9. Create database if not exists and apply migrations
 using (var scope = app.Services.CreateScope())
 {
-    var repo = scope.ServiceProvider.GetRequiredService<IQuantityRepository>();
-    if (repo is QuantityDatabaseRepository dbRepo)
-    {
-        try
-        {
-            var count = dbRepo.GetTotalCount();
-            Console.WriteLine($"Database connected. Total records: {count}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($" Database warning: {ex.Message}");
-        }
-    }
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await dbContext.Database.MigrateAsync(); // Creates database and applies migrations
 }
 
 app.Run();

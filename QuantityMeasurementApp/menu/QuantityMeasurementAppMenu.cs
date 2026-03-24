@@ -20,18 +20,6 @@ namespace QuantityMeasurementApp.Menu
             _measurementService = measurementService;
         }
         
-        // For backward compatibility - but will need converters
-        public QuantityMeasurementAppMenu() : this(
-            new QuantityMeasurementService(
-                new RepoLayer.Repositories.QuantityRepository(),
-                new LengthUnitConverter(),
-                new WeightUnitConverter(),
-                new VolumeUnitConverter(),
-                new TemperatureUnitConverter()
-            ))
-        {
-        }
-
         private IUnitConverter<T> ResolveConverter<T>() where T : struct, Enum
         {
             if (typeof(T) == typeof(LengthUnit))
