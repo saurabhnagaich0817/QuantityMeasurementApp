@@ -8,7 +8,6 @@ namespace ModelLayer.Exceptions
 
         public QuantityMeasurementException(string message) : base(message) { }
 
-        public QuantityMeasurementException(string message, Exception innerException) 
-            : base(message, innerException) { }
+        public QuantityMeasurementException(string message, Exception innerException) : base(message, innerException) { }
     }
 }

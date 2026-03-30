@@ -24,7 +24,7 @@ namespace RepoLayer.Persistence
 
             _dbContext = new AppDbContext(options);
 
-            // Ensure database is created and migrations are applied (if any)
+            
             _dbContext.Database.Migrate();
 
             _innerRepository = new QuantityRepository(_dbContext);
@@ -47,16 +47,13 @@ namespace RepoLayer.Persistence
             => _innerRepository.GetByUserIdAsync(userId);
 
         // ===== Sync Methods (for backward compatibility) =====
-        public QuantityMeasurementEntity SaveToDatabase(QuantityMeasurementEntity entity)
-            => _innerRepository.SaveToDatabase(entity);
+        public QuantityMeasurementEntity SaveToDatabase(QuantityMeasurementEntity entity)=> _innerRepository.SaveToDatabase(entity);
 
         public List<QuantityMeasurementEntity> GetAllFromDatabase()
             => _innerRepository.GetAllFromDatabase();
 
-        public int GetTotalCount()
-            => _innerRepository.GetTotalCount();
+        public int GetTotalCount()=> _innerRepository.GetTotalCount();
 
-        public List<QuantityMeasurementEntity> GetByOperationType(string operationType)
-            => _innerRepository.GetByOperationType(operationType);
+        public List<QuantityMeasurementEntity> GetByOperationType(string operationType)=> _innerRepository.GetByOperationType(operationType);
     }
 }

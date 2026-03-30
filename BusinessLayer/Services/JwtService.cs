@@ -8,20 +8,33 @@ using System.Text;
 
 namespace BusinessLayer.Services
 {
+    /// <summary>
+    /// Service responsible for generating JWT tokens for user authentication.
+    /// Tokens contain user claims and are signed with a secret key.
+    /// </summary>
     public class JwtService : IJwtService
     {
         private readonly IConfiguration _configuration;
+        private const string DefaultSecretKey = "YourSecretKeyHereMustBeLongEnoughForSecurity123456789!";
 
         public JwtService(IConfiguration configuration)
         {
-            _configuration = configuration;
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
+        /// <summary>
+        /// Generates a JWT token for the specified user.
+        /// Token includes user ID, name, email, and role claims.
+        /// </summary>
+        /// <param name="user">The user to generate a token for.</param>
+        /// <returns>A signed JWT token string.</returns>
         public string GenerateToken(User user)
         {
+            if (user == null)
+                throw new ArgumentNullException(nameof(user));
+
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"] ?? 
-                "YourSecretKeyHereMustBeLongEnoughForSecurity123456789!");
+            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"] ?? DefaultSecretKey);
             
             var claims = new List<Claim>
             {

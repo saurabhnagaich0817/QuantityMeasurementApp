@@ -32,5 +32,5 @@ namespace ModelLayer.DTOs.Quantity
         public DateTime CreatedAt { get; set; }
     }
 
-    // ... rest remains same
+   
 }

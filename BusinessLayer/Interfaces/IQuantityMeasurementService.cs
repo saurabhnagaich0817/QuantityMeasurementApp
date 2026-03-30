@@ -1,14 +1,21 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using ModelLayer.DTOs.Quantity;  // 👈 Add this
+using ModelLayer.DTOs.Quantity;
 using ModelLayer.DTOs;
 using ModelLayer.Enums;
 
 namespace BusinessLayer.Interfaces
 {
+    /// <summary>
+    /// Service interface for quantity measurement operations including conversions, comparisons, and arithmetic.
+    /// </summary>
     public interface IQuantityMeasurementService
     {
-        // Methods with userId parameter
+        /// <summary>Compares two quantities and determines if they are equal after unit normalization.</summary>
+        /// <param name="first">The first quantity to compare.</param>
+        /// <param name="second">The second quantity to compare.</param>
+        /// <param name="userId">The ID of the user performing the operation.</param>
+        /// <returns>A DTO containing the comparison result.</returns>
         Task<QuantityMeasurementDTO> CompareQuantities(QuantityInputDTO first, QuantityInputDTO second, int userId);
         Task<QuantityMeasurementDTO> ConvertQuantity(QuantityInputDTO source, QuantityInputDTO target, int userId);
         Task<QuantityMeasurementDTO> AddQuantities(QuantityInputDTO first, QuantityInputDTO second, string? resultUnit, int userId);

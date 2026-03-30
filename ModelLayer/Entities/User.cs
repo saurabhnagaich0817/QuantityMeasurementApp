@@ -6,9 +6,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ModelLayer.Entities
 {
+    /// <summary>
+    /// Represents a user account in the system with authentication and role-based access control.
+    /// </summary>
     [Table("Users")]
     public class User
     {
+        /// <summary>Gets or sets the unique identifier for this user.</summary>
         [Key]
         public int Id { get; set; }
 
@@ -25,7 +29,7 @@ namespace ModelLayer.Entities
         public string PasswordHash { get; set; } = string.Empty;
 
         [Required]
-        public string Role { get; set; } = "User";  // 👈 STRING (not enum)
+        public string Role { get; set; } = "User"; 
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

@@ -5,12 +5,18 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ModelLayer.Entities
 {
+    /// <summary>
+    /// Represents a quantity measurement operation record stored in the database.
+    /// Tracks all mathematical operations performed on quantities including conversions, comparisons, and arithmetic.
+    /// </summary>
     [Table("QuantityMeasurements")]
     public class QuantityMeasurementEntity
     {
+        /// <summary>Gets or sets the unique identifier for this measurement record.</summary>
         [Key]
         public int Id { get; set; }
 
+        /// <summary>Gets or sets the user ID who performed this measurement operation.</summary>
         [Required]
         public int UserId { get; set; }
 

@@ -16,16 +16,24 @@ namespace RepoLayer.Repositories
 
         public UserRepository(AppDbContext context)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
+        /// <summary>Retrieves a user by their unique identifier.</summary>
         public async Task<User?> GetByIdAsync(int id)
         {
+            if (id <= 0)
+                throw new ArgumentException("User ID must be greater than zero", nameof(id));
+
             return await _context.Users.FindAsync(id);
         }
 
+        /// <summary>Retrieves a user by their email address.</summary>
         public async Task<User?> GetByEmailAsync(string email)
         {
+            if (string.IsNullOrWhiteSpace(email))
+                throw new ArgumentException("Email cannot be empty", nameof(email));
+
             return await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == email);
         }

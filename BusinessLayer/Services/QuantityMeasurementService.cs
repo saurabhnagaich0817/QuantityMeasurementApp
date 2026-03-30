@@ -150,7 +150,7 @@ namespace BusinessLayer.Services
         public async Task<QuantityMeasurementDTO> CompareQuantities(
             QuantityInputDTO first, 
             QuantityInputDTO second,
-            int userId)  //  NEW parameter
+            int userId)  
         {
             try
             {
@@ -176,7 +176,7 @@ namespace BusinessLayer.Services
         public async Task<QuantityMeasurementDTO> ConvertQuantity(
             QuantityInputDTO source, 
             QuantityInputDTO target,
-            int userId)  //  NEW parameter
+            int userId)  
         {
             try
             {
@@ -213,7 +213,7 @@ namespace BusinessLayer.Services
             QuantityInputDTO first, 
             QuantityInputDTO second, 
             string? resultUnit,
-            int userId)  //  NEW parameter
+            int userId)  
         {
             try
             {
@@ -267,7 +267,7 @@ namespace BusinessLayer.Services
             QuantityInputDTO first, 
             QuantityInputDTO second, 
             string? resultUnit,
-            int userId)  // NEW parameter
+            int userId)  
         {
             try
             {
@@ -320,7 +320,7 @@ namespace BusinessLayer.Services
         public async Task<QuantityMeasurementDTO> DivideQuantities(
             QuantityInputDTO first, 
             QuantityInputDTO second,
-            int userId)  // NEW parameter
+            int userId)  
         {
             try
             {

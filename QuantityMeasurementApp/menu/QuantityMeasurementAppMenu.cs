@@ -43,17 +43,17 @@ namespace QuantityMeasurementApp.Menu
 
             while (!terminateProgram)
             {
-                Console.WriteLine("\n====================================");
+                
                 Console.WriteLine("   QUANTITY MEASUREMENT APP v3.0");
-                // Console.WriteLine("   (Console Version - UC17 Compatible)");
-                Console.WriteLine("====================================");
+                
+               
                 Console.WriteLine("1. Length Measurement");
                 Console.WriteLine("2. Weight Measurement");
                 Console.WriteLine("3. Volume Measurement");
                 Console.WriteLine("4. Temperature Measurement");
                 Console.WriteLine("5. View Database History");
                 Console.WriteLine("6. Exit");
-                Console.WriteLine("====================================");
+             
                 Console.Write("Select option: ");
 
                 string menuChoice = Console.ReadLine() ?? "";
@@ -99,7 +99,7 @@ namespace QuantityMeasurementApp.Menu
                 
                 Console.WriteLine("\n=== DATABASE HISTORY ===");
                 Console.WriteLine("ID | Operation | Type | From → To | Result");
-                Console.WriteLine("----------------------------------------");
+                // Console.WriteLine("----------------------------------------");
                 
                 foreach (var item in history)
                 {

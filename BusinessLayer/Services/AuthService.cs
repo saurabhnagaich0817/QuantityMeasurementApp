@@ -5,6 +5,10 @@ using RepoLayer.Interfaces;
 
 namespace BusinessLayer.Services
 {
+    /// <summary>
+    /// Service for user authentication including registration and login.
+    /// Handles password hashing, validation, and token generation.
+    /// </summary>
     public class AuthService : IAuthService
     {
         private readonly IUserRepository _userRepository;
@@ -14,24 +18,33 @@ namespace BusinessLayer.Services
             IUserRepository userRepository,
             IJwtService jwtService)
         {
-            _userRepository = userRepository;
-            _jwtService = jwtService;
+            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _jwtService = jwtService ?? throw new ArgumentNullException(nameof(jwtService));
         }
 
+        /// <summary>
+        /// Registers a new user account with the provided credentials.
+        /// </summary>
+        /// <param name="request">Registration request containing username, email, and password.</param>
+        /// <returns>Authentication response with JWT token.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if email or username already exists.</exception>
         public async Task<AuthResponseDto> RegisterAsync(RegisterRequestDto request)
         {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
             if (await _userRepository.EmailExistsAsync(request.Email))
-                throw new Exception("Email already registered");
+                throw new InvalidOperationException($"Email '{request.Email}' is already registered");
 
             if (await _userRepository.UsernameExistsAsync(request.Username))
-                throw new Exception("Username already taken");
+                throw new InvalidOperationException($"Username '{request.Username}' is already taken");
 
             var user = new User
             {
                 Username = request.Username,
                 Email = request.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
-                Role = "User",  //  STRING
+                Role = "User",
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true
             };
@@ -44,14 +57,23 @@ namespace BusinessLayer.Services
                 Id = createdUser.Id,
                 Username = createdUser.Username,
                 Email = createdUser.Email,
-                Role = createdUser.Role,  //  STRING from user
+                Role = createdUser.Role,
                 Token = token,
                 ExpiresAt = DateTime.UtcNow.AddHours(24)
             };
         }
 
+        /// <summary>
+        /// Authenticates a user with email and password.
+        /// </summary>
+        /// <param name="request">Login request containing email and password.</param>
+        /// <returns>Authentication response with JWT token.</returns>
+        /// <exception cref="UnauthorizedAccessException">Thrown if credentials are invalid or account is inactive.</exception>
         public async Task<AuthResponseDto> LoginAsync(LoginRequestDto request)
         {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
             var user = await _userRepository.GetByEmailAsync(request.Email);
             if (user == null)
                 throw new UnauthorizedAccessException("Invalid email or password");
@@ -69,7 +91,7 @@ namespace BusinessLayer.Services
                 Id = user.Id,
                 Username = user.Username,
                 Email = user.Email,
-                Role = user.Role,  // STRING from user
+                Role = user.Role,
                 Token = token,
                 ExpiresAt = DateTime.UtcNow.AddHours(24)
             };

@@ -3,13 +3,18 @@ using ModelLayer.Enums;
 
 namespace BusinessLayer.Services
 {
-    public class VolumeUnitConverter: IMeasurable<VolumeUnit>
+    /// <summary>
+    /// Converts between different volume units (liters, milliliters, gallons).
+    /// Uses liters as the base unit for all conversions.
+    /// </summary>
+    public class VolumeUnitConverter : IMeasurable<VolumeUnit>
     {
+        /// <summary>Conversion factors from each unit to the base unit (liters).</summary>
         private static readonly double[] ConversionFactors =
         {
-            1.0,
-            0.001,
-            3.78541
+            1.0,      // Liters (base unit)
+            0.001,    // Milliliters to liters
+            3.78541   // Gallons to liters
         };
 
         public double GetConversionFactor(VolumeUnit unit)
@@ -27,15 +32,16 @@ namespace BusinessLayer.Services
             return baseValue / GetConversionFactor(unit);
         }
 
+        /// <summary>Gets the standard symbol/abbreviation for a volume unit.</summary>
         public string GetSymbol(VolumeUnit unit)
         {
-            switch (unit)
+            return unit switch
             {
-                case VolumeUnit.Litre: return "L";
-                case VolumeUnit.MilliLiter: return "ML";
-                case VolumeUnit.Gallon: return "gal";
-                default: return unit.ToString().ToLower();
-            }
+                VolumeUnit.Litre => "L",
+                VolumeUnit.MilliLiter => "mL",
+                VolumeUnit.Gallon => "gal",
+                _ => unit.ToString().ToLower()
+            };
         }
     }
 }

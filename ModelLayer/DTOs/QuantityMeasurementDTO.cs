@@ -5,10 +5,19 @@ using ModelLayer.Entities;
 
 namespace ModelLayer.DTOs
 {
+    /// <summary>
+    /// Data Transfer Object representing the result of a quantity measurement operation.
+    /// Used for API responses and client communication.
+    /// </summary>
     public class QuantityMeasurementDTO
     {
+        /// <summary>Gets or sets the unique identifier for this measurement record.</summary>
         public int Id { get; set; }
+
+        /// <summary>Gets or sets the type of operation performed (Compare, Convert, Add, etc.).</summary>
         public OperationType Operation { get; set; }
+
+        /// <summary>Gets or sets the measurement type (Length, Weight, Volume, Temperature).</summary>
         public string MeasurementType { get; set; } = string.Empty;
         
         public double FromValue { get; set; }

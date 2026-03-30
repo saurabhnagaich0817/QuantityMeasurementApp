@@ -3,19 +3,24 @@ using ModelLayer.Enums;
 
 namespace BusinessLayer.Services
 {
-    public class LengthUnitConverter: IMeasurable<LengthUnit>
+    /// <summary>
+    /// Converts between different length units (inches, feet, yards, centimeters).
+    /// Uses inches as the base unit for all conversions.
+    /// </summary>
+    public class LengthUnitConverter : IMeasurable<LengthUnit>
     {
-        private readonly double[] BaseFactors =
+        /// <summary>Conversion factors from each unit to the base unit (inches).</summary>
+        private readonly double[] _conversionFactors =
         {
-            1.0,
-            12.0,
-            36.0,
-            0.393701
+            1.0,           // Inches (base unit)
+            12.0,          // Feet to inches
+            36.0,          // Yards to inches
+            0.393701       // Centimeters to inches
         };
 
         public double GetConversionFactor(LengthUnit unit)
         {
-            return BaseFactors[(int)unit];
+            return _conversionFactors[(int)unit];
         }
 
         public double ConvertToBase(LengthUnit unit, double amount)
@@ -28,16 +33,17 @@ namespace BusinessLayer.Services
             return baseValue / GetConversionFactor(unit);
         }
 
+        /// <summary>Gets the standard symbol/abbreviation for a length unit.</summary>
         public string GetSymbol(LengthUnit unit)
         {
-            switch (unit)
+            return unit switch
             {
-                case LengthUnit.Inches: return "in";
-                case LengthUnit.Feet: return "ft";
-                case LengthUnit.Yards: return "yd";
-                case LengthUnit.Centimeters: return "cm";
-                default: return unit.ToString().ToLower();
-            }
+                LengthUnit.Inches => "in",
+                LengthUnit.Feet => "ft",
+                LengthUnit.Yards => "yd",
+                LengthUnit.Centimeters => "cm",
+                _ => unit.ToString().ToLower()
+            };
         }
     }
 }
