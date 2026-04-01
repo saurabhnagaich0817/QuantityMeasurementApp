@@ -65,7 +65,7 @@ namespace QuantityMeasurementApp.Tests.ControllerTests
                 CreatedAt = DateTime.Now
             };
 
-            _mockService!.Setup(s => s.CompareQuantities(request.First, request.Second, It.IsAny<int>()))
+            _mockService!.Setup(s => s.CompareQuantities(request.First, request.Second))
                 .ReturnsAsync(expectedResult);
 
             // Act
@@ -98,7 +98,7 @@ namespace QuantityMeasurementApp.Tests.ControllerTests
                 ErrorMessage = "Cannot compare different measurement types"
             };
 
-            _mockService!.Setup(s => s.CompareQuantities(request.First, request.Second, It.IsAny<int>()))
+            _mockService!.Setup(s => s.CompareQuantities(request.First, request.Second))
                 .ReturnsAsync(errorResult);
 
             // Act
@@ -133,7 +133,7 @@ namespace QuantityMeasurementApp.Tests.ControllerTests
                 IsError = false
             };
 
-            _mockService!.Setup(s => s.ConvertQuantity(request.Source, request.Target, It.IsAny<int>()))
+            _mockService!.Setup(s => s.ConvertQuantity(request.Source, request.Target))
                 .ReturnsAsync(expectedResult);
 
             // Act
@@ -169,7 +169,7 @@ namespace QuantityMeasurementApp.Tests.ControllerTests
                 IsError = false
             };
 
-            _mockService!.Setup(s => s.AddQuantities(request.First, request.Second, request.ResultUnit, It.IsAny<int>()))
+            _mockService!.Setup(s => s.AddQuantities(request.First, request.Second, request.ResultUnit))
                 .ReturnsAsync(expectedResult);
 
             // Act

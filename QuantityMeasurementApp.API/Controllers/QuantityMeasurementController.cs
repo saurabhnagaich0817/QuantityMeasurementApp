@@ -75,14 +75,10 @@ namespace QuantityMeasurementApp.API.Controllers
         {
             try
             {
-                var userId = GetCurrentUserId();  //  3. Get user ID
-                _logger.LogInformation("User {UserId} comparing quantities: {First} vs {Second}", 
-                    userId, request.First, request.Second);
-                
-                var result = await _service.CompareQuantities(
-                    request.First, 
-                    request.Second, 
-                    userId);  //  4. Pass userId
+                var userId = GetCurrentUserId();  //  3. Get user ID for logging
+                _logger.LogInformation("User {UserId} comparing quantities: {First} vs {Second}", userId, request.First, request.Second);
+
+                var result = await _service.CompareQuantities(request.First, request.Second);
                 
                 if (result.IsError)
                     return BadRequest(result);
@@ -140,10 +136,7 @@ namespace QuantityMeasurementApp.API.Controllers
             try
             {
                 var userId = GetCurrentUserId();
-                var result = await _service.ConvertQuantity(
-                    request.Source, 
-                    request.Target, 
-                    userId);
+                var result = await _service.ConvertQuantity(request.Source, request.Target);
                 
                 if (result.IsError)
                     return BadRequest(result);
@@ -201,11 +194,7 @@ namespace QuantityMeasurementApp.API.Controllers
             try
             {
                 var userId = GetCurrentUserId();
-                var result = await _service.AddQuantities(
-                    request.First, 
-                    request.Second, 
-                    request.ResultUnit,
-                    userId);
+                var result = await _service.AddQuantities(request.First, request.Second, request.ResultUnit);
                 
                 if (result.IsError)
                     return BadRequest(result);
@@ -263,11 +252,7 @@ namespace QuantityMeasurementApp.API.Controllers
             try
             {
                 var userId = GetCurrentUserId();
-                var result = await _service.SubtractQuantities(
-                    request.First, 
-                    request.Second, 
-                    request.ResultUnit,
-                    userId);
+                var result = await _service.SubtractQuantities(request.First, request.Second, request.ResultUnit);
                 
                 if (result.IsError)
                     return BadRequest(result);
@@ -327,10 +312,7 @@ namespace QuantityMeasurementApp.API.Controllers
             try
             {
                 var userId = GetCurrentUserId();
-                var result = await _service.DivideQuantities(
-                    request.First, 
-                    request.Second, 
-                    userId);
+                var result = await _service.DivideQuantities(request.First, request.Second);
                 
                 if (result.IsError)
                     return BadRequest(result);
@@ -370,7 +352,7 @@ namespace QuantityMeasurementApp.API.Controllers
             try
             {
                 var userId = GetCurrentUserId();
-                var operations = await _service.GetUserOperationsAsync(userId);  // 👈 5. New method
+                var operations = await _service.GetMyOperationsAsync();
                 return Ok(operations);
             }
             catch (UnauthorizedAccessException)

@@ -129,5 +129,68 @@ namespace QuantityMeasurementApp.API.Controllers
                 return Unauthorized(new { error = ex.Message });
             }
         }
+
+        /// <summary>
+        /// Authenticate user using Google OAuth
+        /// </summary>
+        /// <remarks>
+        /// Authenticates a user using Google OAuth ID token.
+        /// If the user doesn't exist, a new account is created automatically.
+        /// 
+        /// **Google Authentication Process:**
+        /// 1. Validate Google ID token with Google's servers
+        /// 2. Extract user information from token payload
+        /// 3. Check if user exists by email, create if not
+        /// 4. Generate JWT access token for the user
+        /// 5. Return authentication tokens
+        /// 
+        /// **Token Acquisition:**
+        /// - Obtain ID token from Google Sign-In
+        /// - Include the token in the request body
+        /// 
+        /// **Example Request:**
+        /// ```
+        /// POST /api/v1/Auth/google-login
+        /// {
+        ///   "idToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6..."
+        /// }
+        /// ```
+        /// 
+        /// **Example Response:**
+        /// ```json
+        /// {
+        ///   "id": 1,
+        ///   "username": "john.doe",
+        ///   "email": "john.doe@gmail.com",
+        ///   "role": "User",
+        ///   "token": "eyJhbGciOiJIUzI1NiIs...",
+        ///   "expiresAt": "2024-01-01T12:00:00Z"
+        /// }
+        /// ```
+        /// </remarks>
+        /// <param name="request">Google login request containing ID token</param>
+        /// <response code="200">Google login successful, returns JWT token</response>
+        /// <response code="401">Google login failed - invalid token or account deactivated</response>
+        [AllowAnonymous]
+        [HttpPost("google-login")]
+        [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<AuthResponseDto>> GoogleLogin([FromBody] GoogleLoginRequestDto request)
+        {
+            try
+            {
+                var result = await _authService.GoogleLoginAsync(request);
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Google login failed for request: {@Request}", request);
+                return Unauthorized(new { error = "Google authentication failed" });
+            }
+        }
     }
 }

@@ -6,5 +6,6 @@ namespace BusinessLayer.Interfaces
     {
         Task<AuthResponseDto> RegisterAsync(RegisterRequestDto request);
         Task<AuthResponseDto> LoginAsync(LoginRequestDto request);
+        Task<AuthResponseDto> GoogleLoginAsync(GoogleLoginRequestDto request);
     }
 }

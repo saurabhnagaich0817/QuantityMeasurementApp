@@ -11,6 +11,7 @@ using ModelLayer.DTOs;
 using ModelLayer.Exceptions;
 using RepoLayer.Interfaces;
 using BusinessLayer.Interfaces;
+using Microsoft.AspNetCore.Http;
 
 namespace BusinessLayer.Services
 {
@@ -22,6 +23,7 @@ namespace BusinessLayer.Services
         private readonly VolumeUnitConverter _volumeConverter;
         private readonly TemperatureUnitConverter _temperatureConverter;
         private readonly IMemoryCache _cache;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public QuantityMeasurementService(
             IQuantityRepository repository,
@@ -29,7 +31,8 @@ namespace BusinessLayer.Services
             WeightUnitConverter weightConverter,
             VolumeUnitConverter volumeConverter,
             TemperatureUnitConverter temperatureConverter,
-            IMemoryCache cache)
+            IMemoryCache cache,
+            IHttpContextAccessor httpContextAccessor)
         {
             _repository = repository;
             _lengthConverter = lengthConverter;
@@ -37,6 +40,7 @@ namespace BusinessLayer.Services
             _volumeConverter = volumeConverter;
             _temperatureConverter = temperatureConverter;
             _cache = cache;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         private IUnitConverter<T> GetConverter<T>() where T : struct, Enum
@@ -84,8 +88,7 @@ namespace BusinessLayer.Services
             OperationType operation,
             QuantityInputDTO first,
             QuantityInputDTO second,
-            dynamic? result,
-            int userId,  //  NEW: Add userId parameter
+            object? result,
             string? errorMessage = null)
         {
             try
@@ -95,21 +98,29 @@ namespace BusinessLayer.Services
 
                 if (errorMessage == null && result != null)
                 {
-                    try
+                    // Safely extract Value and Unit from anonymous/result objects
+                    var valueProp = result.GetType().GetProperty("Value");
+                    var unitProp = result.GetType().GetProperty("Unit");
+
+                    if (valueProp != null)
                     {
-                        resultValue = Convert.ToDouble(result.Value);
-                    }
-                    catch
-                    {
-                        // ignore conversion issues
+                        var rawValue = valueProp.GetValue(result);
+                        if (rawValue != null)
+                        {
+                            try { resultValue = Convert.ToDouble(rawValue); } catch { resultValue = 0; }
+                        }
                     }
 
-                    resultUnit = result.Unit?.ToString() ?? string.Empty;
+                    if (unitProp != null)
+                    {
+                        var rawUnit = unitProp.GetValue(result);
+                        resultUnit = rawUnit?.ToString() ?? string.Empty;
+                    }
                 }
 
                 var entity = new QuantityMeasurementEntity
                 {
-                    UserId = userId,  //  NEW: Set userId
+                    UserId = GetCurrentUserId(),
                     OperationType = operation.ToString(),
                     MeasurementType = first.MeasurementType,
                     FromValue = first.Value,
@@ -124,7 +135,7 @@ namespace BusinessLayer.Services
                     ErrorMessage = errorMessage
                 };
 
-                var saved = await _repository.SaveToDatabaseAsync(entity);  // Use Async version
+                var saved = await _repository.SaveToDatabaseAsync(entity);
                 var dto = QuantityMeasurementDTO.FromEntity(saved);
                 
                 return dto;
@@ -146,11 +157,18 @@ namespace BusinessLayer.Services
             }
         }
 
+        private int GetCurrentUserId()
+        {
+            var user = _httpContextAccessor?.HttpContext?.User;
+            var claim = user?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(claim, out var id)) return id;
+            return 0;
+        }
+
         //  UPDATED: All methods with userId parameter
         public async Task<QuantityMeasurementDTO> CompareQuantities(
             QuantityInputDTO first, 
-            QuantityInputDTO second,
-            int userId)  
+            QuantityInputDTO second)  
         {
             try
             {
@@ -164,19 +182,18 @@ namespace BusinessLayer.Services
                 
                 var result = new { Value = areEqual ? 1.0 : 0.0, Unit = "Boolean" };
                 
-                return await SaveOperation(OperationType.Compare, first, second, result, userId);
+                return await SaveOperation(OperationType.Compare, first, second, result);
             }
             catch (Exception ex)
             {
                 var dummyResult = new { Value = 0.0, Unit = "" };
-                return await SaveOperation(OperationType.Compare, first, second, dummyResult, userId, ex.Message);
+                return await SaveOperation(OperationType.Compare, first, second, dummyResult, ex.Message);
             }
         }
 
         public async Task<QuantityMeasurementDTO> ConvertQuantity(
             QuantityInputDTO source, 
-            QuantityInputDTO target,
-            int userId)  
+            QuantityInputDTO target)  
         {
             try
             {
@@ -188,12 +205,12 @@ namespace BusinessLayer.Services
                 
                 dynamic converted = ConvertQuantityByType(q1, source.MeasurementType, targetUnit);
                 
-                return await SaveOperation(OperationType.Convert, source, target, converted, userId);
+                return await SaveOperation(OperationType.Convert, source, target, converted);
             }
             catch (Exception ex)
             {
                 var dummyResult = new { Value = 0.0, Unit = "" };
-                return await SaveOperation(OperationType.Convert, source, target, dummyResult, userId, ex.Message);
+                return await SaveOperation(OperationType.Convert, source, target, dummyResult, ex.Message);
             }
         }
 
@@ -212,8 +229,7 @@ namespace BusinessLayer.Services
         public async Task<QuantityMeasurementDTO> AddQuantities(
             QuantityInputDTO first, 
             QuantityInputDTO second, 
-            string? resultUnit,
-            int userId)  
+            string? resultUnit)  
         {
             try
             {
@@ -234,12 +250,12 @@ namespace BusinessLayer.Services
                     sum = AddQuantitiesByType(q1, q2, first.MeasurementType, null);
                 }
                 
-                return await SaveOperation(OperationType.Add, first, second, sum, userId);
+                return await SaveOperation(OperationType.Add, first, second, sum);
             }
             catch (Exception ex)
             {
                 var dummyResult = new { Value = 0.0, Unit = "" };
-                return await SaveOperation(OperationType.Add, first, second, dummyResult, userId, ex.Message);
+                return await SaveOperation(OperationType.Add, first, second, dummyResult, ex.Message);
             }
         }
 
@@ -266,8 +282,7 @@ namespace BusinessLayer.Services
         public async Task<QuantityMeasurementDTO> SubtractQuantities(
             QuantityInputDTO first, 
             QuantityInputDTO second, 
-            string? resultUnit,
-            int userId)  
+            string? resultUnit)  
         {
             try
             {
@@ -288,12 +303,12 @@ namespace BusinessLayer.Services
                     difference = SubtractQuantitiesByType(q1, q2, first.MeasurementType, null);
                 }
                 
-                return await SaveOperation(OperationType.Subtract, first, second, difference, userId);
+                return await SaveOperation(OperationType.Subtract, first, second, difference);
             }
             catch (Exception ex)
             {
                 var dummyResult = new { Value = 0.0, Unit = "" };
-                return await SaveOperation(OperationType.Subtract, first, second, dummyResult, userId, ex.Message);
+                return await SaveOperation(OperationType.Subtract, first, second, dummyResult, ex.Message);
             }
         }
 
@@ -319,8 +334,7 @@ namespace BusinessLayer.Services
 
         public async Task<QuantityMeasurementDTO> DivideQuantities(
             QuantityInputDTO first, 
-            QuantityInputDTO second,
-            int userId)  
+            QuantityInputDTO second)  
         {
             try
             {
@@ -337,12 +351,12 @@ namespace BusinessLayer.Services
                 
                 var result = new { Value = ratio, Unit = "Ratio" };
                 
-                return await SaveOperation(OperationType.Divide, first, second, result, userId);
+                return await SaveOperation(OperationType.Divide, first, second, result);
             }
             catch (Exception ex)
             {
                 var dummyResult = new { Value = 0.0, Unit = "" };
-                return await SaveOperation(OperationType.Divide, first, second, dummyResult, userId, ex.Message);
+                return await SaveOperation(OperationType.Divide, first, second, dummyResult, ex.Message);
             }
         }
 
@@ -359,19 +373,21 @@ namespace BusinessLayer.Services
         }
 
         //  NEW: Get user-specific operations with caching
-        public async Task<List<QuantityMeasurementDTO>> GetUserOperationsAsync(int userId)
+        public async Task<List<QuantityMeasurementDTO>> GetMyOperationsAsync()
         {
+            var userId = GetCurrentUserId();
+
             var cacheKey = $"UserOperations_{userId}";
-            
+
             if (!_cache.TryGetValue(cacheKey, out List<QuantityMeasurementDTO>? operations))
             {
                 var entities = await _repository.GetByUserIdAsync(userId);
                 operations = entities.Select(e => QuantityMeasurementDTO.FromEntity(e)).ToList();
-                
+
                 // Cache for 5 minutes
                 _cache.Set(cacheKey, operations, TimeSpan.FromMinutes(5));
             }
-            
+
             return operations ?? new List<QuantityMeasurementDTO>();
         }
 
@@ -420,30 +436,6 @@ namespace BusinessLayer.Services
         {
             return await Task.FromResult(new List<QuantityMeasurementDTO>());
         }
-        // Default methods (with default userId = 0)
-public async Task<QuantityMeasurementDTO> CompareQuantities(QuantityInputDTO first, QuantityInputDTO second)
-{
-    return await CompareQuantities(first, second, 0);
-}
-
-public async Task<QuantityMeasurementDTO> ConvertQuantity(QuantityInputDTO source, QuantityInputDTO target)
-{
-    return await ConvertQuantity(source, target, 0);
-}
-
-public async Task<QuantityMeasurementDTO> AddQuantities(QuantityInputDTO first, QuantityInputDTO second, string? resultUnit)
-{
-    return await AddQuantities(first, second, resultUnit, 0);
-}
-
-public async Task<QuantityMeasurementDTO> SubtractQuantities(QuantityInputDTO first, QuantityInputDTO second, string? resultUnit)
-{
-    return await SubtractQuantities(first, second, resultUnit, 0);
-}
-
-public async Task<QuantityMeasurementDTO> DivideQuantities(QuantityInputDTO first, QuantityInputDTO second)
-{
-    return await DivideQuantities(first, second, 0);
-}
+        
     }
 }

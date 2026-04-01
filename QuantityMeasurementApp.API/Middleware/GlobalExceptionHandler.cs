@@ -8,11 +8,13 @@ namespace QuantityMeasurementApp.API.Middleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<GlobalExceptionHandler> _logger;
+        private readonly IHostEnvironment _env;
 
-        public GlobalExceptionHandler(RequestDelegate next, ILogger<GlobalExceptionHandler> logger)
+        public GlobalExceptionHandler(RequestDelegate next, ILogger<GlobalExceptionHandler> logger, IHostEnvironment env)
         {
             _next = next;
             _logger = logger;
+            _env = env;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -49,6 +51,20 @@ namespace QuantityMeasurementApp.API.Middleware
                     errorResponse.Message = qmEx.Message;
                     break;
 
+                case UnauthorizedAccessException _:
+                    response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                    errorResponse.StatusCode = response.StatusCode;
+                    errorResponse.Error = "Unauthorized";
+                    errorResponse.Message = "Unauthorized access";
+                    break;
+
+                case InvalidOperationException invOp:
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    errorResponse.StatusCode = response.StatusCode;
+                    errorResponse.Error = "Invalid Operation";
+                    errorResponse.Message = invOp.Message;
+                    break;
+
                 case DatabaseException dbEx:
                     response.StatusCode = (int)HttpStatusCode.InternalServerError;
                     errorResponse.StatusCode = response.StatusCode;
@@ -69,7 +85,10 @@ namespace QuantityMeasurementApp.API.Middleware
                     errorResponse.StatusCode = response.StatusCode;
                     errorResponse.Error = "Internal Server Error";
                     errorResponse.Message = "An unexpected error occurred. Please try again later.";
-                    errorResponse.Details = exception.Message; // In production, don't show this
+                    if (_env.IsDevelopment())
+                    {
+                        errorResponse.Details = exception.Message;
+                    }
                     break;
             }
 

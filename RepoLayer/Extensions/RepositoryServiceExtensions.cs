@@ -1,10 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using RepoLayer.Auth;
 using RepoLayer.Context;
 using RepoLayer.Interfaces;
-using RepoLayer.Persistence;
+using RepoLayer.Repositories;
 
 namespace RepoLayer.Extensions
 {
