@@ -3,52 +3,53 @@ using ModelLayer.Enums;
 
 namespace BusinessLayer.Services
 {
-    /// <summary>
-    /// Converts between different temperature units (Celsius, Fahrenheit, Kelvin).
-    /// Uses Celsius as the base unit for all conversions.
-    /// </summary>
-    public class TemperatureUnitConverter : IUnitConverter<TemperatureUnit>
+    public class TemperatureUnitConverter : IMeasurable<TemperatureUnit>
     {
-        /// <summary>Converts a temperature to Celsius (base unit).</summary>
-        /// <param name="unitType">The unit of the input temperature.</param>
-        /// <param name="inputTemp">The temperature value to convert.</param>
-        /// <returns>The temperature in Celsius.</returns>
-        public double ConvertToBase(TemperatureUnit unitType, double inputTemp)
+        // Base unit: Celsius
+        public double ConvertToBase(TemperatureUnit unit, double amount)
         {
-            return unitType switch
+            switch (unit)
             {
-                TemperatureUnit.Celsius => inputTemp,
-                TemperatureUnit.Fahrenheit => (inputTemp - 32.0) * 5.0 / 9.0,
-                TemperatureUnit.Kelvin => inputTemp - 273.15,
-                _ => throw new ArgumentException($"Unsupported temperature unit: {unitType}")
-            };
+                case TemperatureUnit.Celsius:
+                    return amount;
+                case TemperatureUnit.Fahrenheit:
+                    return (amount - 32) * 5 / 9;
+                case TemperatureUnit.Kelvin:
+                    return amount - 273.15;
+                default:
+                    return amount;
+            }
         }
 
-        /// <summary>Converts a temperature from Celsius (base unit) to the specified unit.</summary>
-        /// <param name="unitType">The target unit.</param>
-        /// <param name="celsiusValue">The temperature in Celsius.</param>
-        /// <returns>The temperature in the specified unit.</returns>
-        public double ConvertFromBase(TemperatureUnit unitType, double celsiusValue)
+        public double ConvertFromBase(TemperatureUnit unit, double baseValue)
         {
-            return unitType switch
+            switch (unit)
             {
-                TemperatureUnit.Celsius => celsiusValue,
-                TemperatureUnit.Fahrenheit => (celsiusValue * 9.0 / 5.0) + 32.0,
-                TemperatureUnit.Kelvin => celsiusValue + 273.15,
-                _ => throw new ArgumentException($"Unsupported temperature unit: {unitType}")
-            };
+                case TemperatureUnit.Celsius:
+                    return baseValue;
+                case TemperatureUnit.Fahrenheit:
+                    return (baseValue * 9 / 5) + 32;
+                case TemperatureUnit.Kelvin:
+                    return baseValue + 273.15;
+                default:
+                    return baseValue;
+            }
         }
 
-        /// <summary>Gets the standard symbol for a temperature unit.</summary>
-        public string GetSymbol(TemperatureUnit unitType)
+        public double GetConversionFactor(TemperatureUnit unit)
         {
-            return unitType switch
+            return 1.0;
+        }
+
+        public string GetSymbol(TemperatureUnit unit)
+        {
+            switch (unit)
             {
-                TemperatureUnit.Celsius => "°C",
-                TemperatureUnit.Fahrenheit => "°F",
-                TemperatureUnit.Kelvin => "K",
-                _ => unitType.ToString()
-            };
+                case TemperatureUnit.Celsius: return "°C";
+                case TemperatureUnit.Fahrenheit: return "°F";
+                case TemperatureUnit.Kelvin: return "K";
+                default: return unit.ToString();
+            }
         }
     }
 }

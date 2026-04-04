@@ -3,24 +3,27 @@ using ModelLayer.Enums;
 
 namespace BusinessLayer.Services
 {
-    /// <summary>
-    /// Converts between different length units (inches, feet, yards, centimeters).
-    /// Uses inches as the base unit for all conversions.
-    /// </summary>
     public class LengthUnitConverter : IMeasurable<LengthUnit>
     {
-        /// <summary>Conversion factors from each unit to the base unit (inches).</summary>
+        // Base unit: mm (millimeter)
         private readonly double[] _conversionFactors =
         {
-            1.0,           // Inches (base unit)
-            12.0,          // Feet to inches
-            36.0,          // Yards to inches
-            0.393701       // Centimeters to inches
+            1.0,        // mm
+            10.0,       // cm (1 cm = 10 mm)
+            1000.0,     // m (1 m = 1000 mm)
+            1000000.0,  // km (1 km = 1,000,000 mm)
+            25.4,       // inch (1 inch = 25.4 mm)
+            304.8,      // ft (1 ft = 304.8 mm)
+            914.4,      // yd (1 yd = 914.4 mm)
+            1609344.0   // mile (1 mile = 1,609,344 mm)
         };
 
         public double GetConversionFactor(LengthUnit unit)
         {
-            return _conversionFactors[(int)unit];
+            int index = (int)unit;
+            if (index >= 0 && index < _conversionFactors.Length)
+                return _conversionFactors[index];
+            return 1.0;
         }
 
         public double ConvertToBase(LengthUnit unit, double amount)
@@ -30,18 +33,23 @@ namespace BusinessLayer.Services
 
         public double ConvertFromBase(LengthUnit unit, double baseValue)
         {
-            return baseValue / GetConversionFactor(unit);
+            double factor = GetConversionFactor(unit);
+            if (factor == 0) return baseValue;
+            return baseValue / factor;
         }
 
-        /// <summary>Gets the standard symbol/abbreviation for a length unit.</summary>
         public string GetSymbol(LengthUnit unit)
         {
             return unit switch
             {
-                LengthUnit.Inches => "in",
-                LengthUnit.Feet => "ft",
-                LengthUnit.Yards => "yd",
-                LengthUnit.Centimeters => "cm",
+                LengthUnit.mm => "mm",
+                LengthUnit.cm => "cm",
+                LengthUnit.m => "m",
+                LengthUnit.km => "km",
+                LengthUnit.inch => "in",
+                LengthUnit.ft => "ft",
+                LengthUnit.yd => "yd",
+                LengthUnit.mile => "mi",
                 _ => unit.ToString().ToLower()
             };
         }

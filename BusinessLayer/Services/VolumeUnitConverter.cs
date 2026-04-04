@@ -3,23 +3,27 @@ using ModelLayer.Enums;
 
 namespace BusinessLayer.Services
 {
-    /// <summary>
-    /// Converts between different volume units (liters, milliliters, gallons).
-    /// Uses liters as the base unit for all conversions.
-    /// </summary>
     public class VolumeUnitConverter : IMeasurable<VolumeUnit>
     {
-        /// <summary>Conversion factors from each unit to the base unit (liters).</summary>
-        private static readonly double[] ConversionFactors =
+        // Base unit: ml (milliliter)
+        private readonly double[] _conversionFactors =
         {
-            1.0,      // Liters (base unit)
-            0.001,    // Milliliters to liters
-            3.78541   // Gallons to liters
+            1.0,        // ml
+            1000.0,     // l (1 L = 1000 ml)
+            3785.41,    // gallon (1 US gallon = 3785.41 ml)
+            946.353,    // quart (1 US quart = 946.353 ml)
+            473.176,    // pint (1 US pint = 473.176 ml)
+            236.588,    // cup (1 US cup = 236.588 ml)
+            14.7868,    // tbsp (1 tbsp = 14.7868 ml)
+            4.92892     // tsp (1 tsp = 4.92892 ml)
         };
 
         public double GetConversionFactor(VolumeUnit unit)
         {
-            return ConversionFactors[(int)unit];
+            int index = (int)unit;
+            if (index >= 0 && index < _conversionFactors.Length)
+                return _conversionFactors[index];
+            return 1.0;
         }
 
         public double ConvertToBase(VolumeUnit unit, double amount)
@@ -29,19 +33,25 @@ namespace BusinessLayer.Services
 
         public double ConvertFromBase(VolumeUnit unit, double baseValue)
         {
-            return baseValue / GetConversionFactor(unit);
+            double factor = GetConversionFactor(unit);
+            if (factor == 0) return baseValue;
+            return baseValue / factor;
         }
 
-        /// <summary>Gets the standard symbol/abbreviation for a volume unit.</summary>
         public string GetSymbol(VolumeUnit unit)
         {
-            return unit switch
+            switch (unit)
             {
-                VolumeUnit.Litre => "L",
-                VolumeUnit.MilliLiter => "mL",
-                VolumeUnit.Gallon => "gal",
-                _ => unit.ToString().ToLower()
-            };
+                case VolumeUnit.ml: return "ml";
+                case VolumeUnit.l: return "L";
+                case VolumeUnit.gallon: return "gal";
+                case VolumeUnit.quart: return "qt";
+                case VolumeUnit.pint: return "pt";
+                case VolumeUnit.cup: return "cup";
+                case VolumeUnit.tbsp: return "tbsp";
+                case VolumeUnit.tsp: return "tsp";
+                default: return unit.ToString().ToLower();
+            }
         }
     }
 }

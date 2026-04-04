@@ -2,8 +2,12 @@ namespace ModelLayer.Enums
 {
     public enum WeightUnit
     {
-        Grams,
-        Kilograms,
-        Pound
+        mg,
+        g,
+        kg,
+        tonne,
+        oz,
+        lb,
+        stone
     }
 }

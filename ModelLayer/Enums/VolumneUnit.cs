@@ -2,8 +2,13 @@ namespace ModelLayer.Enums
 {
     public enum VolumeUnit
     {
-        Litre,
-        MilliLiter,
-        Gallon
+        ml,
+        l,
+        gallon,
+        quart,
+        pint,
+        cup,
+        tbsp,
+        tsp
     }
 }

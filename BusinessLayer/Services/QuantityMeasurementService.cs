@@ -57,17 +57,55 @@ namespace BusinessLayer.Services
             throw new NotSupportedException($"Unsupported type {typeof(T).Name}");
         }
 
-        private object ParseUnit(string unitName, string measurementType)
+       private object ParseUnit(string unitName, string measurementType)
+{
+    return measurementType.ToLower() switch
+    {
+        "length" => unitName.ToLower() switch
         {
-            return measurementType.ToLower() switch
-            {
-                "length" => Enum.Parse<LengthUnit>(unitName, true),
-                "weight" => Enum.Parse<WeightUnit>(unitName, true),
-                "volume" => Enum.Parse<VolumeUnit>(unitName, true),
-                "temperature" => Enum.Parse<TemperatureUnit>(unitName, true),
-                _ => throw new QuantityMeasurementException($"Invalid measurement type: {measurementType}")
-            };
-        }
+            "mm" => LengthUnit.mm,
+            "cm" => LengthUnit.cm,
+            "m" => LengthUnit.m,
+            "km" => LengthUnit.km,
+            "inch" or "inches" => LengthUnit.inch,
+            "foot" or "feet" or "ft" => LengthUnit.ft,
+            "yard" or "yards" or "yd" => LengthUnit.yd,
+            "mile" or "miles" => LengthUnit.mile,
+            _ => Enum.Parse<LengthUnit>(unitName, true)
+        },
+        "weight" => unitName.ToLower() switch
+        {
+            "mg" => WeightUnit.mg,
+            "g" => WeightUnit.g,
+            "kg" => WeightUnit.kg,
+            "tonne" => WeightUnit.tonne,
+            "oz" => WeightUnit.oz,
+            "lb" => WeightUnit.lb,
+            "stone" => WeightUnit.stone,
+            _ => Enum.Parse<WeightUnit>(unitName, true)
+        },
+        "volume" => unitName.ToLower() switch
+        {
+            "ml" => VolumeUnit.ml,
+            "l" => VolumeUnit.l,
+            "gallon" => VolumeUnit.gallon,
+            "quart" => VolumeUnit.quart,
+            "pint" => VolumeUnit.pint,
+            "cup" => VolumeUnit.cup,
+            "tbsp" => VolumeUnit.tbsp,
+            "tsp" => VolumeUnit.tsp,
+            _ => Enum.Parse<VolumeUnit>(unitName, true)
+        },
+        "temperature" => unitName.ToLower() switch
+        {
+            "celsius" or "°c" => TemperatureUnit.Celsius,
+            "fahrenheit" or "°f" => TemperatureUnit.Fahrenheit,
+            "kelvin" or "k" => TemperatureUnit.Kelvin,
+            _ => Enum.Parse<TemperatureUnit>(unitName, true)
+        },
+        _ => throw new QuantityMeasurementException($"Invalid measurement type: {measurementType}")
+    };
+}
 
         private dynamic CreateQuantity(QuantityInputDTO dto)
         {
