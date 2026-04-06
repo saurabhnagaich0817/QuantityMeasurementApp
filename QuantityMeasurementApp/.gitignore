@@ -1,0 +1,78 @@
+# =========================
+# Build Folders
+# =========================
+bin/
+obj/
+Debug/
+Release/
+
+# =========================
+# User-specific files
+# =========================
+*.user
+*.suo
+*.userprefs
+
+# =========================
+# Visual Studio Code
+# =========================
+.vscode/
+
+# =========================
+# Visual Studio
+# =========================
+.vs/
+*.vcxproj.user
+
+# =========================
+# Rider
+# =========================
+.idea/
+
+# =========================
+# Logs
+# =========================
+*.log
+
+# =========================
+# OS Generated Files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# NuGet Packages
+# =========================
+*.nupkg
+packages/
+.nuget/
+
+# =========================
+# Entity Framework Migrations (optional)
+# =========================
+# Uncomment if you don't want migrations tracked
+# Migrations/
+
+# =========================
+# Database Files
+# =========================
+*.mdf
+*.ldf
+
+# =========================
+# Publish Folder
+# =========================
+publish/
+*.publishsettings
+
+# =========================
+# Test Results
+# =========================
+TestResults/
+
+# =========================
+# Temporary Files
+# =========================
+*.tmp
+*.temp
+QuantityMeasurement.Api/
