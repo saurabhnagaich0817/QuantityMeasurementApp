@@ -90,31 +90,34 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddBusinessServices();
 builder.Services.AddMemoryCache();
 
+// CORS — Netlify frontend allow karo
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins(
+                "https://quantity-measurement-frontend.netlify.app",
+                "http://quantity-measurement-frontend.netlify.app",
+                "http://localhost:4200",
+                "https://localhost:4200"
+              )
                .AllowAnyMethod()
-               .AllowAnyHeader();
+               .AllowAnyHeader()
+               .AllowCredentials();
     });
 });
 
 var app = builder.Build();
 
-// Swagger — Production + Development dono mein (Render ke liye zaroori)
+// Swagger — Production + Development dono mein
 app.UseSwagger();
 app.UseSwaggerUI(c => 
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Quantity Measurement API v1");
-    c.RoutePrefix = string.Empty; // Swagger root pe
+    c.RoutePrefix = string.Empty;
 });
 
 app.UseMiddleware<GlobalExceptionHandler>();
-
-// HTTPS redirect mat karo Render pe (Render khud handle karta hai)
-// app.UseHttpsRedirection();
-
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
