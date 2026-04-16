@@ -1,0 +1,56 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Auth Service",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/Services/AuthService/AuthService.API/bin/Debug/net8.0/AuthService.API.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Services/AuthService/AuthService.API",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
+            "name": "User Service", 
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/Services/UserService/UserService.API/bin/Debug/net8.0/UserService.API.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Services/UserService/UserService.API",
+            "console": "internalConsole"
+        },
+        {
+            "name": "Quantity Service",
+            "type": "coreclr", 
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/Services/QuantityService/QuantityService.API/bin/Debug/net8.0/QuantityService.API.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Services/QuantityService/QuantityService.API",
+            "console": "internalConsole"
+        },
+        {
+            "name": "History Service",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build", 
+            "program": "${workspaceFolder}/src/Services/HistoryService/HistoryService.API/bin/Debug/net8.0/HistoryService.API.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Services/HistoryService/HistoryService.API",
+            "console": "internalConsole"
+        },
+        {
+            "name": "API Gateway",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/ApiGateway/ApiGateway/bin/Debug/net8.0/ApiGateway.dll", 
+            "args": [],
+            "cwd": "${workspaceFolder}/src/ApiGateway/ApiGateway",
+            "console": "internalConsole"
+        }
+    ]
+}

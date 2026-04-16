@@ -1,0 +1,17 @@
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Infrastructure\obj\Debug\net8.0\QuantityService.Infrastructure.csproj.AssemblyReference.cache
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Infrastructure\obj\Debug\net8.0\QuantityService.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Infrastructure\obj\Debug\net8.0\QuantityService.Infrastructure.AssemblyInfoInputs.cache
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Infrastructure\obj\Debug\net8.0\QuantityService.Infrastructure.AssemblyInfo.cs
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Infrastructure\obj\Debug\net8.0\QuantityService.Infrastructure.csproj.CoreCompileInputs.cache
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Infrastructure\bin\Debug\net8.0\QuantityService.Infrastructure.deps.json
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Infrastructure\bin\Debug\net8.0\QuantityService.Infrastructure.runtimeconfig.json
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Infrastructure\bin\Debug\net8.0\QuantityService.Infrastructure.dll
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Infrastructure\bin\Debug\net8.0\QuantityService.Infrastructure.pdb
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Infrastructure\bin\Debug\net8.0\QuantityService.Core.dll
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Infrastructure\bin\Debug\net8.0\QuantityService.Core.pdb
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Infrastructure\obj\Debug\net8.0\Quantity.62C277E3.Up2Date
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Infrastructure\obj\Debug\net8.0\QuantityService.Infrastructure.dll
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Infrastructure\obj\Debug\net8.0\refint\QuantityService.Infrastructure.dll
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Infrastructure\obj\Debug\net8.0\QuantityService.Infrastructure.pdb
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Infrastructure\obj\Debug\net8.0\QuantityService.Infrastructure.genruntimeconfig.cache
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Infrastructure\obj\Debug\net8.0\ref\QuantityService.Infrastructure.dll

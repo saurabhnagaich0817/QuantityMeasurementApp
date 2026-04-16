@@ -1,0 +1,11 @@
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\BuildingBlocks\BuildingBlocks\bin\Debug\net8.0\BuildingBlocks.deps.json
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\BuildingBlocks\BuildingBlocks\bin\Debug\net8.0\BuildingBlocks.dll
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\BuildingBlocks\BuildingBlocks\bin\Debug\net8.0\BuildingBlocks.pdb
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\BuildingBlocks\BuildingBlocks\obj\Debug\net8.0\BuildingBlocks.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\BuildingBlocks\BuildingBlocks\obj\Debug\net8.0\BuildingBlocks.AssemblyInfoInputs.cache
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\BuildingBlocks\BuildingBlocks\obj\Debug\net8.0\BuildingBlocks.AssemblyInfo.cs
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\BuildingBlocks\BuildingBlocks\obj\Debug\net8.0\BuildingBlocks.csproj.CoreCompileInputs.cache
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\BuildingBlocks\BuildingBlocks\obj\Debug\net8.0\BuildingBlocks.dll
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\BuildingBlocks\BuildingBlocks\obj\Debug\net8.0\refint\BuildingBlocks.dll
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\BuildingBlocks\BuildingBlocks\obj\Debug\net8.0\BuildingBlocks.pdb
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\BuildingBlocks\BuildingBlocks\obj\Debug\net8.0\ref\BuildingBlocks.dll

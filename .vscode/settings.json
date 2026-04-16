@@ -1,0 +1,4 @@
+{
+    "dotnet.defaultSolution": "QuantityMicroservices.sln",
+    "csharp.suppressBuildAssetsNotification": true
+}

@@ -1,0 +1,11 @@
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Core\bin\Debug\net8.0\QuantityService.Core.deps.json
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Core\bin\Debug\net8.0\QuantityService.Core.dll
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Core\bin\Debug\net8.0\QuantityService.Core.pdb
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Core\obj\Debug\net8.0\QuantityService.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Core\obj\Debug\net8.0\QuantityService.Core.AssemblyInfoInputs.cache
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Core\obj\Debug\net8.0\QuantityService.Core.AssemblyInfo.cs
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Core\obj\Debug\net8.0\QuantityService.Core.csproj.CoreCompileInputs.cache
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Core\obj\Debug\net8.0\QuantityService.Core.dll
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Core\obj\Debug\net8.0\refint\QuantityService.Core.dll
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Core\obj\Debug\net8.0\QuantityService.Core.pdb
+C:\Users\user\OneDrive\Desktop\QuantityMicroservices\src\Services\QuantityService\QuantityService.Core\obj\Debug\net8.0\ref\QuantityService.Core.dll

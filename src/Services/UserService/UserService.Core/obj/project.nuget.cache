@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "hW3yqQhmki0=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\user\\OneDrive\\Desktop\\QuantityMicroservices\\src\\Services\\UserService\\UserService.Core\\UserService.Core.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\user\\.nuget\\packages\\bcrypt.net-next\\4.1.0\\bcrypt.net-next.4.1.0.nupkg.sha512"
+  ],
+  "logs": []
+}
